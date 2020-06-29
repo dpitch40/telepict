@@ -193,7 +193,7 @@ def populate_db():
             session.add(ent)
 
 if __name__ == '__main__':
-    if os.path.isfile(Config.dbfile):
-        os.remove(Config.dbfile)
+    if os.path.isfile(Config.DBFILE):
+        os.remove(Config.DBFILE)
     Base.metadata.create_all(engine)
     populate_db()

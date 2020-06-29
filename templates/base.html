@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% block head -%}
+    <!-- <link rel="stylesheet" href="style.css" /> -->
+    <title>Telepict - {% block title %}{% endblock %}</title>
+    <!-- <script>
+      var ws = new WebSocket("ws://localhost:{{ config['WS_PORT'] }}/");
+      ws.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        var target;
+        for (const property in data) {
+          target = document.querySelector('#' + property);
+          target.textContent = data[property];
+        }
+      };
+    </script> -->
+    {%- endblock %}
+  </head>
+  <body>
+    <div id="content">
+      {% block content %}{% endblock %}
+    </div>
+    <div id="footer">
+      {% block footer %}{% endblock %}
+    </div>
+  </body>
+</html>
