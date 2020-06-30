@@ -1,7 +1,7 @@
 import os
 import os.path
 
-from db import DB, Directions, Game, Player, Stack, Writing, Drawing, PendingGame
+from db import DB, Directions, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
 from config import Config
 
 def populate_db(d):
@@ -23,6 +23,7 @@ def populate_db(d):
                                  players=[david, nathan, elwood])
     pending_game_2 = PendingGame(id_=2, num_rounds=3, write_first=False,
                                  players=[david, elwood])
+    invitation = Invitation(recipient=nathan, game=pending_game_2)
 
     # Stacks
     yesterday = Stack(game=game, owner=david)

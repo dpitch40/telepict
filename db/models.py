@@ -5,6 +5,7 @@ import operator
 from sqlalchemy import Table, Column, Integer, String, ForeignKey, Text, SmallInteger, Enum, \
     Boolean, LargeBinary, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declared_attr
 
 from db.base import Base
 from auth import gen_password_hash_and_salt
@@ -86,6 +87,8 @@ class PendingGame(Base):
     direction = Column('direction', Enum(Directions), default=Directions.left)
     write_first = Column('write_first', Boolean, default=True)
 
+    invitations = relationship('Invitation', back_populates='game')
+
     players_ = relationship('PendingGamePlayerAssn', back_populates='game')
 
     @property
@@ -103,6 +106,20 @@ class PendingGame(Base):
     def __repr__(self):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
                f'{self.direction}, {self.write_first})'
+
+class Invitation(Base):
+    __tablename__ = 'invitations'
+
+    id_ = Column('id', Integer, primary_key=True)
+    created = Column('created', DateTime, default=datetime.now)
+    game_id = Column('game_id', Integer, ForeignKey('pending_games.id'), nullable=False)
+    game = relationship('PendingGame', back_populates='invitations')
+
+    recipient_id = Column('recipient_id', Integer, ForeignKey('players.id'), nullable=False)
+    recipient = relationship('Player', back_populates='invitations')
+
+    def __repr__(self):
+        return f'Invitation({self.player} -> {self.game})'
 
 class Player(Base):
     __tablename__ = 'players'
@@ -124,6 +141,8 @@ class Player(Base):
     @property
     def pending_games(self):
         return sorted([a.game for a in self.pending_games_], key=operator.attrgetter('id_'))
+
+    invitations = relationship('Invitation', back_populates='recipient')
     
     def __init__(self, *args, **kwargs):
         if 'password' in kwargs:

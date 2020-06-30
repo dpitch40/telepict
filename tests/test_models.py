@@ -47,6 +47,15 @@ def test_pending_games(test_session, david, nathan, elwood):
     assert game2.num_rounds == 3
     assert not game2.write_first
 
+def test_invitation(test_session, david, nathan, elwood):
+    assert len(david.invitations) == 0
+    assert len(nathan.invitations) == 1
+    assert len(elwood.invitations) == 0
+
+    inv = nathan.invitations[0]
+    assert inv.recipient_id == nathan.id_
+    assert inv.game_id == 2
+
 def test_players(test_session, david, nathan, elwood):
     assert david.password_hash == gen_password_hash('12345678', david.password_salt)
     assert nathan.password_hash == gen_password_hash('you_shall_not_password', nathan.password_salt)
