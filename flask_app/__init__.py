@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, flash, redirect, session as f
     current_app
 
 from config import Config
-from .auth import bp as auth_bp
+from .auth import bp as auth_bp, require_logged_in
 from db import DB, Player, Game, PendingGame
 from .exceptions import FlashedError
 
@@ -25,12 +25,14 @@ def index():
         return render_template('index.html')
 
 @app.route('/game/<game_id>')
+@require_logged_in
 def view_game(game_id):
     with current_app.db.session_scope() as session:
         game = session.query(Game).get(game_id)
         return str(game)
 
 @app.route('/pending/<game_id>')
+@require_logged_in
 def view_pending_game(game_id):
     with current_app.db.session_scope() as session:
         game = session.query(PendingGame).get(game_id)
