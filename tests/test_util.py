@@ -1,5 +1,5 @@
 from util import get_pending_stacks, get_game_state
-from db import session_scope, Game, Player, Writing, Drawing
+from db import Game, Player, Writing, Drawing
 
 def test_get_pending_stacks(test_session, david, nathan, elwood):
     # Unfinished game

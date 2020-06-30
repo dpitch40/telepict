@@ -1,5 +1,4 @@
-from db import session_scope, Game, GamePlayerAssn, Player, Stack, Drawing, Writing, Directions, \
-    PendingGame
+from db import Game, GamePlayerAssn, Player, Stack, Drawing, Writing, Directions, PendingGame
 from auth import gen_password_hash
 
 def test_games(test_session, david, nathan, elwood):

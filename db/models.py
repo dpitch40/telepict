@@ -6,7 +6,7 @@ from sqlalchemy import Table, Column, Integer, String, ForeignKey, Text, SmallIn
     Boolean, LargeBinary, DateTime
 from sqlalchemy.orm import relationship
 
-from db.base import Base, Session
+from db.base import Base
 from auth import gen_password_hash_and_salt
 
 class Directions(enum.Enum):
@@ -45,6 +45,7 @@ class Game(Base):
     __tablename__ = 'games'
 
     id_ = Column('id', Integer, primary_key=True)
+    started = Column('started', DateTime, default=datetime.now)
     num_rounds = Column('num_rounds', SmallInteger, default=1)
     direction = Column('direction', Enum(Directions), default=Directions.left)
     write_first = Column('write_first', Boolean, default=True)
@@ -61,6 +62,15 @@ class Game(Base):
     def stacks(self):
         stack_mapping = {s.owner_id: s for s in self.stacks_}
         return [stack_mapping[player.id_] for player in self.players]
+
+    @property
+    def last_move(self):
+        max_time = datetime(1970, 1, 1, 0, 0, 0)
+        for stack in self.stacks:
+            for ent in stack.stack:
+                if ent.created > max_time:
+                    max_time = ent.created
+        return max_time
 
     def player_stack(self, player):
         for s in self.stacks_:
@@ -88,6 +98,7 @@ class PendingGame(Base):
     __tablename__ = 'pending_games'
 
     id_ = Column('id', Integer, primary_key=True)
+    created = Column('created', DateTime, default=datetime.now)
     num_rounds = Column('num_rounds', SmallInteger, default=1)
     direction = Column('direction', Enum(Directions), default=Directions.left)
     write_first = Column('write_first', Boolean, default=True)
@@ -114,6 +125,7 @@ class Player(Base):
     __tablename__ = 'players'
 
     id_ = Column('id', Integer, primary_key=True)
+    created = Column('created', DateTime, default=datetime.now)
     name = Column('name', String(64), nullable=False, unique=True, index=True)
     display_name = Column('display_name', String(64), nullable=False)
     password_hash = Column('password_hash', LargeBinary(64), nullable=False)
@@ -166,6 +178,7 @@ class Writing(Base):
     __tablename__ = 'writings'
 
     id_ = Column('id', Integer, primary_key=True)
+    created = Column('created', DateTime, default=datetime.now)
     author_id = Column('author_id', Integer, ForeignKey('players.id'), nullable=False)
     author = relationship('Player')
     stack_pos = Column('stack_pos', SmallInteger, nullable=False)
@@ -183,6 +196,7 @@ class Drawing(Base):
     __tablename__ = 'drawing'
 
     id_ = Column('id', Integer, primary_key=True)
+    created = Column('created', DateTime, default=datetime.now)
     author_id = Column('author_id', Integer, ForeignKey('players.id'), nullable=False)
     author = relationship('Player')
     stack_pos = Column('stack_pos', SmallInteger, nullable=False)

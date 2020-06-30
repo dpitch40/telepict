@@ -1,26 +1,23 @@
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
-import db
+from db import DB, Player
 from populate_db import populate_db
 from config import Config
 
 @pytest.fixture(scope='function', autouse=True)
 def reset_test_db():
-    engine = create_engine(Config.DB_URL)
-    Session = sessionmaker(bind=engine)
-    db.engine, db.Session = engine, Session
-    db.Base.metadata.create_all(engine)
-    populate_db()
+    d = DB()
+    d.create_schema()
+    populate_db(d)
+    return d
 
 @pytest.fixture(scope='function')
-def test_session():
-    with db.session_scope() as session:
+def test_session(reset_test_db):
+    with reset_test_db.session_scope() as session:
         yield session
 
 def get_player_by_name(name, session):
-    return session.query(db.Player).filter_by(name=name).one()
+    return session.query(Player).filter_by(name=name).one()
 
 @pytest.fixture(scope='function')
 def elwood(test_session):

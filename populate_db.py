@@ -1,11 +1,10 @@
 import os
 import os.path
 
-from db import session_scope, Base, engine, Directions, Game, Player, Stack, Writing, Drawing, \
-    PendingGame
+from db import DB, Directions, Game, Player, Stack, Writing, Drawing, PendingGame
 from config import Config
 
-def populate_db():
+def populate_db(d):
     # Players
     david = Player(name='david', display_name='DarthMarth', password='12345678')
     nathan = Player(name='Nathan', display_name='humcalc', password='you_shall_not_password')
@@ -187,7 +186,7 @@ def populate_db():
     df_ed = Drawing(drawing=open(os.path.join('data', 'drawings', 'nd_21.jpg'), 'rb').read(),
                     stack_pos=0, stack=e_stack_drawfirst, author=elwood)
 
-    with session_scope() as session:
+    with d.session_scope() as session:
         for ent in [david, nathan, elwood, queue_game, reverse_game, draw_first_game,
                     pending_game_1, pending_game_2]:
             session.add(ent)
@@ -195,5 +194,6 @@ def populate_db():
 if __name__ == '__main__':
     if os.path.isfile(Config.DBFILE):
         os.remove(Config.DBFILE)
-    Base.metadata.create_all(engine)
-    populate_db()
+    d = DB()
+    d.create_schema()
+    populate_db(d)
