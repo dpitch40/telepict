@@ -1,11 +1,11 @@
-from hashlib import sha3_512
+from hashlib import pbkdf2_hmac
 import secrets
 
+from config import Config
+
 def gen_password_hash(password, salt):
-    hash_ = sha3_512()
-    hash_.update(password.encode('utf8'))
-    hash_.update(salt)
-    return hash_.digest()
+    hash_ = pbkdf2_hmac('sha512', password.encode('utf8'), salt, Config.HASH_ITERATIONS)
+    return hash_
 
 def gen_password_salt():
     return secrets.token_bytes(64)
