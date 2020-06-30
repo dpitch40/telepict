@@ -32,29 +32,47 @@ def test_games(test_session, david, nathan, elwood):
 
 def test_pending_games(test_session, david, nathan, elwood):
     games = test_session.query(PendingGame).all()
-    assert len(games) == 2
+    assert len(games) == 4
 
-    game1, game2 = games
+    game1, game2, game3, game4 = games
 
     assert [p.id_ for p in game1.players] == [david.id_, nathan.id_, elwood.id_]
     assert [p.id_ for p in game2.players] == [david.id_, elwood.id_]
+    assert [p.id_ for p in game3.players] == [nathan.id_, elwood.id_]
+    assert [p.id_ for p in game4.players] == [david.id_]
 
     assert game1.pass_left is False
     assert game1.num_rounds == 1
-    assert game1.write_first
+    assert game1.write_first is True
 
     assert game2.pass_left is True
     assert game2.num_rounds == 3
-    assert not game2.write_first
+    assert game2.write_first is False
+
+    assert game3.pass_left is True
+    assert game3.num_rounds == 5
+    assert game3.write_first is False
+
+    assert game4.pass_left is True
+    assert game4.num_rounds == 7
+    assert game4.write_first is True
 
 def test_invitation(test_session, david, nathan, elwood):
-    assert len(david.invitations) == 0
+    assert len(david.invitations) == 1
     assert len(nathan.invitations) == 1
-    assert len(elwood.invitations) == 0
+    assert len(elwood.invitations) == 1
 
     inv = nathan.invitations[0]
     assert inv.recipient_id == nathan.id_
     assert inv.game_id == 2
+
+    inv = david.invitations[0]
+    assert inv.recipient_id == david.id_
+    assert inv.game_id == 3
+
+    inv = elwood.invitations[0]
+    assert inv.recipient_id == elwood.id_
+    assert inv.game_id == 4
 
 def test_players(test_session, david, nathan, elwood):
     assert david.password_hash == gen_password_hash('12345678', david.password_salt)
@@ -67,11 +85,12 @@ def test_players(test_session, david, nathan, elwood):
     assert [g.id_ for g in david.games] == [1, 2, 3, 4, 5, 6]
     assert [g.id_ for g in elwood.games] == [1, 3, 4, 5, 6]
 
-    assert len(david.pending_games) == 2
-    assert len(nathan.pending_games) == 1
-    assert len(elwood.pending_games) == 2
-    assert [g.id_ for g in david.pending_games] == [1, 2]
-    assert [g.id_ for g in nathan.pending_games] == [1]
+    assert len(david.pending_games) == 3
+    assert len(nathan.pending_games) == 2
+    assert len(elwood.pending_games) == 3
+    assert [g.id_ for g in david.pending_games] == [1, 2, 4]
+    assert [g.id_ for g in nathan.pending_games] == [1, 3]
+    assert [g.id_ for g in elwood.pending_games] == [1, 2, 3]
 
 def test_assn(test_session, david, nathan, elwood):
     assns = test_session.query(GamePlayerAssn).filter_by(game_id=1). \
