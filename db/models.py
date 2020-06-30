@@ -13,33 +13,16 @@ class Directions(enum.Enum):
     left = 1
     right = 2
 
-class GamePlayerAssn(Base):
-    __tablename__ = 'games_players'
+def Assn(game_class):
+    d = {'__tablename__': f'{game_class.__tablename__}_players',
+         'player_order': Column('player_order', SmallInteger, nullable=False, default=1),
+         'game_id': Column('game_id', Integer, ForeignKey(f'{game_class.__tablename__}.id'), primary_key=True),
+         'game': relationship(game_class.__name__, back_populates='players_'),
+         'player_id': Column('player_id', Integer, ForeignKey('players.id'), primary_key=True),
+         'player': relationship('Player', back_populates=f'{game_class.__tablename__}_'),
+         '__repr__': lambda s: f'{s.__class__.__name__}{s.game_id}/{s.player.name}#{s.player_order}'}
 
-    player_order = Column('player_order', SmallInteger, nullable=False, default=1)
-
-    game_id = Column('game_id', Integer, ForeignKey('games.id'), primary_key=True)
-    game = relationship('Game', back_populates='players_')
-
-    player_id = Column('player_id', Integer, ForeignKey('players.id'), primary_key=True)
-    player = relationship('Player', back_populates='games_')
-
-    def __repr__(self):
-        return f'Game{self.game_id}/{self.player.name}#{self.player_order}'
-
-class PendingGamePlayerAssn(Base):
-    __tablename__ = 'pending_games_players'
-
-    player_order = Column('player_order', SmallInteger, nullable=False, default=1)
-
-    game_id = Column('game_id', Integer, ForeignKey('pending_games.id'), primary_key=True)
-    game = relationship('PendingGame', back_populates='players_')
-
-    player_id = Column('player_id', Integer, ForeignKey('players.id'), primary_key=True)
-    player = relationship('Player', back_populates='pending_games_')
-
-    def __repr__(self):
-        return f'PendingGame{self.game_id}{self.player.name}#{self.player_order}'
+    return type(f'{game_class.__name__}PlayerAssn', (Base,), d)
 
 class Game(Base):
     __tablename__ = 'games'
@@ -153,6 +136,9 @@ class Player(Base):
     def __repr__(self):
         return f'{self.name}({self.display_name})'
 
+GamePlayerAssn = Assn(Game)
+PendingGamePlayerAssn = Assn(PendingGame)
+
 class Stack(Base):
     __tablename__ = 'stacks'
 
@@ -174,38 +160,33 @@ class Stack(Base):
     def __repr__(self):
         return f'Stack({self.owner.name}, {len(self.stack)})'
 
-class Writing(Base):
+class PaperMixin:
+    id_ = Column('id', Integer, primary_key=True)
+    created = Column('created', DateTime, default=datetime.now)
+    @declared_attr
+    def author_id(self):
+        return Column('author_id', Integer, ForeignKey('players.id'), nullable=False)
+    @declared_attr
+    def author(self):
+        return relationship('Player')
+    stack_pos = Column('stack_pos', SmallInteger, nullable=False)
+
+    @declared_attr
+    def stack_id(self):
+        return Column('stack', Integer, ForeignKey('stacks.id'), nullable=False)
+
+    @property
+    def game(self):
+        return self.stack.game
+
+class Writing(Base, PaperMixin):
     __tablename__ = 'writings'
 
-    id_ = Column('id', Integer, primary_key=True)
-    created = Column('created', DateTime, default=datetime.now)
-    author_id = Column('author_id', Integer, ForeignKey('players.id'), nullable=False)
-    author = relationship('Player')
-    stack_pos = Column('stack_pos', SmallInteger, nullable=False)
-
-    stack_id = Column('stack', Integer, ForeignKey('stacks.id'), nullable=False)
     stack = relationship('Stack', back_populates='writings')
-
     text = Column('text', Text, nullable=False)
 
-    @property
-    def game(self):
-        return self.stack.game
-
-class Drawing(Base):
+class Drawing(Base, PaperMixin):
     __tablename__ = 'drawing'
 
-    id_ = Column('id', Integer, primary_key=True)
-    created = Column('created', DateTime, default=datetime.now)
-    author_id = Column('author_id', Integer, ForeignKey('players.id'), nullable=False)
-    author = relationship('Player')
-    stack_pos = Column('stack_pos', SmallInteger, nullable=False)
-
-    stack_id = Column('stack', Integer, ForeignKey('stacks.id'), nullable=False)
     stack = relationship('Stack', back_populates='drawings')
-
     drawing = Column('drawing', LargeBinary, nullable=False)
-
-    @property
-    def game(self):
-        return self.stack.game
