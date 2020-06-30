@@ -1,0 +1,6 @@
+{%- extends "base.html" -%}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}<meta http-equiv="refresh" content="{{ delay }};url={{ url }}">
+
+<p>{{ message }}</p>{% endblock %}

@@ -1,84 +1,39 @@
-{% extends "base.html" %}
+{%- extends "base.html" -%}
 {% block title %}Index{% endblock %}
 
-{% block head %}
-  {{ super() }}
-  <style type="text/css">
-    body {
-        font-family: "Courier New", sans-serif;
-        text-align: center;
-    }
-    .buttons {
-        font-size: 4em;
-        display: flex;
-        justify-content: center;
-    }
-    .button, .value {
-        line-height: 1;
-        padding: 2rem;
-        margin: 2rem;
-        border: medium solid;
-        min-height: 1em;
-        min-width: 1em;
-    }
-    .button {
-        cursor: pointer;
-        user-select: none;
-    }
-    .minus {
-        color: red;
-    }
-    .plus {
-        color: green;
-    }
-    .value {
-        min-width: 2em;
-    }
-    .state {
-        font-size: 2em;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-  <div class="buttons">
-    <div class="minus button">-</div>
-    <div class="value">?</div>
-    <div class="plus button">+</div>
-  </div>
-  <div class="state">
-    <span class="users">?</span> online
-  </div>
-{% endblock %}
-
-{% block footer -%}
-  <script>
-    var minus = document.querySelector('.minus'),
-    plus = document.querySelector('.plus'),
-    value = document.querySelector('.value'),
-    users = document.querySelector('.users'),
-    websocket = new WebSocket("ws://127.0.0.1:{{ config['WS_PORT'] }}/");
-    minus.onclick = function (event) {
-        websocket.send(JSON.stringify({'action': 'minus'}));
-    }
-    plus.onclick = function (event) {
-        websocket.send(JSON.stringify({'action': 'plus'}));
-    }
-    websocket.onmessage = function (event) {
-        data = JSON.parse(event.data);
-        switch (data.type) {
-            case 'state':
-                value.textContent = data.value;
-                break;
-            case 'users':
-                users.textContent = (
-                    data.count.toString() + " user" +
-                    (data.count == 1 ? "" : "s"));
-                break;
-            default:
-                console.error(
-                    "unsupported event", data);
-        }
-    };
-  </script>
+{% block content -%}
+  {% if 'username' in session -%}
+    <h1>Active Games</h1>
+    <table>
+      <thead><tr>
+        <th>ID</th>
+        <th>Started</th>
+        <th>Last Move</th>
+        <th>Players</th>
+      </tr></thead>
+      {% for game in games -%}
+      <tr>
+        <td><a href="{{ url_for('view_game', game_id=game.id_) }}">{{ game.id_ }}</a></td>
+        <td>{{ game.started.strftime(config.TS_FORMAT) }}</td>
+        <td>{{ game.last_move.strftime(config.TS_FORMAT) }}</td>
+        <td>{{ game.players|map(attribute='name')|join(', ') }}
+      </tr>
+      {%- endfor %}
+    </table>
+    <h1>Pending Games</h1>
+    <table>
+      <thead><tr>
+        <th>ID</th>
+        <th>Created</th>
+        <th>Players</th>
+      </tr></thead>
+      {% for game in pending_games -%}
+      <tr>
+        <td><a href="{{ url_for('view_pending_game', game_id=game.id_) }}">{{ game.id_ }}</a></td>
+        <td>{{ game.created.strftime(config.TS_FORMAT) }}</td>
+        <td>{{ game.players|map(attribute='name')|join(', ') }}
+      </tr>
+      {%- endfor %}
+    </table>
+  {%- endif %}
 {%- endblock %}

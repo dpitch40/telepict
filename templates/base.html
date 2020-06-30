@@ -4,20 +4,22 @@
     {% block head -%}
     <!-- <link rel="stylesheet" href="style.css" /> -->
     <title>Telepict - {% block title %}{% endblock %}</title>
-    <!-- <script>
-      var ws = new WebSocket("ws://localhost:{{ config['WS_PORT'] }}/");
-      ws.onmessage = function (event) {
-        var data = JSON.parse(event.data);
-        var target;
-        for (const property in data) {
-          target = document.querySelector('#' + property);
-          target.textContent = data[property];
-        }
-      };
-    </script> -->
+    <ul>
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li>{%- include 'partials/user.html' %}</li>
+    </ul>
     {%- endblock %}
   </head>
   <body>
+    {% with messages = get_flashed_messages(with_categories=True) -%}
+      {%- if messages -%}
+        <ul class="flashes">
+        {% for category, message in messages -%}
+          <li>{{ category }}: {{ message }}</li>
+        {%- endfor %}
+        </ul>
+      {%- endif -%}
+    {%- endwith %}
     <div id="content">
       {% block content %}{% endblock %}
     </div>

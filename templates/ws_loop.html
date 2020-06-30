@@ -1,0 +1,19 @@
+{%- extends 'base.html' -%}
+
+{% block head -%}
+    {{ super() }}
+    <script>
+      var handlers = {};
+      var ws = new WebSocket("ws://localhost:{{ config['WS_PORT'] }}/");
+      ws.onmessage = function (event) {
+        var data = JSON.parse(event.data);
+        var action = data.action;
+        var handler = handlers[action];
+        if (handler !== undefined) {
+          handler(data.payload);
+        } else {
+          console.log("No handler found for action " + action, data.payload, handlers);
+        }
+      };
+    </script>
+{%- endblock %}

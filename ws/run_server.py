@@ -11,32 +11,41 @@ import websockets
 
 from config import Config, env
 
+handlers = dict()
+
+def handler(key):
+    def wrapper(func):
+        handlers[key] = func
+        return func
+    return wrapper
+
 STATE = {"value": 0}
 USERS = set()
 
 def state_event():
-    return json.dumps({"type": "state", **STATE})
-
-def users_event():
-    return json.dumps({"type": "users", "count": len(USERS)})
+    return json.dumps({'action': 'state', 'payload': {'count': STATE['value'],
+                                                      'users': len(USERS)}})
 
 async def notify_state():
     if USERS:  # asyncio.wait doesn't accept an empty list
         message = state_event()
         await asyncio.wait([user.send(message) for user in USERS])
 
-async def notify_users():
-    if USERS:  # asyncio.wait doesn't accept an empty list
-        message = users_event()
-        await asyncio.wait([user.send(message) for user in USERS])
-
 async def register(websocket):
     USERS.add(websocket)
-    await notify_users()
+    await notify_state()
 
 async def unregister(websocket):
     USERS.remove(websocket)
-    await notify_users()
+    await notify_state()
+
+@handler('minus')
+def minus():
+    STATE['value'] -= 1
+
+@handler('plus')
+def plus():
+    STATE['value'] += 1
 
 async def counter(websocket, path):
     # register(websocket) sends user_event() to websocket
@@ -45,14 +54,12 @@ async def counter(websocket, path):
         await websocket.send(state_event())
         async for message in websocket:
             data = json.loads(message)
-            if data["action"] == "minus":
-                STATE["value"] -= 1
-                await notify_state()
-            elif data["action"] == "plus":
-                STATE["value"] += 1
+            action = data.pop('action');
+            if action in handlers:
+                handlers[action](**data)
                 await notify_state()
             else:
-                print(f"unsupported event: {dat}")
+                print(f"unsupported event: {data}")
     finally:
         await unregister(websocket)
 
