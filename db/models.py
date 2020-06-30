@@ -1,18 +1,13 @@
-import enum
 from datetime import datetime
 import operator
 
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, Text, SmallInteger, Enum, \
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, Text, SmallInteger, \
     Boolean, LargeBinary, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 
 from db.base import Base
 from auth import gen_password_hash_and_salt
-
-class Directions(enum.Enum):
-    left = 1
-    right = 2
 
 def Assn(game_class):
     d = {'__tablename__': f'{game_class.__tablename__}_players',
@@ -31,10 +26,10 @@ class Game(Base):
     id_ = Column('id', Integer, primary_key=True)
     started = Column('started', DateTime, default=datetime.now)
     num_rounds = Column('num_rounds', SmallInteger, default=1)
-    direction = Column('direction', Enum(Directions), default=Directions.left)
+    pass_left = Column('pass_left', Boolean, default=True)
     write_first = Column('write_first', Boolean, default=True)
 
-    players_ = relationship('GamePlayerAssn', back_populates='game')
+    players_ = relationship('GamePlayerAssn', back_populates='game', cascade='all')
 
     @property
     def players(self):
@@ -49,10 +44,10 @@ class Game(Base):
 
     @property
     def last_move(self):
-        max_time = datetime(1970, 1, 1, 0, 0, 0)
+        max_time = None
         for stack in self.stacks:
             for ent in stack.stack:
-                if ent.created > max_time:
+                if max_time is None or ent.created > max_time:
                     max_time = ent.created
         return max_time
 
@@ -76,20 +71,23 @@ class Game(Base):
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
-               f'{self.direction}, {self.write_first})'
+               f'{self.pass_left}, {self.write_first})'
 
 class PendingGame(Base):
     __tablename__ = 'pending_games'
 
     id_ = Column('id', Integer, primary_key=True)
     created = Column('created', DateTime, default=datetime.now)
+    creator_id = Column('creator', Integer, ForeignKey('players.id'), nullable=False)
+    creator = relationship('Player')
     num_rounds = Column('num_rounds', SmallInteger, default=1)
-    direction = Column('direction', Enum(Directions), default=Directions.left)
+    pass_left = Column('pass_left', Boolean, default=True)
     write_first = Column('write_first', Boolean, default=True)
 
-    invitations = relationship('Invitation', back_populates='game')
+    invitations = relationship('Invitation', back_populates='game', cascade='all')
 
-    players_ = relationship('PendingGamePlayerAssn', back_populates='game')
+    players_ = relationship('PendingGamePlayerAssn', back_populates='game',
+                            cascade='all')
 
     @property
     def players(self):
@@ -105,21 +103,20 @@ class PendingGame(Base):
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
-               f'{self.direction}, {self.write_first})'
+               f'{self.pass_left}, {self.write_first})'
 
 class Invitation(Base):
     __tablename__ = 'invitations'
 
-    id_ = Column('id', Integer, primary_key=True)
     created = Column('created', DateTime, default=datetime.now)
-    game_id = Column('game_id', Integer, ForeignKey('pending_games.id'), nullable=False)
+    game_id = Column('game_id', Integer, ForeignKey('pending_games.id'), primary_key=True)
     game = relationship('PendingGame', back_populates='invitations')
 
-    recipient_id = Column('recipient_id', Integer, ForeignKey('players.id'), nullable=False)
+    recipient_id = Column('recipient_id', Integer, ForeignKey('players.id'), primary_key=True)
     recipient = relationship('Player', back_populates='invitations')
 
     def __repr__(self):
-        return f'Invitation({self.player} -> {self.game})'
+        return f'Invitation({self.recipient} -> {self.game})'
 
 class Player(Base):
     __tablename__ = 'players'
@@ -132,17 +129,17 @@ class Player(Base):
     password_salt = Column('password_salt', LargeBinary(64), nullable=False)
     # email = Column('email', String(128), nullable=False)
 
-    games_ = relationship('GamePlayerAssn', back_populates='player')
+    games_ = relationship('GamePlayerAssn', back_populates='player', cascade='all')
     @property
     def games(self):
         return sorted([a.game for a in self.games_], key=operator.attrgetter('id_'))
 
-    pending_games_ = relationship('PendingGamePlayerAssn', back_populates='player')
+    pending_games_ = relationship('PendingGamePlayerAssn', back_populates='player', cascade='all')
     @property
     def pending_games(self):
         return sorted([a.game for a in self.pending_games_], key=operator.attrgetter('id_'))
 
-    invitations = relationship('Invitation', back_populates='recipient')
+    invitations = relationship('Invitation', back_populates='recipient', cascade='all')
     
     def __init__(self, *args, **kwargs):
         if 'password' in kwargs:
@@ -169,8 +166,8 @@ class Stack(Base):
     owner_id = Column('owner_id', Integer, ForeignKey('players.id'), nullable=False)
     owner = relationship('Player')
 
-    writings = relationship('Writing', back_populates='stack')
-    drawings = relationship('Drawing', back_populates='stack')
+    writings = relationship('Writing', back_populates='stack', cascade='all')
+    drawings = relationship('Drawing', back_populates='stack', cascade='all')
 
     @property
     def stack(self):

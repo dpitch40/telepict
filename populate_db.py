@@ -1,7 +1,7 @@
 import os
 import os.path
 
-from db import DB, Directions, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
+from db import DB, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
 from config import Config
 
 def populate_db(d):
@@ -15,15 +15,21 @@ def populate_db(d):
     long_game = Game(id_=2, num_rounds=4, players=[david, nathan])
     unfinished_game = Game(id_=3, num_rounds=2, players=[david, elwood, nathan])
     queue_game = Game(id_=4, players=[david, nathan, elwood])
-    reverse_game = Game(id_=5, direction=Directions.right, players=[david, nathan, elwood])
+    reverse_game = Game(id_=5, pass_left=False, players=[david, nathan, elwood])
     draw_first_game = Game(id_=6, write_first=False, players=[david, nathan, elwood])
 
     # Pending games
-    pending_game_1 = PendingGame(id_=1, direction=Directions.right,
-                                 players=[david, nathan, elwood])
+    pending_game_1 = PendingGame(id_=1, pass_left=False,
+                                 creator=david, players=[david, nathan, elwood])
     pending_game_2 = PendingGame(id_=2, num_rounds=3, write_first=False,
-                                 players=[david, elwood])
+                                 creator=elwood, players=[david, elwood])
+    pending_game_3 = PendingGame(id_=3, num_rounds=5, write_first=False,
+                                 creator=nathan, players=[nathan, elwood])
+    pending_game_4 = PendingGame(id_=4, num_rounds=7,
+                                 creator=david, players=[david])
     invitation = Invitation(recipient=nathan, game=pending_game_2)
+    invitation2 = Invitation(recipient=david, game=pending_game_3)
+    invitation3 = Invitation(recipient=elwood, game=pending_game_4)
 
     # Stacks
     yesterday = Stack(game=game, owner=david)

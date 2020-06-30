@@ -3,8 +3,8 @@ from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from .models import Directions, Game, Player, Stack, Writing, Drawing, GamePlayerAssn, PendingGame, \
-    Invitation
+from .models import Game, Player, Stack, Writing, Drawing, GamePlayerAssn, PendingGame, Invitation, \
+    PendingGamePlayerAssn
 from .base import Base
 from config import Config
 

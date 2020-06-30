@@ -1,4 +1,4 @@
-from db import Game, GamePlayerAssn, Player, Stack, Drawing, Writing, Directions, PendingGame
+from db import Game, GamePlayerAssn, Player, Stack, Drawing, Writing, PendingGame
 from auth import gen_password_hash
 
 def test_games(test_session, david, nathan, elwood):
@@ -11,8 +11,8 @@ def test_games(test_session, david, nathan, elwood):
     assert unfinished_game.num_rounds == 2
     assert queue_game.num_rounds == reverse_game.num_rounds == draw_first_game.num_rounds == 1
 
-    assert game.direction is Directions.left
-    assert reverse_game.direction is Directions.right
+    assert game.pass_left is True
+    assert reverse_game.pass_left is False
 
     assert long_game.write_first is True
     assert draw_first_game.write_first is False
@@ -39,11 +39,11 @@ def test_pending_games(test_session, david, nathan, elwood):
     assert [p.id_ for p in game1.players] == [david.id_, nathan.id_, elwood.id_]
     assert [p.id_ for p in game2.players] == [david.id_, elwood.id_]
 
-    assert game1.direction is Directions.right
+    assert game1.pass_left is False
     assert game1.num_rounds == 1
     assert game1.write_first
 
-    assert game2.direction is Directions.left
+    assert game2.pass_left is True
     assert game2.num_rounds == 3
     assert not game2.write_first
 

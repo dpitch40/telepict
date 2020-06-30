@@ -1,4 +1,4 @@
-from db import Directions, Drawing
+from db import Drawing
 
 def get_pending_stacks(game, player):
     player_order = None
@@ -11,7 +11,7 @@ def get_pending_stacks(game, player):
 
     stacks = game.stacks
     num_players = len(game.players_)
-    step = -1 if game.direction is Directions.left else 1
+    step = -1 if game.pass_left else 1
     stacks_ordered = stacks[player_order::step] + stacks[:player_order:step]
     return [stack for i, stack in enumerate(stacks_ordered) if
             (i - len(stack.stack)) % num_players == 0]
