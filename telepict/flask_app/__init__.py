@@ -4,13 +4,13 @@ from flask import Flask, render_template, request, flash, redirect, session as f
     current_app, url_for, jsonify
 from PIL import Image
 
-from config import Config
+from ..config import Config
 from .auth import bp as auth_bp, require_logged_in
-from .pending import bp as pending_bp
-from db import DB, Player, Game, PendingGame, PendingGamePlayerAssn, Invitation, Stack, Drawing
+from .game import bp as pending_bp
+from ..db import DB, Player, Game, PendingGame, PendingGamePlayerAssn, Invitation, Stack, Drawing
 from .exceptions import FlashedError
-from util import get_pending_stacks
-from util.image import flatten_rgba_image
+from ..util import get_pending_stacks
+from ..util.image import flatten_rgba_image
 from .util import inject_current_player
 
 app = Flask('Telepict')
@@ -19,31 +19,6 @@ app.db = DB()
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(pending_bp)
-
-@app.route('/')
-def index():
-    if 'username' in flask_session:
-        view_data = dict()
-        with current_app.db.session_scope() as session:
-            player = session.query(Player).filter_by(name=flask_session['username']).one_or_none()
-            if player:
-                view_data['games'] = player.games
-                view_data['pending_games'] = player.pending_games
-                view_data['player'] = player
-                view_data['invitations'] = player.invitations
-                return render_template('index.html', **view_data)
-
-    return render_template('index.html')
-
-@app.route('/game/<int:game_id>')
-@inject_current_player
-@require_logged_in
-def view_game(session, current_player, game_id):
-    with current_app.db.session_scope() as session:
-        game = session.query(Game).get(game_id)
-        if game is None:
-            raise FlashedError('Not a player in this game')
-    return render_template('game.html', game_id=game_id, player_id=current_player.id_)
 
 @app.route('/img_upload', methods=['POST'])
 def image_upload():

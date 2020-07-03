@@ -1,7 +1,7 @@
 import base64
 import operator
 
-from db import Drawing
+from ..db import Drawing
 
 def get_pending_stacks(game, player):
     player_order = None
@@ -47,10 +47,11 @@ def get_game_state(game, player):
 
     If the game is complete, returns all stacks for enjoyment.
 
-    If the game is incomplete and the player hasn't written/drawn anything yet, prompts them to start.
+    If the game is incomplete and the player hasn't written/drawn anything yet, prompts them
+    to start.
 
-    If the game is incomplete and the player has at least one pending stack, returns the next pending
-    stack for the user to respond to by drawing/writing.
+    If the game is incomplete and the player has at least one pending stack, returns the next
+    pending stack for the user to respond to by drawing/writing.
 
     If the game is incomplete and the player has no pending stacks, returns nothing
     (displays a wait message).
@@ -64,41 +65,41 @@ def get_game_state(game, player):
         return {'stacks': stacks,
                 'action': 'view',
                 'state': 'done'}
-    else:
-        pending_stacks = get_pending_stacks(game, player)
-        prev_player = game.get_adjacent_player(player, False)
-        if pending_stacks:
-            current_stack = pending_stacks[0].stack
-            first = not bool(current_stack)
-            if first:
-                prev = ''
-                text = ''
-                ent_id = -1
-                if game.write_first:
-                    action = 'write'
-                else:
-                    action = 'draw'
-            elif len(current_stack) == game.num_rounds * len(game.players_):
-                # This player is done
-                return {'action': 'view_own',
-                        'stack': serialize_stack(pending_stacks[0]),
-                        'state': 'done_own'}
+
+    pending_stacks = get_pending_stacks(game, player)
+    prev_player = game.get_adjacent_player(player, False)
+    if pending_stacks:
+        current_stack = pending_stacks[0].stack
+        first = not bool(current_stack)
+        if first:
+            prev = ''
+            text = ''
+            ent_id = -1
+            if game.write_first:
+                action = 'write'
             else:
-                ent = current_stack[-1]
-                ent_id = ent.id_
-                action = 'write' if isinstance(ent, Drawing) else 'draw'
-                text = f'{prev_player.name} passed:'
-
-                if action == 'draw':
-                    prev = ent.text
-                else:
-                    prev = ent.data_url
-
-            return {'prev': prev,
-                    'action': action,
-                    'text': text,
-                    'state': f'{action} {ent_id}'}
+                action = 'draw'
+        elif len(current_stack) == game.num_rounds * len(game.players_):
+            # This player is done
+            return {'action': 'view_own',
+                    'stack': serialize_stack(pending_stacks[0]),
+                    'state': 'done_own'}
         else:
-            return {'action': 'wait',
-                    'text': f'Waiting for {prev_player.name} to pass you something',
-                    'state': 'wait'}
+            ent = current_stack[-1]
+            ent_id = ent.id_
+            action = 'write' if isinstance(ent, Drawing) else 'draw'
+            text = f'{prev_player.name} passed:'
+
+            if action == 'draw':
+                prev = ent.text
+            else:
+                prev = ent.data_url
+
+        return {'prev': prev,
+                'action': action,
+                'text': text,
+                'state': f'{action} {ent_id}'}
+
+    return {'action': 'wait',
+            'text': f'Waiting for {prev_player.name} to pass you something',
+            'state': 'wait'}

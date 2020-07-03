@@ -1,7 +1,7 @@
 from hashlib import pbkdf2_hmac
 import secrets
 
-from config import Config
+from ..config import Config
 
 def gen_password_hash(password, salt):
     hash_ = pbkdf2_hmac('sha512', password.encode('utf8'), salt, Config.HASH_ITERATIONS)

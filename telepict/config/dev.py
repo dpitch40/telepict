@@ -1,4 +1,4 @@
-from config.base import Config
+from .base import Config
 
 class ConfigDev(Config):
     DBFILE = 'telepict.db'

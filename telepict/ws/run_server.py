@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-# WS server that sends messages at random intervals
-
 import asyncio
-import datetime
-import random
 import json
 import io
 from collections import defaultdict
@@ -13,10 +9,10 @@ import websockets
 import numpy as np
 from PIL import Image
 
-from config import Config, env
-from db import DB, Game, Player, Writing, Drawing
-from util import get_game_state, get_pending_stacks
-from util.image import flatten_rgba_image
+from ..config import Config
+from ..db import DB, Game, Player, Writing, Drawing
+from ..util import get_game_state, get_pending_stacks
+from ..util.image import flatten_rgba_image
 
 db = DB()
 

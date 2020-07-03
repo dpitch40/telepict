@@ -1,9 +1,38 @@
-from Flask import Blueprint
+#pylint: disable=no-value-for-parameter
 
+from flask import Blueprint, request, render_template, session as flask_session, flash, \
+    current_app
+
+from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, Stack
 from .util import inject_current_player
 from .auth import require_logged_in
+from .exceptions import FlashedError
 
-bp = Blueprint('pending', __name__)
+bp = Blueprint('game', __name__)
+
+@bp.route('/')
+def index():
+    if 'username' in flask_session:
+        view_data = dict()
+        with current_app.db.session_scope() as session:
+            player = session.query(Player).filter_by(name=flask_session['username']).one_or_none()
+            if player:
+                view_data['games'] = player.games
+                view_data['pending_games'] = player.pending_games
+                view_data['player'] = player
+                view_data['invitations'] = player.invitations
+                return render_template('index.html', **view_data)
+
+    return render_template('index.html')
+
+@bp.route('/game/<int:game_id>')
+@inject_current_player
+@require_logged_in
+def view_game(session, current_player, game_id):
+    game = session.query(Game).get(game_id)
+    if game is None:
+        raise FlashedError('Not a player in this game')
+    return render_template('game.html', game_id=game_id, player_id=current_player.id_)
 
 @bp.route('/create_game', methods=['get', 'post'])
 @inject_current_player
@@ -11,15 +40,15 @@ bp = Blueprint('pending', __name__)
 def create_game(session, current_player):
     if request.method == 'GET':
         return render_template('create_game.html')
-    else:
-        num_rounds = int(request.form['numrounds'])
-        pass_left = request.form['direction'] == 'left'
-        write_first = request.form['write_first'] == '1'
-        game = PendingGame(num_rounds=num_rounds, pass_left=pass_left, write_first=write_first,
-                           creator=current_player, players=[current_player])
-        session.add(game)
-        session.commit()
-        return pending_game(game.id_)
+
+    num_rounds = int(request.form['numrounds'])
+    pass_left = request.form['direction'] == 'left'
+    write_first = request.form['write_first'] == '1'
+    game = PendingGame(num_rounds=num_rounds, pass_left=pass_left, write_first=write_first,
+                       creator=current_player, players=[current_player])
+    session.add(game)
+    session.commit()
+    return pending_game(game.id_)
 
 @bp.route('/delete_game/<int:game_id>', methods=['get', 'post'])
 @inject_current_player
@@ -31,10 +60,10 @@ def delete_game(session, current_player, game_id):
         raise FlashedError('Cannot delete a game you did not create')
     if request.method == 'GET':
         return render_template('delete_game.html', game=game)
-    else:
-        session.delete(game)
-        session.commit()
-        return index()
+
+    session.delete(game)
+    session.commit()
+    return index()
 
 @bp.route('/pending/<int:game_id>', methods=['get', 'post'])
 @inject_current_player
@@ -45,17 +74,17 @@ def pending_game(session, current_player, game_id):
     if request.method == 'GET' or not owner:
         if owner:
             return render_template('edit_pending_game.html', game=game)
-        else:
-            invitation = session.query(Invitation).get({'game_id': game.id_,
-                                                        'recipient_id': current_player.id_})
-            return render_template('view_pending_game.html', game=game, invitation=invitation)
-    else:
-        game.num_rounds = int(request.form['numrounds'])
-        game.pass_left = request.form['direction'] == 'left'
-        game.write_first = request.form['write_first'] == '1'
-        flash("Updates applied", "info")
-        session.commit()
-        return render_template('edit_pending_game.html', game=game)
+
+        invitation = session.query(Invitation).get({'game_id': game.id_,
+                                                    'recipient_id': current_player.id_})
+        return render_template('view_pending_game.html', game=game, invitation=invitation)
+
+    game.num_rounds = int(request.form['numrounds'])
+    game.pass_left = request.form['direction'] == 'left'
+    game.write_first = request.form['write_first'] == '1'
+    flash("Updates applied", "info")
+    session.commit()
+    return render_template('edit_pending_game.html', game=game)
 
 @bp.route('/accept_invite/<int:game_id>', methods=['get', 'post'])
 @inject_current_player

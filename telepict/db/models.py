@@ -2,22 +2,24 @@ from datetime import datetime
 import operator
 import base64
 
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, Text, SmallInteger, \
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, SmallInteger, \
     Boolean, LargeBinary, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 
-from db.base import Base
-from auth import gen_password_hash_and_salt
+from .base import Base
+from ..auth import gen_password_hash_and_salt
 
-def Assn(game_class):
+def assn(game_class):
     d = {'__tablename__': f'{game_class.__tablename__}_players',
          'player_order': Column('player_order', SmallInteger, nullable=False, default=1),
-         'game_id': Column('game_id', Integer, ForeignKey(f'{game_class.__tablename__}.id'), primary_key=True),
+         'game_id': Column('game_id', Integer, ForeignKey(f'{game_class.__tablename__}.id'),
+                           primary_key=True),
          'game': relationship(game_class.__name__, back_populates='players_'),
          'player_id': Column('player_id', Integer, ForeignKey('players.id'), primary_key=True),
          'player': relationship('Player', back_populates=f'{game_class.__tablename__}_'),
-         '__repr__': lambda s: f'{s.__class__.__name__}{s.game_id}/{s.player.name}#{s.player_order}'}
+         '__repr__':lambda s: f'{s.__class__.__name__}{s.game_id}/'
+                              f'{s.player.name}#{s.player_order}'}
 
     return type(f'{game_class.__name__}PlayerAssn', (Base,), d)
 
@@ -41,9 +43,9 @@ class Game(Base):
         idx = player_ids.index(player.id_)
         if idx is None:
             return None
-        else:
-            target_idx = idx + (1 if self.pass_left else -1) * (1 if next_ else -1)
-            return self.players[target_idx % len(self.players_)]
+
+        target_idx = idx + (1 if self.pass_left else -1) * (1 if next_ else -1)
+        return self.players[target_idx % len(self.players_)]
 
     stacks_ = relationship('Stack', back_populates='game')
 
@@ -65,6 +67,7 @@ class Game(Base):
         for s in self.stacks_:
             if s.owner_id == player.id_:
                 return s
+        return None
 
     @ property
     def complete(self):
@@ -77,7 +80,7 @@ class Game(Base):
             players_ = kwargs['players_'] = list()
             for i, player in enumerate(players):
                 players_.append(GamePlayerAssn(player_order=i, player=player, game=self))
-        return super(Game, self).__init__(*args, **kwargs)
+        super(Game, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
@@ -109,7 +112,7 @@ class PendingGame(Base):
             players_ = kwargs['players_'] = list()
             for i, player in enumerate(players):
                 players_.append(PendingGamePlayerAssn(player_order=i, player=player, game=self))
-        return super(PendingGame, self).__init__(*args, **kwargs)
+        super(PendingGame, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
@@ -150,20 +153,20 @@ class Player(Base):
         return sorted([a.game for a in self.pending_games_], key=operator.attrgetter('id_'))
 
     invitations = relationship('Invitation', back_populates='recipient', cascade='all')
-    
+
     def __init__(self, *args, **kwargs):
         if 'password' in kwargs:
             # Convert password to hash and salt
             pwd = kwargs.pop('password')
             hash_, salt = gen_password_hash_and_salt(pwd)
             kwargs.update({'password_hash': hash_, 'password_salt': salt})
-        return super(Player, self).__init__(*args, **kwargs)
+        super(Player, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'{self.name}({self.display_name})'
 
-GamePlayerAssn = Assn(Game)
-PendingGamePlayerAssn = Assn(PendingGame)
+GamePlayerAssn = assn(Game)
+PendingGamePlayerAssn = assn(PendingGame)
 
 class Stack(Base):
     __tablename__ = 'stacks'
@@ -217,7 +220,7 @@ class Writing(Base, PaperMixin):
     def __init__(self, *args, **kwargs):
         if 'stack' in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
-        return super(Writing, self).__init__(*args, **kwargs)
+        super(Writing, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'Writing({self.author.name}, {self.text!r}, pos={self.stack_pos})'
@@ -236,7 +239,7 @@ class Drawing(Base, PaperMixin):
     def __init__(self, *args, **kwargs):
         if 'stack' in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
-        return super(Drawing, self).__init__(*args, **kwargs)
+        super(Drawing, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'Drawing({self.author.name}, pos={self.stack_pos})'

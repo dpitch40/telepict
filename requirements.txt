@@ -1,7 +1,6 @@
 flask
 numpy
 Pillow
-pytest
 setuptools
 sqlalchemy
 websockets
