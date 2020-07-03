@@ -2,7 +2,7 @@
 {% block title %}Create Account{% endblock %}
 
 {% block content %}
-  <form action="{{ url_for('auth.create_account') }}" method='post'>
+  <form action="{{ url_for('game.auth.create_account') }}" method='post'>
     <label for="input-name">Name </label><input id="input-name" type="text" name="name" required />
     <label for="input-dispname">Display Name (can be changed later )</label><input id="input-dispname" type="text" name="dispname" required />
     <span title="At least 8 characters long">

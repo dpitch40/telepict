@@ -14,7 +14,7 @@
       </tr></thead>
       {% for game in games -%}
       <tr>
-        <td><a href="{{ url_for('view_game', game_id=game.id_) }}">{{ game.id_ }}</a></td>
+        <td><a href="{{ url_for('game.view_game', game_id=game.id_) }}">{{ game.id_ }}</a></td>
         <td>{{ game.started.strftime(config.TS_FORMAT) }}</td>
         <td>{% if game.last_move is not none %}{{ game.last_move.strftime(config.TS_FORMAT) }}{% endif %}</td>
         <td>{{ game.complete }}</td>
@@ -22,7 +22,7 @@
       </tr>
       {%- endfor %}
     </table>
-    <a href="{{ url_for('create_game') }}">Create Game</a>
+    <a href="{{ url_for('game.create_game') }}">Create Game</a>
     <h1>Pending Games</h1>
     <table>
       <thead><tr>
@@ -33,7 +33,7 @@
       </tr></thead>
       {% for game in pending_games -%}
       <tr>
-        <td><a href="{{ url_for('pending_game', game_id=game.id_) }}">{{ game.id_ }}</a></td>
+        <td><a href="{{ url_for('game.pending_game', game_id=game.id_) }}">{{ game.id_ }}</a></td>
         <td>{{ game.creator.name }}</td>
         <td>{{ game.created.strftime(config.TS_FORMAT) }}</td>
         <td>{{ game.players|map(attribute='name')|join(', ') }}
@@ -50,7 +50,7 @@
       </tr></thead>
       {% for invitation in invitations -%}
       <tr>
-        <td><a href="{{ url_for('pending_game', game_id=invitation.game.id_) }}">{{ invitation.game.id_ }}</a></td>
+        <td><a href="{{ url_for('game.pending_game', game_id=invitation.game.id_) }}">{{ invitation.game.id_ }}</a></td>
         <td>{{ invitation.game.creator.name }}</td>
         <td>{{ invitation.game.created.strftime(config.TS_FORMAT) }}</td>
         <td>{{ invitation.game.players|map(attribute='name')|join(', ') }}

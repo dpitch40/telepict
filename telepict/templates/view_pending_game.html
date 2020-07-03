@@ -4,14 +4,14 @@
 {% block content %}
   {{ game }}
   {% if invitation is not none -%}
-    <form action="{{ url_for('accept_invitation', game_id=game.id_, reject=True) }}" method='post'>
+    <form action="{{ url_for('game.accept_invitation', game_id=game.id_, reject=True) }}" method='post'>
         <button type="submit">Reject invitation</button>
     </form>
-    <form action="{{ url_for('accept_invitation', game_id=game.id_) }}" method='post'>
+    <form action="{{ url_for('game.accept_invitation', game_id=game.id_) }}" method='post'>
         <button type="submit">Accept invitation</button>
     </form>
   {%- else %}
-    <form action="{{ url_for('leave_pending_game', game_id=game.id_) }}" method='post'>
+    <form action="{{ url_for('game.leave_pending_game', game_id=game.id_) }}" method='post'>
         <button type="submit">Leave game</button>
     </form>
   {%- endif %}

@@ -38,7 +38,7 @@ def logout():
     flask_session.pop('username', None)
     return redirect_page('Logout Successful',
                          'You have been logged out. Redirecting in {delay} seconds...',
-                         url_for('index'))
+                         url_for('game.index'))
 
 @bp.route('/create_account', methods=['GET', 'POST'])
 def create_account():

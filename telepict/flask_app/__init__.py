@@ -1,4 +1,5 @@
 import io
+import os.path
 
 from flask import Flask, render_template, request, flash, redirect, session as flask_session, \
     current_app, url_for, jsonify
@@ -13,7 +14,10 @@ from ..util import get_pending_stacks
 from ..util.image import flatten_rgba_image
 from .util import inject_current_player
 
-app = Flask('Telepict')
+app_dir = os.path.dirname(os.path.dirname(__file__))
+
+app = Flask('Telepict', template_folder=os.path.join(app_dir, 'templates'),
+            static_folder=os.path.join(app_dir, 'static'))
 app.config.from_object(Config)
 app.db = DB()
 
@@ -58,7 +62,7 @@ def image_upload():
 
 @app.context_processor
 def inject_external_url():
-    return {'server': url_for('index', _external=True).rsplit(':', 1)[0]}
+    return {'server': url_for('game.index', _external=True).rsplit(':', 1)[0]}
 
 @app.errorhandler(FlashedError)
 def handle_flashed_error(exc):

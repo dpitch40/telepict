@@ -2,7 +2,7 @@
 {% block title %}Create Game{% endblock %}
 
 {% block content %}
-  <form action="{{ url_for('create_game') }}" method='post'>
+  <form action="{{ url_for('game.create_game') }}" method='post'>
     <label for="input-numrounds">Number of Rounds </label><input id="input-numrounds" type="text" name="numrounds" pattern="\d+" required value="1" />
     <br/>
     <input id="pass-left" type="radio" name="direction" value="left" checked /><label for="pass-left">Pass left</label>
