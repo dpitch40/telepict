@@ -187,7 +187,7 @@ class Stack(Base):
         return len(self.writings) + len(self.drawings)
 
     def __repr__(self):
-        return f'Stack({self.owner.name}, {len(self.stack)})'
+        return f'Stack({self.owner.name}, {self.stack!s})'
 
 class PaperMixin:
     id_ = Column('id', Integer, primary_key=True)
@@ -208,9 +208,6 @@ class PaperMixin:
     def game(self):
         return self.stack.game
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}({self.author.name}, pos={self.stack_pos})'
-
 class Writing(Base, PaperMixin):
     __tablename__ = 'writings'
 
@@ -221,6 +218,9 @@ class Writing(Base, PaperMixin):
         if 'stack' in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
         return super(Writing, self).__init__(*args, **kwargs)
+
+    def __repr__(self):
+        return f'Writing({self.author.name}, {self.text!r}, pos={self.stack_pos})'
 
 class Drawing(Base, PaperMixin):
     __tablename__ = 'drawing'
@@ -237,3 +237,6 @@ class Drawing(Base, PaperMixin):
         if 'stack' in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
         return super(Drawing, self).__init__(*args, **kwargs)
+
+    def __repr__(self):
+        return f'Drawing({self.author.name}, pos={self.stack_pos})'

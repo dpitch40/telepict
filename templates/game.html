@@ -15,8 +15,10 @@
       while (disp.firstChild) {
         disp.removeChild(disp.firstChild);
       }
-      textInputDiv.style.visibility = 'hidden';
-      imageInputDiv.style.visibility = 'hidden';
+      textInputDiv.style.display = 'none';
+      imageInputDiv.style.display = 'none';
+      clearCanvas();
+      textInput.value = "";
     }
 
     function mainHandler(data) {
@@ -55,20 +57,20 @@
     }
 
     function passWriting() {
-      ws.send(textInput.value);
+      ws.send('WRITING:' + textInput.value);
     }
   </script>
 {% endblock %}
 
 {% block content %}
   <div id="game-display"></div>
-  <div id="text-input-div" style="visibility: hidden">
+  <div id="text-input-div" style="display: none">
     <input id="text-input" size="100" />
     <button type="button" onclick="passWriting()">Pass</button>
   </div>
-  <div id="image-input-div" style="visibility: hidden">
+  <div id="image-input-div" style="display: none">
     <!-- http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/ -->
-    <canvas id="image-canvas" width="640" height="480" style="border: 1px solid #000000;"></canvas>
+    <canvas id="image-canvas" width="{{ config['CANVAS_WIDTH'] }}" height="{{ config['CANVAS_HEIGHT'] }}" style="border: 1px solid #000000;"></canvas>
     <button type="button" onclick="clearCanvas()">Clear</button>
     <button type="button" onclick="passDrawing()">Pass</button>
   </div>
@@ -81,6 +83,9 @@
     var textInputDiv = document.querySelector('#text-input-div');
     var imageInput = document.querySelector('#image-canvas');
     var imageInputDiv = document.querySelector('#image-input-div');
+
+    var canvasWidth = {{ config['CANVAS_WIDTH'] }};
+    var canvasHeight = {{ config['CANVAS_HEIGHT'] }};
 
     handlers.view = function(data) {
         var pageData;
@@ -98,6 +103,20 @@
           }
         }
     };
+    handlers.view_own = function(data) {
+        var pageData;
+        disp.appendChild(makeText('Your stack is back!'));
+        for (const page of data.stack.pages) {
+          pageData = page.content;
+          if (page.type == 'Drawing') {
+            disp.appendChild(makeText(page.author + ' drew:'));
+            disp.appendChild(makeImg(pageData));
+          } else {
+            disp.appendChild(makeText(page.author + ' wrote:'));
+            disp.appendChild(makeText(pageData));
+          }
+        }
+    };
     handlers.write = function(data) {
       if (data.text != '') {
           disp.appendChild(makeText(data.text));
@@ -106,7 +125,7 @@
         img.src = data.prev;
         disp.appendChild(img);
         disp.appendChild(makeText('Write something:'))
-        textInputDiv.style.visibility = 'visible';
+        textInputDiv.style.display = '';
     };
     handlers.draw = function(data) {
       if (data.text != '') {
@@ -114,7 +133,7 @@
         }
         disp.appendChild(makeText(data.prev));
         disp.appendChild(makeText('Draw something:'))
-        imageInputDiv.style.visibility = 'visible';
+        imageInputDiv.style.display = '';
     };
     handlers.wait = function(data) {
         disp.appendChild(makeText(data.text));
@@ -142,7 +161,7 @@
         redraw();
       }
     }
-    imageInput.onmouseup = function(event) {
+    document.querySelector('body').onmouseup = function(event) {
       mouseDown = false;
     }
     imageInput.onmouseenter = function(event) {
@@ -187,6 +206,29 @@
       clickY = new Array();
       clickDrag = new Array();
       redraw();
+    }
+
+    function compressImageData(imgData) {
+      const compressedData = new Array();
+      const data = imgData.data;
+      var x;
+      var y;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i+3] > 0) {
+          x = (i % (imgData.width * 4) / 4);
+          y = Math.floor(i / (imgData.width * 4));
+          compressedData.push(x, y, data[i], data[i+1], data[i+2], data[i+3]);
+        }
+      }
+      return Uint16Array.from(compressedData);
+    }
+
+    function passDrawing() {
+      // Serialize image data
+      var imgData = drawingContext.getImageData(0, 0, canvasWidth, canvasHeight);
+      var data = "imgData\x00" + imgData.width + "\x00" + imgData.height + "\x00";
+      var compressed = compressImageData(imgData);
+      ws.send(compressed);
     }
 
   </script>

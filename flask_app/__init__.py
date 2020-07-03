@@ -62,7 +62,7 @@ def create_game(session, current_player):
                            creator=current_player, players=[current_player])
         session.add(game)
         session.commit()
-        return index()
+        return pending_game(game.id_)
 
 @app.route('/delete_game/<int:game_id>', methods=['get', 'post'])
 @inject_current_player

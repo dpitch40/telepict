@@ -13,10 +13,27 @@ def get_pending_stacks(game, player):
 
     stacks = game.stacks
     num_players = len(game.players_)
+    # Order the stacks backwards--starting with the one from the player who passes to
+    # the current player
     step = -1 if game.pass_left else 1
-    stacks_ordered = stacks[player_order::step] + stacks[:player_order:step]
+    stacks_ordered = stacks[player_order-1::step] + stacks[:player_order-1:step]
     return [stack for i, stack in enumerate(stacks_ordered) if
-            (i - len(stack.stack)) % num_players == 0]
+            (i + 1 - len(stack.stack)) % num_players == 0]
+
+def serialize_stack(stack):
+    pages = list()
+    stack_dict = {'owner': stack.owner.name,
+                  'pages': pages}
+    for page in stack.stack:
+        page_dict = {'author': page.author.name}
+        if isinstance(page, Drawing):
+            page_dict['type'] = 'Drawing'
+            page_dict['content'] = page.data_url
+        else:
+            page_dict['type'] = 'Writing'
+            page_dict['content'] = page.text
+        pages.append(page_dict)
+    return stack_dict
 
 def get_game_state(game, player):
     """Used to load the state of a game for a player for displaying on the page.
@@ -36,19 +53,7 @@ def get_game_state(game, player):
         # Return all stacks
         stacks = list()
         for stack in game.stacks:
-            pages = list()
-            stack_dict = {'owner': stack.owner.name,
-                          'pages': pages}
-            for page in stack.stack:
-                page_dict = {'author': page.author.name}
-                if isinstance(page, Drawing):
-                    page_dict['type'] = 'Drawing'
-                    page_dict['content'] = page.data_url
-                else:
-                    page_dict['type'] = 'Writing'
-                    page_dict['content'] = page.text
-                pages.append(page_dict)
-            stacks.append(stack_dict)
+            stacks.append(serialize_stack(stack))
         return {'stacks': stacks,
                 'action': 'view',
                 'state': 'done'}
@@ -66,6 +71,11 @@ def get_game_state(game, player):
                     action = 'write'
                 else:
                     action = 'draw'
+            elif len(current_stack) == game.num_rounds * len(game.players_):
+                # This player is done
+                return {'action': 'view_own',
+                        'stack': serialize_stack(pending_stacks[0]),
+                        'state': 'done_own'}
             else:
                 ent = current_stack[-1]
                 ent_id = ent.id_

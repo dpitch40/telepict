@@ -6,9 +6,12 @@ import asyncio
 import datetime
 import random
 import json
+import io
 from collections import defaultdict
 
 import websockets
+import numpy as np
+from PIL import Image
 
 from config import Config, env
 from db import DB, Game, Player, Writing, Drawing
@@ -31,17 +34,31 @@ def handle_text(data, game_id, player_id):
             session.add(writing)
             session.commit()
 
+def decompress_image(compressed_array):
+    array = np.zeros((Config.CANVAS_HEIGHT, Config.CANVAS_WIDTH, 4), dtype=np.uint8)
+    for x, y, r, g, b, a in compressed_array:
+        array[y][x] = [r, g, b, a]
+    return array
+
 def handle_image(data, game_id, player_id):
     with db.session_scope(expire_on_commit=False) as session:
         game = session.query(Game).get(game_id)
         player = session.query(Player).get(player_id)
         pending_stacks = get_pending_stacks(game, player)
 
-        # TODO: Process image data somehow
+        compressed_array = np.frombuffer(data, dtype=np.uint16).reshape([-1, 6])
+        array = decompress_image(compressed_array)
+        image = Image.fromarray(array, mode='RGBA')
+        background = Image.new('RGB', image.size, (255, 255, 255))
+        background.paste(image, mask=image.split()[3])
+
+        bio = io.BytesIO()
+        background.save(bio, format='JPEG', quality=Config.JPEG_QUALITY)
+        print(f'{len(bio.getvalue())} bytes')
 
         if pending_stacks:
             stack = pending_stacks[0]
-            drawings = Drawing(author=player, stack=stack, drawing=data)
+            drawings = Drawing(author=player, stack=stack, drawing=bio.getvalue())
             stack.drawings.append(drawings)
             session.add(drawings)
             session.commit()
@@ -61,6 +78,8 @@ async def send_state(game_id, player_id):
         game = session.query(Game).get(game_id)
         player = session.query(Player).get(player_id)
         state = get_game_state(game, player)
+        # for stack in game.stacks:
+        #     print(stack)
         print(f'Sending {state["state"]!s} to {player.name}')
     await sockets_by_player[player_id].send(json.dumps(state))
 
@@ -72,7 +91,8 @@ async def handler(websocket, path):
     try:
         await send_state(game_id, player_id)
         async for message in websocket:
-            if len(message) < 1024:
+            if isinstance(message, str):
+                _, message = message.split(':', 1)
                 # This check could probably be better
                 handle_text(message, game_id, player_id)
             else:
