@@ -230,7 +230,6 @@ def image_upload():
     max_factor = max(height_factor, width_factor)
     if max_factor > 1:
         target_size = (int(image.size[0] // max_factor), int(image.size[1] // max_factor))
-        print(target_size)
         image = image.resize(target_size)
 
     bio = io.BytesIO()
