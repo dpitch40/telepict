@@ -1,5 +1,6 @@
 import os
 import os.path
+import argparse
 
 from db import DB, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
 from config import Config
@@ -199,8 +200,14 @@ def populate_db(d):
             session.add(ent)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--populate', action='store_true',
+                        help='Populate with test data')
+    args = parser.parse_args()
+
     if os.path.isfile(Config.DBFILE):
         os.remove(Config.DBFILE)
     d = DB()
     d.create_schema()
-    populate_db(d)
+    if args.populate:
+        populate_db(d)

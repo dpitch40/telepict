@@ -34,14 +34,15 @@ def index():
     if 'username' in flask_session:
         view_data = dict()
         with current_app.db.session_scope() as session:
-            player = session.query(Player).filter_by(name=flask_session['username']).one()
-            view_data['games'] = player.games
-            view_data['pending_games'] = player.pending_games
-            view_data['player'] = player
-            view_data['invitations'] = player.invitations
-            return render_template('index.html', **view_data)
-    else:
-        return render_template('index.html')
+            player = session.query(Player).filter_by(name=flask_session['username']).one_or_none()
+            if player:
+                view_data['games'] = player.games
+                view_data['pending_games'] = player.pending_games
+                view_data['player'] = player
+                view_data['invitations'] = player.invitations
+                return render_template('index.html', **view_data)
+
+    return render_template('index.html')
 
 @app.route('/game/<int:game_id>')
 @inject_current_player
