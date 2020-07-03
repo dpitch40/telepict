@@ -92,6 +92,21 @@
   </div>
   <div id="image-input-div" style="display: none">
     <!-- http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/ -->
+    <select id="color-select">
+      <option value="#000000" selected>Black</option>
+      <option value="#df4b26">Red</option>
+      <option value="#cb3594">Purple</option>
+      <option value="#659b41">Green</option>
+      <option value="#ffcf33">Yellow</option>
+      <option value="#986928">Brown</option>
+    </select>
+    <select id="size-select">
+      <option value="1">Tiny</option>
+      <option value="3">Small</option>
+      <option value="5" selected>Normal</option>
+      <option value="8">Large</option>
+      <option value="14">Huge</option>
+    </select>
     <canvas id="image-canvas" width="{{ config['CANVAS_WIDTH'] }}" height="{{ config['CANVAS_HEIGHT'] }}" style="border: 1px solid #000000;"></canvas>
     <button type="button" onclick="clearCanvas()">Clear</button>
     <button type="button" onclick="passDrawing()">Pass</button>
@@ -107,9 +122,32 @@
     var disp = document.querySelector('#game-display');
     var textInput = document.querySelector('#text-input');
     var textInputDiv = document.querySelector('#text-input-div');
+
     var imageInput = document.querySelector('#image-canvas');
     var imageInputDiv = document.querySelector('#image-input-div');
     var imgUpload = document.querySelector('#img-upload');
+
+    // Color selection
+    var colorSelect = document.querySelector('#color-select');
+    var selectedColor;
+    var selectableColors = [];
+    for (const option of colorSelect.querySelectorAll('option')) {
+      selectableColors.push(option.value);
+    }
+    function colorSelected(event) {
+      selectedColor = colorSelect.selectedIndex;
+    }
+    colorSelect.addEventListener('input', colorSelected);
+    colorSelected();
+
+    // Size selection
+    var sizeSelect = document.querySelector('#size-select');
+    var selectedSize;
+    function sizeSelected(event) {
+      selectedSize = Number(sizeSelect.value);
+    }
+    sizeSelect.addEventListener('input', sizeSelected);
+    sizeSelected();
 
     var canvasWidth = {{ config['CANVAS_WIDTH'] }};
     var canvasHeight = {{ config['CANVAS_HEIGHT'] }};
@@ -170,6 +208,8 @@
     var drawingContext = document.querySelector('#image-canvas').getContext("2d");
     var clickX = new Array();
     var clickY = new Array();
+    var clickColors = new Array();
+    var clickSizes = new Array();
     var clickDrag = new Array();
     var inBounds = false;
     var mouseDown = false;
@@ -206,17 +246,19 @@
     function addClick(x, y, dragging) {
       clickX.push(x);
       clickY.push(y);
+      clickColors.push(selectedColor);
+      clickSizes.push(selectedSize);
       clickDrag.push(dragging);
     }
     function redraw() {
       drawingContext.clearRect(0, 0, drawingContext.canvas.width,
                                drawingContext.canvas.height); // Clears the canvas
 
-      drawingContext.strokeStyle = "#df4b26";
       drawingContext.lineJoin = "round";
-      drawingContext.lineWidth = 5;
 
       for(var i=0; i < clickX.length; i++) {
+        drawingContext.strokeStyle = selectableColors[clickColors[i]];
+        drawingContext.lineWidth = clickSizes[i];
         drawingContext.beginPath();
         if(clickDrag[i] && i){
           drawingContext.moveTo(clickX[i-1], clickY[i-1]);
