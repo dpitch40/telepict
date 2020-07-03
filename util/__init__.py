@@ -1,4 +1,5 @@
 import base64
+import operator
 
 from db import Drawing
 
@@ -13,12 +14,18 @@ def get_pending_stacks(game, player):
 
     stacks = game.stacks
     num_players = len(game.players_)
-    # Order the stacks backwards--starting with the one from the player who passes to
-    # the current player
+    # Order the stacks backwards--starting with the current player
     step = -1 if game.pass_left else 1
-    stacks_ordered = stacks[player_order-1::step] + stacks[:player_order-1:step]
-    return [stack for i, stack in enumerate(stacks_ordered) if
-            (i + 1 - len(stack.stack)) % num_players == 0]
+    stacks_ordered = stacks[player_order::step] + stacks[:player_order:step]
+    # Pending stacks are any stacks whose height is equal to their place in the order
+    # list, mod the number of players--e.g. a player's own empty stack, or a stack of height 1
+    # passed by the previous player, and so on
+    pending_stacks = [stack for i, stack in enumerate(stacks_ordered) if
+                      (i - len(stack.stack)) % num_players == 0]
+
+    # Order by increasing size
+    pending_stacks.sort(key=operator.methodcaller('__len__'))
+    return pending_stacks
 
 def serialize_stack(stack):
     pages = list()

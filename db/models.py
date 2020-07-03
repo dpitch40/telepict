@@ -198,11 +198,11 @@ class PaperMixin:
     @declared_attr
     def author(self):
         return relationship('Player')
-    stack_pos = Column('stack_pos', SmallInteger, nullable=False)
+    stack_pos = Column('stack_pos', SmallInteger)
 
     @declared_attr
     def stack_id(self):
-        return Column('stack', Integer, ForeignKey('stacks.id'), nullable=False)
+        return Column('stack', Integer, ForeignKey('stacks.id'))
 
     @property
     def game(self):
@@ -223,7 +223,7 @@ class Writing(Base, PaperMixin):
         return f'Writing({self.author.name}, {self.text!r}, pos={self.stack_pos})'
 
 class Drawing(Base, PaperMixin):
-    __tablename__ = 'drawing'
+    __tablename__ = 'drawings'
 
     stack = relationship('Stack', back_populates='drawings')
     drawing = Column('drawing', LargeBinary, nullable=False)

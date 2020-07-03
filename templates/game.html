@@ -9,6 +9,7 @@
     var currentState;
 
     var handlers = {};
+    var httpHost = "{{ server }}:{{ config['HTTP_PORT'] }}";
     var ws = new WebSocket("ws://localhost:{{ config['WS_PORT'] }}/" + game_id + "/" + player_id);
 
     function resetDisplay() {
@@ -59,6 +60,27 @@
     function passWriting() {
       ws.send('WRITING:' + textInput.value);
     }
+
+    function sendImage() {
+      var files = imgUpload.files;
+      var file, request, formData;
+      if (files.length > 0) {
+        file = files[0];
+
+        formData = new FormData();
+        formData.set('file', file, file.name);
+        formData.set('game_id', game_id);
+        formData.set('player_id', player_id);
+
+        url = httpHost + '/img_upload'
+        request = new XMLHttpRequest();
+        request.open('POST', url, true);
+        request.send(formData);
+        request.onload = function(event) {
+          ws.send('UPDATE:');
+        }
+      }
+    }
   </script>
 {% endblock %}
 
@@ -73,6 +95,10 @@
     <canvas id="image-canvas" width="{{ config['CANVAS_WIDTH'] }}" height="{{ config['CANVAS_HEIGHT'] }}" style="border: 1px solid #000000;"></canvas>
     <button type="button" onclick="clearCanvas()">Clear</button>
     <button type="button" onclick="passDrawing()">Pass</button>
+    <br/>
+    <p>Or upload a file:</p>
+    <input type="file" id="img-upload">
+    <button type="button" onclick="sendImage()">Upload</button>
   </div>
 {% endblock %}
 
@@ -83,6 +109,7 @@
     var textInputDiv = document.querySelector('#text-input-div');
     var imageInput = document.querySelector('#image-canvas');
     var imageInputDiv = document.querySelector('#image-input-div');
+    var imgUpload = document.querySelector('#img-upload');
 
     var canvasWidth = {{ config['CANVAS_WIDTH'] }};
     var canvasHeight = {{ config['CANVAS_HEIGHT'] }};

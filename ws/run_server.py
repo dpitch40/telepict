@@ -16,6 +16,7 @@ from PIL import Image
 from config import Config, env
 from db import DB, Game, Player, Writing, Drawing
 from util import get_game_state, get_pending_stacks
+from util.image import flatten_rgba_image
 
 db = DB()
 
@@ -49,11 +50,10 @@ def handle_image(data, game_id, player_id):
         compressed_array = np.frombuffer(data, dtype=np.uint16).reshape([-1, 6])
         array = decompress_image(compressed_array)
         image = Image.fromarray(array, mode='RGBA')
-        background = Image.new('RGB', image.size, (255, 255, 255))
-        background.paste(image, mask=image.split()[3])
+        image = flatten_rgba_image(image)
 
         bio = io.BytesIO()
-        background.save(bio, format='JPEG', quality=Config.JPEG_QUALITY)
+        image.save(bio, format='JPEG', quality=Config.JPEG_QUALITY)
         print(f'{len(bio.getvalue())} bytes')
 
         if pending_stacks:
@@ -92,11 +92,15 @@ async def handler(websocket, path):
         await send_state(game_id, player_id)
         async for message in websocket:
             if isinstance(message, str):
-                _, message = message.split(':', 1)
-                # This check could probably be better
-                handle_text(message, game_id, player_id)
+                action, message = message.split(':', 1)
+                if action == 'WRITING':
+                    handle_text(message, game_id, player_id)
+                elif action == 'UPDATE':
+                    # Just update everyone
+                    pass
             else:
                 handle_image(message, game_id, player_id)
+
             # Update all players
             aws = [send_state(game_id, pid)
                    for pid in players_by_game[game_id]]
@@ -105,7 +109,8 @@ async def handler(websocket, path):
         leave_game(game_id, player_id)
 
 def main():
-    start_server = websockets.serve(handler, "localhost", Config.WS_PORT)
+    start_server = websockets.serve(handler, "localhost", Config.WS_PORT,
+                                    max_size=Config.MAX_WS_MESSAGE_SIZE)
     print(f'Running on ws://localhost:{Config.WS_PORT}')
 
     asyncio.get_event_loop().run_until_complete(start_server)
