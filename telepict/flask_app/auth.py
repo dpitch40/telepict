@@ -21,12 +21,12 @@ def login():
         player = session.query(Player).filter_by(name=name).one_or_none()
         # TODO: Log failed login attempts
         if player is None:
-            flash('Bad username or password', 'error')
+            flash('Bad username or password', 'danger')
             return render_template('login.html', redirect_url=request.form['redirect_url'])
         player_hash = player.password_hash
         input_hash = gen_password_hash(password, player.password_salt)
         if not secrets.compare_digest(player_hash, input_hash):
-            flash('Bad username or password', 'error')
+            flash('Bad username or password', 'danger')
             return render_template('login.html', redirect_url=request.form['redirect_url'])
     flask_session['username'] = name
     return redirect_page('Login Successful',
@@ -54,7 +54,7 @@ def create_account():
         player = Player(name=name, display_name=dispname, password=password)
         session.add(player)
         session.commit()
-    flash(f'Account {name} created successfully!')
+    flash(f'Account {name} created successfully!', 'primary')
     return render_template('login.html')
 
 def require_logged_in(func):

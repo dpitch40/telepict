@@ -1,5 +1,10 @@
 {% if 'username' in session -%}
-  <div>Logged in as {{ session['username'] }} <a href="{{ url_for('auth.logout') }}">Logout</a></div>
+<li class="nav-item"><div class="navbar-text">Logged in as {{ session['username'] }}</div></li>
+<li class="nav-item">
+  <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+</li>
 {%- else -%}
-  <div><a href="{{ url_for('auth.login') }}">Login</a></div>
+<li class="nav-item">
+  <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+</li>
 {%- endif %}

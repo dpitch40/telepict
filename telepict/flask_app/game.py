@@ -82,7 +82,7 @@ def pending_game(session, current_player, game_id):
     game.num_rounds = int(request.form['numrounds'])
     game.pass_left = request.form['direction'] == 'left'
     game.write_first = request.form['write_first'] == '1'
-    flash("Updates applied", "info")
+    flash("Updates applied", "primary")
     session.commit()
     return render_template('edit_pending_game.html', game=game)
 
@@ -153,7 +153,7 @@ def invite_player(session, current_player, game_id):
     player_name = request.form['player_name']
     player = session.query(Player).filter_by(name=player_name).one_or_none()
     if player is None:
-        flash(f'No player named {player_name!r} exists', 'error')
+        flash(f'No player named {player_name!r} exists', 'danger')
     else:
         invitation = Invitation(game=game, recipient=player)
         session.add(invitation)

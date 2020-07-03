@@ -1,5 +1,5 @@
 class FlashedError(Exception):
-    def __init__(self, message, *args, category='error', **kwargs):
+    def __init__(self, message, *args, category='danger', **kwargs):
         super(FlashedError, self).__init__(message, *args, **kwargs)
         self.message = message
         self.category = category
