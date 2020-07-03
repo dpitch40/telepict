@@ -29,10 +29,10 @@ def get_pending_stacks(game, player):
 
 def serialize_stack(stack):
     pages = list()
-    stack_dict = {'owner': stack.owner.name,
+    stack_dict = {'owner': stack.owner.display_name,
                   'pages': pages}
     for page in stack.stack:
-        page_dict = {'author': page.author.name}
+        page_dict = {'author': page.author.display_name}
         if isinstance(page, Drawing):
             page_dict['type'] = 'Drawing'
             page_dict['content'] = page.data_url
@@ -88,7 +88,7 @@ def get_game_state(game, player):
             ent = current_stack[-1]
             ent_id = ent.id_
             action = 'write' if isinstance(ent, Drawing) else 'draw'
-            text = f'{prev_player.name} passed:'
+            text = f'{prev_player.display_name} passed:'
 
             if action == 'draw':
                 prev = ent.text
@@ -101,5 +101,5 @@ def get_game_state(game, player):
                 'state': f'{action} {ent_id}'}
 
     return {'action': 'wait',
-            'text': f'Waiting for {prev_player.name} to pass you something',
+            'text': f'Waiting for {prev_player.display_name} to pass you something',
             'state': 'wait'}

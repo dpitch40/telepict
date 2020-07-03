@@ -15,7 +15,7 @@
   <h2>Players</h2>
   <ul>
     {% for player in game.players -%}
-    <li>{{ player.name }}{% if game.creator.id_ != player.id_ %} <form action="{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}" method='post'><button>Remove</button></form>{% endif %}
+    <li>{{ player.name }} ({{ player.display_name }}){% if game.creator.id_ != player.id_ %} <form action="{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}" method='post'><button>Remove</button></form>{% endif %}
       {%- if not loop.first %} <form action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}" method='post'><button>Move Up</button></form>{% endif %}
       {%- if not loop.last %} <form action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}" method='post'><button>Move Down</button></form>{% endif %}</li>
     {%- endfor %}
@@ -23,7 +23,7 @@
   <strong>Invited:</strong>
   <ul>
     {% for invitation in game.invitations -%}
-    <li>{{ invitation.recipient.name }}</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button>Revoke</button></form>
+    <li>{{ invitation.recipient.name }} ({{ invitation.recipient.display_name }})</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button>Revoke</button></form>
     {%- endfor %}
   </ul>
   <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post">
