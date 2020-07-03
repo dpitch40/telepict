@@ -28,6 +28,18 @@ def test_games(test_session, david, nathan, elwood):
     assert not reverse_game.complete
     assert not draw_first_game.complete
 
+    assert game.get_adjacent_player(david).id_ == nathan.id_
+    assert game.get_adjacent_player(nathan).id_ == elwood.id_
+    assert game.get_adjacent_player(david, False).id_ == elwood.id_
+
+    assert long_game.get_adjacent_player(david).id_ == nathan.id_
+    assert long_game.get_adjacent_player(nathan).id_ == david.id_
+    assert long_game.get_adjacent_player(david, False).id_ == nathan.id_
+
+    assert reverse_game.get_adjacent_player(david).id_ == elwood.id_
+    assert reverse_game.get_adjacent_player(nathan).id_ == david.id_
+    assert reverse_game.get_adjacent_player(david, False).id_ == nathan.id_
+
     assert all([len(g.players_) == len(g.stacks) for g in games])
 
 def test_pending_games(test_session, david, nathan, elwood):

@@ -1,5 +1,6 @@
 from datetime import datetime
 import operator
+import base64
 
 from sqlalchemy import Table, Column, Integer, String, ForeignKey, Text, SmallInteger, \
     Boolean, LargeBinary, DateTime
@@ -34,6 +35,15 @@ class Game(Base):
     @property
     def players(self):
         return [a.player for a in sorted(self.players_, key=operator.attrgetter('player_order'))]
+
+    def get_adjacent_player(self, player, next_=True):
+        player_ids = [p.id_ for p in self.players]
+        idx = player_ids.index(player.id_)
+        if idx is None:
+            return None
+        else:
+            target_idx = idx + (1 if self.pass_left else -1) * (1 if next_ else -1)
+            return self.players[target_idx % len(self.players_)]
 
     stacks_ = relationship('Stack', back_populates='game')
 
@@ -173,6 +183,9 @@ class Stack(Base):
     def stack(self):
         return sorted(self.writings + self.drawings, key=operator.attrgetter('stack_pos'))
 
+    def __len__(self):
+        return len(self.writings) + len(self.drawings)
+
     def __repr__(self):
         return f'Stack({self.owner.name}, {len(self.stack)})'
 
@@ -195,14 +208,32 @@ class PaperMixin:
     def game(self):
         return self.stack.game
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.author.name}, pos={self.stack_pos})'
+
 class Writing(Base, PaperMixin):
     __tablename__ = 'writings'
 
     stack = relationship('Stack', back_populates='writings')
     text = Column('text', Text, nullable=False)
 
+    def __init__(self, *args, **kwargs):
+        if 'stack' in kwargs:
+            kwargs['stack_pos'] = len(kwargs['stack'])
+        return super(Writing, self).__init__(*args, **kwargs)
+
 class Drawing(Base, PaperMixin):
     __tablename__ = 'drawing'
 
     stack = relationship('Stack', back_populates='drawings')
     drawing = Column('drawing', LargeBinary, nullable=False)
+
+    @property
+    def data_url(self):
+        img_data = base64.b64encode(self.drawing).decode('utf8')
+        return f'data:image/jpeg;base64,{img_data}'
+
+    def __init__(self, *args, **kwargs):
+        if 'stack' in kwargs:
+            kwargs['stack_pos'] = len(kwargs['stack'])
+        return super(Drawing, self).__init__(*args, **kwargs)

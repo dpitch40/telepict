@@ -1,4 +1,4 @@
-from util import get_pending_stacks, get_game_state
+from util import get_pending_stacks, _get_game_state
 from db import Game, Player, Writing, Drawing
 
 def test_get_pending_stacks(test_session, david, nathan, elwood):
@@ -58,44 +58,44 @@ def test_get_pending_stacks(test_session, david, nathan, elwood):
     assert david_pending_stacks[1].owner_id == elwood.id_
     assert nathan_pending_stacks[0].owner_id == nathan.id_
 
-def test_get_game_state(test_session, david, nathan, elwood):
+def test__get_game_state(test_session, david, nathan, elwood):
     # Game
     game = test_session.query(Game).get(1)
 
-    david_state = get_game_state(game, david)
+    david_state = _get_game_state(game, david)
     assert david_state['action'] == 'view'
     assert len(david_state['stacks']) == 3
-    nathan_state = get_game_state(game, nathan)
+    nathan_state = _get_game_state(game, nathan)
     assert nathan_state['action'] == 'view'
     assert all([ns is ds for ns, ds in zip(nathan_state['stacks'], david_state['stacks'])])
-    elwood_state = get_game_state(game, elwood)
+    elwood_state = _get_game_state(game, elwood)
     assert elwood_state['action'] == 'view'
     assert all([es is ds for es, ds in zip(elwood_state['stacks'], david_state['stacks'])])
 
-    # Long game
+    # Long games
     long_game = test_session.query(Game).get(2)
 
-    david_state = get_game_state(long_game, david)
+    david_state = _get_game_state(long_game, david)
     assert david_state['action'] == 'view'
     assert len(david_state['stacks']) == 2
-    nathan_state = get_game_state(long_game, nathan)
+    nathan_state = _get_game_state(long_game, nathan)
     assert nathan_state['action'] == 'view'
     assert all([ns is ds for ns, ds in zip(nathan_state['stacks'], david_state['stacks'])])
 
     # Unfinished game
     unfinished_game = test_session.query(Game).get(3)
 
-    david_state = get_game_state(unfinished_game, david)
+    david_state = _get_game_state(unfinished_game, david)
     assert david_state['action'] == 'write'
     assert isinstance(david_state['prev'], Drawing)
     assert david_state['prev'].author_id == nathan.id_
     assert david_state['prev'].stack_pos == 3
-    nathan_state = get_game_state(unfinished_game, nathan)
+    nathan_state = _get_game_state(unfinished_game, nathan)
     assert nathan_state['action'] == 'write'
     assert isinstance(nathan_state['prev'], Drawing)
     assert nathan_state['prev'].author_id == elwood.id_
     assert nathan_state['prev'].stack_pos == 3
-    elwood_state = get_game_state(unfinished_game, elwood)
+    elwood_state = _get_game_state(unfinished_game, elwood)
     assert elwood_state['action'] == 'write'
     assert isinstance(elwood_state['prev'], Drawing)
     assert elwood_state['prev'].author_id == david.id_
@@ -104,14 +104,14 @@ def test_get_game_state(test_session, david, nathan, elwood):
     # Elwood has a queue game
     queue_game = test_session.query(Game).get(4)
 
-    david_state = get_game_state(queue_game, david)
+    david_state = _get_game_state(queue_game, david)
     assert david_state['action'] == 'draw'
     assert isinstance(david_state['prev'], Writing)
     assert david_state['prev'].author_id == elwood.id_
     assert david_state['prev'].stack_pos == 0
-    nathan_state = get_game_state(queue_game, nathan)
+    nathan_state = _get_game_state(queue_game, nathan)
     assert nathan_state == {'action': 'wait'}
-    elwood_state = get_game_state(queue_game, elwood)
+    elwood_state = _get_game_state(queue_game, elwood)
     assert elwood_state['action'] == 'draw'
     assert isinstance(elwood_state['prev'], Writing)
     assert elwood_state['prev'].author_id == nathan.id_
@@ -120,17 +120,17 @@ def test_get_game_state(test_session, david, nathan, elwood):
     # Reverse game
     reverse_game = test_session.query(Game).get(5)
 
-    david_state = get_game_state(reverse_game, david)
+    david_state = _get_game_state(reverse_game, david)
     assert david_state['action'] == 'draw'
     assert isinstance(david_state['prev'], Writing)
     assert david_state['prev'].author_id == nathan.id_
     assert david_state['prev'].stack_pos == 0
-    nathan_state = get_game_state(reverse_game, nathan)
+    nathan_state = _get_game_state(reverse_game, nathan)
     assert nathan_state['action'] == 'draw'
     assert isinstance(nathan_state['prev'], Writing)
     assert nathan_state['prev'].author_id == elwood.id_
     assert nathan_state['prev'].stack_pos == 0
-    elwood_state = get_game_state(reverse_game, elwood)
+    elwood_state = _get_game_state(reverse_game, elwood)
     assert elwood_state['action'] == 'draw'
     assert isinstance(elwood_state['prev'], Writing)
     assert elwood_state['prev'].author_id == david.id_
@@ -139,11 +139,11 @@ def test_get_game_state(test_session, david, nathan, elwood):
     # Draw first game
     drawfirst_game = test_session.query(Game).get(6)
 
-    david_state = get_game_state(drawfirst_game, david)
+    david_state = _get_game_state(drawfirst_game, david)
     assert david_state['action'] == 'draw'
     assert david_state['prev'] is None
-    nathan_state = get_game_state(drawfirst_game, nathan)
+    nathan_state = _get_game_state(drawfirst_game, nathan)
     assert nathan_state['action'] == 'draw'
     assert nathan_state['prev'] is None
-    elwood_state = get_game_state(drawfirst_game, elwood)
+    elwood_state = _get_game_state(drawfirst_game, elwood)
     assert elwood_state == {'action': 'wait'}

@@ -6,65 +6,86 @@ import asyncio
 import datetime
 import random
 import json
+from collections import defaultdict
 
 import websockets
 
 from config import Config, env
+from db import DB, Game, Player, Writing, Drawing
+from util import get_game_state, get_pending_stacks
 
-handlers = dict()
+db = DB()
 
-def handler(key):
-    def wrapper(func):
-        handlers[key] = func
-        return func
-    return wrapper
+players_by_game = defaultdict(set)
+sockets_by_player = dict()
 
-STATE = {"value": 0}
-USERS = set()
+def handle_text(data, game_id, player_id):
+    with db.session_scope(expire_on_commit=False) as session:
+        game = session.query(Game).get(game_id)
+        player = session.query(Player).get(player_id)
+        pending_stacks = get_pending_stacks(game, player)
+        if pending_stacks:
+            stack = pending_stacks[0]
+            writing = Writing(author=player, stack=stack, text=data.strip())
+            stack.writings.append(writing)
+            session.add(writing)
+            session.commit()
 
-def state_event():
-    return json.dumps({'action': 'state', 'payload': {'count': STATE['value'],
-                                                      'users': len(USERS)}})
+def handle_image(data, game_id, player_id):
+    with db.session_scope(expire_on_commit=False) as session:
+        game = session.query(Game).get(game_id)
+        player = session.query(Player).get(player_id)
+        pending_stacks = get_pending_stacks(game, player)
 
-async def notify_state():
-    if USERS:  # asyncio.wait doesn't accept an empty list
-        message = state_event()
-        await asyncio.wait([user.send(message) for user in USERS])
+        # TODO: Process image data somehow
 
-async def register(websocket):
-    USERS.add(websocket)
-    await notify_state()
+        if pending_stacks:
+            stack = pending_stacks[0]
+            drawings = Drawing(author=player, stack=stack, drawing=data)
+            stack.drawings.append(drawings)
+            session.add(drawings)
+            session.commit()
 
-async def unregister(websocket):
-    USERS.remove(websocket)
-    await notify_state()
+def join_game(websocket, game_id, player_id):
+    players_by_game[game_id].add(player_id)
+    sockets_by_player[player_id] = websocket
+    print(f'join {game_id}: {player_id}')
 
-@handler('minus')
-def minus():
-    STATE['value'] -= 1
+def leave_game(game_id, player_id):
+    players_by_game[game_id].discard(player_id)
+    sockets_by_player.pop(player_id, None)
+    print(f'leave {game_id}: {player_id}')
 
-@handler('plus')
-def plus():
-    STATE['value'] += 1
+async def send_state(game_id, player_id):
+    with db.session_scope(expire_on_commit=False) as session:
+        game = session.query(Game).get(game_id)
+        player = session.query(Player).get(player_id)
+        state = get_game_state(game, player)
+        print(f'Sending {state["state"]!s} to {player.name}')
+    await sockets_by_player[player_id].send(json.dumps(state))
 
-async def counter(websocket, path):
+async def handler(websocket, path):
     # register(websocket) sends user_event() to websocket
-    await register(websocket)
+    game_id, player_id = path.strip('/').split('/')
+    game_id, player_id = int(game_id), int(player_id)
+    join_game(websocket, game_id, player_id)
     try:
-        await websocket.send(state_event())
+        await send_state(game_id, player_id)
         async for message in websocket:
-            data = json.loads(message)
-            action = data.pop('action');
-            if action in handlers:
-                handlers[action](**data)
-                await notify_state()
+            if len(message) < 1024:
+                # This check could probably be better
+                handle_text(message, game_id, player_id)
             else:
-                print(f"unsupported event: {data}")
+                handle_image(message, game_id, player_id)
+            # Update all players
+            aws = [send_state(game_id, pid)
+                   for pid in players_by_game[game_id]]
+            await asyncio.gather(*aws)
     finally:
-        await unregister(websocket)
+        leave_game(game_id, player_id)
 
 def main():
-    start_server = websockets.serve(counter, "localhost", Config.WS_PORT)
+    start_server = websockets.serve(handler, "localhost", Config.WS_PORT)
     print(f'Running on ws://localhost:{Config.WS_PORT}')
 
     asyncio.get_event_loop().run_until_complete(start_server)

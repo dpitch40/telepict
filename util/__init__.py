@@ -1,3 +1,5 @@
+import base64
+
 from db import Drawing
 
 def get_pending_stacks(game, player):
@@ -32,23 +34,54 @@ def get_game_state(game, player):
 
     if game.complete:
         # Return all stacks
-        return {'stacks': game.stacks,
-                'action': 'view'}
+        stacks = list()
+        for stack in game.stacks:
+            pages = list()
+            stack_dict = {'owner': stack.owner.name,
+                          'pages': pages}
+            for page in stack.stack:
+                page_dict = {'author': page.author.name}
+                if isinstance(page, Drawing):
+                    page_dict['type'] = 'Drawing'
+                    page_dict['content'] = page.data_url
+                else:
+                    page_dict['type'] = 'Writing'
+                    page_dict['content'] = page.text
+                pages.append(page_dict)
+            stacks.append(stack_dict)
+        return {'stacks': stacks,
+                'action': 'view',
+                'state': 'done'}
     else:
         pending_stacks = get_pending_stacks(game, player)
+        prev_player = game.get_adjacent_player(player, False)
         if pending_stacks:
             current_stack = pending_stacks[0].stack
-            if not current_stack:
-                ent = None
+            first = not bool(current_stack)
+            if first:
+                prev = ''
+                text = ''
+                ent_id = -1
                 if game.write_first:
                     action = 'write'
                 else:
                     action = 'draw'
             else:
                 ent = current_stack[-1]
+                ent_id = ent.id_
                 action = 'write' if isinstance(ent, Drawing) else 'draw'
+                text = f'{prev_player.name} passed:'
 
-            return {'prev': ent,
-                    'action': action}
+                if action == 'draw':
+                    prev = ent.text
+                else:
+                    prev = ent.data_url
+
+            return {'prev': prev,
+                    'action': action,
+                    'text': text,
+                    'state': f'{action} {ent_id}'}
         else:
-            return {'action': 'wait'}
+            return {'action': 'wait',
+                    'text': f'Waiting for {prev_player.name} to pass you something',
+                    'state': 'wait'}

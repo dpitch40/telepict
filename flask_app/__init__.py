@@ -42,9 +42,11 @@ def index():
 @inject_current_player
 @require_logged_in
 def view_game(session, current_player, game_id):
-    # WS integration here
-    game = session.query(Game).get(game_id)
-    return str(game)
+    with current_app.db.session_scope() as session:
+        game = session.query(Game).get(game_id)
+        if game is None:
+            raise FlashedError('Not a player in this game')
+    return render_template('game.html', game_id=game_id, player_id=current_player.id_)
 
 @app.route('/create_game', methods=['get', 'post'])
 @inject_current_player

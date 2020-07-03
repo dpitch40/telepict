@@ -1,73 +1,193 @@
-{%- extends "ws_loop.html" -%}
+{%- extends "base.html" -%}
 {% block title %}Index{% endblock %}
 
 {% block head %}
   {{ super() }}
-  <style type="text/css">
-    body {
-        font-family: "Courier New", sans-serif;
-        text-align: center;
+  <script>
+    var game_id = {{ game_id }};
+    var player_id = {{ player_id }};
+    var currentState;
+
+    var handlers = {};
+    var ws = new WebSocket("ws://localhost:{{ config['WS_PORT'] }}/" + game_id + "/" + player_id);
+
+    function resetDisplay() {
+      while (disp.firstChild) {
+        disp.removeChild(disp.firstChild);
+      }
+      textInputDiv.style.visibility = 'hidden';
+      imageInputDiv.style.visibility = 'hidden';
     }
-    .buttons {
-        font-size: 4em;
-        display: flex;
-        justify-content: center;
+
+    function mainHandler(data) {
+      if (currentState != data['state']) {
+        var action = data.action;
+        var handler = handlers[action];
+
+        resetDisplay();
+        if (handler !== undefined) {
+          handler(data);
+          currentState = data['state'];
+        } else {
+          console.log("No handler found for action " + action, data, handlers);
+        }
+      }
     }
-    .button, .value {
-        line-height: 1;
-        padding: 2rem;
-        margin: 2rem;
-        border: medium solid;
-        min-height: 1em;
-        min-width: 1em;
+
+    ws.onmessage = function (event) {
+      var data = JSON.parse(event.data);
+      mainHandler(data);
+    };
+
+    function makeText(text, type) {
+      if (type === undefined) {
+        type = 'div';
+      }
+      var element = document.createElement(type);
+      element.textContent = text;
+      return element;
     }
-    .button {
-        cursor: pointer;
-        user-select: none;
+
+    function makeImg(dataUrl) {
+      var img = document.createElement('img');
+      img.src = dataUrl;
+      return img;
     }
-    .minus {
-        color: red;
+
+    function passWriting() {
+      ws.send(textInput.value);
     }
-    .plus {
-        color: green;
-    }
-    .value {
-        min-width: 2em;
-    }
-    .state {
-        font-size: 2em;
-    }
-</style>
+  </script>
 {% endblock %}
 
 {% block content %}
-  <div class="buttons">
-    <div class="minus button">-</div>
-    <div class="value">?</div>
-    <div class="plus button">+</div>
+  <div id="game-display"></div>
+  <div id="text-input-div" style="visibility: hidden">
+    <input id="text-input" size="100" />
+    <button type="button" onclick="passWriting()">Pass</button>
   </div>
-  <div class="state">
-    <span class="users">?</span> online
+  <div id="image-input-div" style="visibility: hidden">
+    <!-- http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/ -->
+    <canvas id="image-canvas" width="640" height="480" style="border: 1px solid #000000;"></canvas>
+    <button type="button" onclick="clearCanvas()">Clear</button>
+    <button type="button" onclick="passDrawing()">Pass</button>
   </div>
 {% endblock %}
 
 {% block footer -%}
   <script>
-    var minus = document.querySelector('.minus'),
-    plus = document.querySelector('.plus'),
-    value = document.querySelector('.value'),
-    users = document.querySelector('.users');
-    minus.onclick = function (event) {
-        ws.send(JSON.stringify({'action': 'minus'}));
+    var disp = document.querySelector('#game-display');
+    var textInput = document.querySelector('#text-input');
+    var textInputDiv = document.querySelector('#text-input-div');
+    var imageInput = document.querySelector('#image-canvas');
+    var imageInputDiv = document.querySelector('#image-input-div');
+
+    handlers.view = function(data) {
+        var pageData;
+        for (const stack of data.stacks) {
+          disp.appendChild(makeText(stack.owner + "'s stack:", 'h2'));
+          for (const page of stack.pages) {
+            pageData = page.content;
+            if (page.type == 'Drawing') {
+              disp.appendChild(makeText(page.author + ' drew:'));
+              disp.appendChild(makeImg(pageData));
+            } else {
+              disp.appendChild(makeText(page.author + ' wrote:'));
+              disp.appendChild(makeText(pageData));
+            }
+          }
+        }
+    };
+    handlers.write = function(data) {
+      if (data.text != '') {
+          disp.appendChild(makeText(data.text));
+        }
+        var img = document.createElement('img');
+        img.src = data.prev;
+        disp.appendChild(img);
+        disp.appendChild(makeText('Write something:'))
+        textInputDiv.style.visibility = 'visible';
+    };
+    handlers.draw = function(data) {
+      if (data.text != '') {
+          disp.appendChild(makeText(data.text));
+        }
+        disp.appendChild(makeText(data.prev));
+        disp.appendChild(makeText('Draw something:'))
+        imageInputDiv.style.visibility = 'visible';
+    };
+    handlers.wait = function(data) {
+        disp.appendChild(makeText(data.text));
+    };
+
+    // Set up drawing canvas
+    var drawingContext = document.querySelector('#image-canvas').getContext("2d");
+    var clickX = new Array();
+    var clickY = new Array();
+    var clickDrag = new Array();
+    var inBounds = false;
+    var mouseDown = false;
+
+    imageInput.onmousedown = function(event) {
+      var mouseX = event.pageX - this.offsetLeft;
+      var mouseY = event.pageY - this.offsetTop;
+
+      mouseDown = true;
+      addClick(event.pageX - this.offsetLeft, event.pageY - this.offsetTop, false);
+      redraw();
     }
-    plus.onclick = function (event) {
-        ws.send(JSON.stringify({'action': 'plus'}));
+    imageInput.onmousemove = function(event) {
+      if (inBounds && mouseDown){
+        addClick(event.pageX - this.offsetLeft, event.pageY - this.offsetTop, true);
+        redraw();
+      }
+    }
+    imageInput.onmouseup = function(event) {
+      mouseDown = false;
+    }
+    imageInput.onmouseenter = function(event) {
+      inBounds = true;
+      if (mouseDown) {
+        addClick(event.pageX - this.offsetLeft, event.pageY - this.offsetTop, false);
+        redraw();
+      }
+    }
+    imageInput.onmouseleave = function(event) {
+      inBounds = false;
+    }
+    var clickX = new Array();
+
+    function addClick(x, y, dragging) {
+      clickX.push(x);
+      clickY.push(y);
+      clickDrag.push(dragging);
+    }
+    function redraw() {
+      drawingContext.clearRect(0, 0, drawingContext.canvas.width,
+                               drawingContext.canvas.height); // Clears the canvas
+
+      drawingContext.strokeStyle = "#df4b26";
+      drawingContext.lineJoin = "round";
+      drawingContext.lineWidth = 5;
+
+      for(var i=0; i < clickX.length; i++) {
+        drawingContext.beginPath();
+        if(clickDrag[i] && i){
+          drawingContext.moveTo(clickX[i-1], clickY[i-1]);
+         } else{
+           drawingContext.moveTo(clickX[i]-1, clickY[i]);
+         }
+         drawingContext.lineTo(clickX[i], clickY[i]);
+         drawingContext.closePath();
+         drawingContext.stroke();
+      }
+    }
+    function clearCanvas() {
+      clickX = new Array();
+      clickY = new Array();
+      clickDrag = new Array();
+      redraw();
     }
 
-    handlers.state = function (payload) {
-        value.textContent = payload.count;
-        users.textContent = (payload.users.toString() + " user" +
-                             (payload.users == 1 ? "" : "s"));
-    }
   </script>
 {%- endblock %}
