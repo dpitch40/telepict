@@ -2,7 +2,7 @@ import os
 
 class Config:
     DB_URL = None
-    HTTP_PORT = int(os.environ['FLASK_RUN_PORT'])
+    HTTP_PORT = int(os.environ.get('FLASK_RUN_PORT', 8764))
     WS_PORT = 8765
     SECRET_KEY = None
     HASH_ITERATIONS = 500000

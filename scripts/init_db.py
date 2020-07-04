@@ -2,8 +2,8 @@ import os
 import os.path
 import argparse
 
-from db import DB, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
-from config import Config
+from telepict.db import DB, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
+from telepict.config import Config
 
 def populate_db(d):
     # Players
