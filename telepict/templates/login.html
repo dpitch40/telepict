@@ -5,7 +5,7 @@
   <form action="{{ url_for('auth.login') }}" method='post'>
     <label for="input-name">Name </label><input id="input=name" type="text" name="name" required />
     <label for="input-pwd"></label>Password <input id="input-pwd" type="password" name="password" required />
-    <input id="redirect-url" type="hidden" name="redirect_url" value="{% if redirect_url is defined %}{{ redirect_url }}{% elif request.path|trim('/') != 'login' %}{{ request.url }}{% else %}/{% endif %}" />
+    <input id="redirect-url" type="hidden" name="redirect_url" value="{% if redirect_url is defined %}{{ redirect_url }}{% elif request.path|trim('/') not in ('login', 'create_account') %}{{ request.url }}{% else %}{{ url_for('game.index') }}{% endif %}" />
     <button type="submit">Login</button>
   </form>
   <a href="{{ url_for('auth.create_account') }}">Create account</a>

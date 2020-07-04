@@ -70,4 +70,4 @@ def inject_external_url():
 @app.errorhandler(FlashedError)
 def handle_flashed_error(exc):
     flash(exc.message, exc.category)
-    return redirect(request.url)
+    return redirect(request.url, 303)

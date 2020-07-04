@@ -2,12 +2,11 @@ import secrets
 import functools
 
 from flask import Blueprint, render_template, request, current_app, flash, \
-    session as flask_session, url_for
+    session as flask_session, url_for, redirect
 
 from ..db import Player
 from ..auth import gen_password_hash
 from .exceptions import FlashedError
-from .util import redirect_page
 
 bp = Blueprint('auth', __name__)
 
@@ -29,16 +28,12 @@ def login():
             flash('Bad username or password', 'danger')
             return render_template('login.html', redirect_url=request.form['redirect_url'])
     flask_session['username'] = name
-    return redirect_page('Login Successful',
-                         'You have logged in successfully. Redirecting in {delay} seconds...',
-                         request.form['redirect_url'])
+    return redirect(request.form['redirect_url'], 303)
 
 @bp.route('/logout')
 def logout():
     flask_session.pop('username', None)
-    return redirect_page('Logout Successful',
-                         'You have been logged out. Redirecting in {delay} seconds...',
-                         url_for('game.index'))
+    return redirect(url_for('game.index'), 303)
 
 @bp.route('/create_account', methods=['GET', 'POST'])
 def create_account():
@@ -55,7 +50,7 @@ def create_account():
         session.add(player)
         session.commit()
     flash(f'Account {name} created successfully!', 'primary')
-    return render_template('login.html')
+    return redirect(url_for('auth.login'), 303)
 
 def require_logged_in(func):
     @functools.wraps(func)
