@@ -105,9 +105,9 @@ async def handler(websocket, path):
         leave_game(game_id, player_id)
 
 def main():
-    start_server = websockets.serve(handler, "localhost", Config.WS_PORT,
+    start_server = websockets.serve(handler, "0.0.0.0", Config.WS_PORT,
                                     max_size=Config.MAX_WS_MESSAGE_SIZE)
-    print(f'Running on ws://localhost:{Config.WS_PORT}')
+    print(f'Running on ws://0.0.0.0:{Config.WS_PORT}')
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
