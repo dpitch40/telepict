@@ -1,8 +1,8 @@
 import pytest
 
-from db import DB, Player
-from populate_db import populate_db
-from config import Config
+from telepict.db import DB, Player
+from scripts.init_db import populate_db
+from telepict.config import Config
 
 @pytest.fixture(scope='function', autouse=True)
 def reset_test_db():

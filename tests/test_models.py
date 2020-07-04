@@ -1,5 +1,5 @@
-from db import Game, GamePlayerAssn, Player, Stack, Drawing, Writing, PendingGame
-from auth import gen_password_hash
+from telepict.db import Game, GamePlayerAssn, Player, Stack, Drawing, Writing, PendingGame
+from telepict.auth import gen_password_hash
 
 def test_games(test_session, david, nathan, elwood):
     games = test_session.query(Game).all()

@@ -34,21 +34,16 @@ class Game(Base):
     write_first = Column('write_first', Boolean, default=True)
 
     players_ = relationship('GamePlayerAssn', back_populates='game', cascade='all')
+    stacks_ = relationship('Stack', back_populates='game')
+
+    @ property
+    def complete(self):
+        target_len = len(self.players_) * self.num_rounds
+        return all([len(s.stack) == target_len for s in self.stacks])
 
     @property
     def players(self):
         return [a.player for a in sorted(self.players_, key=operator.attrgetter('player_order'))]
-
-    def get_adjacent_player(self, player, next_=True):
-        player_ids = [p.id_ for p in self.players]
-        idx = player_ids.index(player.id_)
-        if idx is None:
-            return None
-
-        target_idx = idx + (1 if self.pass_left else -1) * (1 if next_ else -1)
-        return self.players[target_idx % len(self.players_)]
-
-    stacks_ = relationship('Stack', back_populates='game')
 
     @property
     def stacks(self):
@@ -64,16 +59,20 @@ class Game(Base):
                     max_time = ent.created
         return max_time
 
+    def get_adjacent_player(self, player, next_=True):
+        player_ids = [p.id_ for p in self.players]
+        idx = player_ids.index(player.id_)
+        if idx is None:
+            return None
+
+        target_idx = idx + (1 if self.pass_left else -1) * (1 if next_ else -1)
+        return self.players[target_idx % len(self.players_)]
+
     def player_stack(self, player):
         for s in self.stacks_:
             if s.owner_id == player.id_:
                 return s
         return None
-
-    @ property
-    def complete(self):
-        target_len = len(self.players_) * self.num_rounds
-        return all([len(s.stack) == target_len for s in self.stacks])
 
     def __init__(self, *args, **kwargs):
         if 'players' in kwargs:
@@ -100,7 +99,6 @@ class PendingGame(Base):
     write_first = Column('write_first', Boolean, default=True)
 
     invitations = relationship('Invitation', back_populates='game', cascade='all')
-
     players_ = relationship('PendingGamePlayerAssn', back_populates='game',
                             cascade='all')
 
@@ -147,16 +145,16 @@ class Player(Base):
     # email = Column('email', String(128), nullable=False)
 
     games_ = relationship('GamePlayerAssn', back_populates='player', cascade='all')
+    pending_games_ = relationship('PendingGamePlayerAssn', back_populates='player', cascade='all')
+    invitations = relationship('Invitation', back_populates='recipient', cascade='all')
+
     @property
     def games(self):
         return sorted([a.game for a in self.games_], key=operator.attrgetter('id_'))
 
-    pending_games_ = relationship('PendingGamePlayerAssn', back_populates='player', cascade='all')
     @property
     def pending_games(self):
         return sorted([a.game for a in self.pending_games_], key=operator.attrgetter('id_'))
-
-    invitations = relationship('Invitation', back_populates='recipient', cascade='all')
 
     def __init__(self, *args, **kwargs):
         if 'password' in kwargs:
@@ -180,7 +178,6 @@ class Stack(Base):
 
     game_id = Column('game_id', Integer, ForeignKey('games.id'), nullable=False)
     game = relationship('Game', back_populates='stacks_')
-
     owner_id = Column('owner_id', Integer, ForeignKey('players.id'), nullable=False)
     owner = relationship('Player')
 
@@ -225,7 +222,7 @@ class Writing(Base, PaperMixin):
     text = Column('text', Text, nullable=False)
 
     def __init__(self, *args, **kwargs):
-        if 'stack' in kwargs:
+        if 'stack' in kwargs and 'stack_pos' not in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
         super(Writing, self).__init__(*args, **kwargs)
 
@@ -245,7 +242,7 @@ class Drawing(Base, PaperMixin):
         return f'data:image/jpeg;base64,{img_data}'
 
     def __init__(self, *args, **kwargs):
-        if 'stack' in kwargs:
+        if 'stack' in kwargs and 'stack_pos' not in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
         super(Drawing, self).__init__(*args, **kwargs)
 
