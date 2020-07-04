@@ -142,7 +142,7 @@ def start_game(session, current_player, game_id):
         stack = Stack(game=active_game, owner=player)
         session.add(stack)
     session.commit()
-    return redirect(url_for('view_game', game_id=active_game.id_), 303)
+    return redirect(url_for('game.view_game', game_id=active_game.id_), 303)
 
 @bp.route('/leave_pending_game/<int:game_id>', methods=['post'])
 @inject_current_player
