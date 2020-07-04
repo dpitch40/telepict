@@ -137,7 +137,7 @@ var CanvasDraw = /** @class */ (function () {
                 ]),
                 " ",
             ]),
-            h('div', { style: { width: styleWidth, height: styleHeight, border: "1px solid gray" } }, [
+            h('div', { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } }, [
                 (this.drawingCanvas = h('canvas', {
                     width: this.w,
                     height: this.h,
