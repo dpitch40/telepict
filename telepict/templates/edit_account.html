@@ -1,0 +1,12 @@
+{%- extends "base.html" -%}
+{% block title %}Edit Account{% endblock %}
+
+{% block content %}
+  <form action="{{ url_for('auth.edit_account') }}" method='post'>
+    <label for="input-dispname">Change Display Name</label><input id="input-dispname" type="text" name="dispname" value="{{ player.display_name }}" required />
+    <span title="At least 8 characters long">
+      <label for="input-pwd"></label>Change Password <input id="input-pwd" type="password" name="password" pattern="(?:.{8,})?" />
+    </span>
+    <button type="submit">Update Account</button>
+  </form>
+{% endblock %}
