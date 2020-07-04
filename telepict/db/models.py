@@ -23,6 +23,7 @@ def assn(game_class):
 
     return type(f'{game_class.__name__}PlayerAssn', (Base,), d)
 
+
 class Game(Base):
     __tablename__ = 'games'
 
@@ -86,6 +87,7 @@ class Game(Base):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
                f'{self.pass_left}, {self.write_first})'
 
+
 class PendingGame(Base):
     __tablename__ = 'pending_games'
 
@@ -118,6 +120,7 @@ class PendingGame(Base):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
                f'{self.pass_left}, {self.write_first})'
 
+
 class Invitation(Base):
     __tablename__ = 'invitations'
 
@@ -130,6 +133,7 @@ class Invitation(Base):
 
     def __repr__(self):
         return f'Invitation({self.recipient} -> {self.game})'
+
 
 class Player(Base):
     __tablename__ = 'players'
@@ -168,6 +172,7 @@ class Player(Base):
 GamePlayerAssn = assn(Game)
 PendingGamePlayerAssn = assn(PendingGame)
 
+
 class Stack(Base):
     __tablename__ = 'stacks'
 
@@ -192,6 +197,7 @@ class Stack(Base):
     def __repr__(self):
         return f'Stack({self.owner.name}, {self.stack!s})'
 
+
 class PaperMixin:
     id_ = Column('id', Integer, primary_key=True)
     created = Column('created', DateTime, default=datetime.now)
@@ -211,6 +217,7 @@ class PaperMixin:
     def game(self):
         return self.stack.game
 
+
 class Writing(Base, PaperMixin):
     __tablename__ = 'writings'
 
@@ -224,6 +231,7 @@ class Writing(Base, PaperMixin):
 
     def __repr__(self):
         return f'Writing({self.author.name}, {self.text!r}, pos={self.stack_pos})'
+
 
 class Drawing(Base, PaperMixin):
     __tablename__ = 'drawings'
