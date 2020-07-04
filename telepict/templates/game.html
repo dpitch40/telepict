@@ -111,25 +111,10 @@
     var canvasHeight = {{ config['CANVAS_HEIGHT'] }};
 
     handlers.view = function(data) {
-        var pageData;
-        for (const stack of data.stacks) {
-          disp.appendChild(makeText(stack.owner + "'s stack:", 'h2'));
-          for (const page of stack.pages) {
-            pageData = page.content;
-            if (page.type == 'Drawing') {
-              disp.appendChild(makeText(page.author + ' drew:'));
-              disp.appendChild(makeImg(pageData));
-            } else {
-              disp.appendChild(makeText(page.author + ' wrote:'));
-              disp.appendChild(makeText(pageData));
-            }
-          }
-        }
-    };
-    handlers.view_own = function(data) {
-        var pageData;
-        disp.appendChild(makeText('Your stack is back!'));
-        for (const page of data.stack.pages) {
+      var pageData;
+      for (const stack of data.stacks) {
+        disp.appendChild(makeText(stack.owner + "'s stack:", 'h2'));
+        for (const page of stack.pages) {
           pageData = page.content;
           if (page.type == 'Drawing') {
             disp.appendChild(makeText(page.author + ' drew:'));
@@ -139,27 +124,42 @@
             disp.appendChild(makeText(pageData));
           }
         }
+      }
+    };
+    handlers.view_own = function(data) {
+      var pageData;
+      disp.appendChild(makeText('Your stack is back!'));
+      for (const page of data.stack.pages) {
+        pageData = page.content;
+        if (page.type == 'Drawing') {
+          disp.appendChild(makeText(page.author + ' drew:'));
+          disp.appendChild(makeImg(pageData));
+        } else {
+          disp.appendChild(makeText(page.author + ' wrote:'));
+          disp.appendChild(makeText(pageData));
+        }
+      }
     };
     handlers.write = function(data) {
       if (data.text != '') {
-          disp.appendChild(makeText(data.text));
-        }
-        var img = document.createElement('img');
-        img.src = data.prev;
-        disp.appendChild(img);
-        disp.appendChild(makeText('Write something:'))
-        textInputDiv.style.display = '';
+        disp.appendChild(makeText(data.text));
+      }
+      var img = document.createElement('img');
+      img.src = data.prev;
+      disp.appendChild(img);
+      disp.appendChild(makeText('Write something:'))
+      textInputDiv.style.display = '';
     };
     handlers.draw = function(data) {
       if (data.text != '') {
-          disp.appendChild(makeText(data.text));
-        }
-        disp.appendChild(makeText(data.prev));
-        disp.appendChild(makeText('Draw something:'))
-        imageInputDiv.style.display = '';
+        disp.appendChild(makeText(data.text));
+      }
+      disp.appendChild(makeText(data.prev));
+      disp.appendChild(makeText('Draw something:'))
+      imageInputDiv.style.display = '';
     };
     handlers.wait = function(data) {
-        disp.appendChild(makeText(data.text));
+      disp.appendChild(makeText(data.text));
     };
 
     function passDrawing() {
