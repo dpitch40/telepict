@@ -2,11 +2,27 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-  <form action="{{ url_for('auth.login') }}" method='post'>
-    <label for="input-name">Name </label><input id="input=name" type="text" name="name" required />
-    <label for="input-pwd"></label>Password <input id="input-pwd" type="password" name="password" required />
-    <input id="redirect-url" type="hidden" name="redirect_url" value="{% if redirect_url is defined %}{{ redirect_url }}{% elif request.path|trim('/') not in ('login', 'create_account') %}{{ request.url }}{% else %}{{ url_for('game.index') }}{% endif %}" />
-    <button type="submit">Login</button>
-  </form>
-  <a href="{{ url_for('auth.create_account') }}">Create account</a>
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <form action="{{ url_for('auth.login') }}" method='post'>
+        <div class="form-group">
+          <label for="input-name">Name </label>
+          <input id="input=name" type="text" name="name" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="input-pwd">Password </label>
+          <input id="input-pwd" type="password" name="password" class="form-control" required />
+        </div>
+        <input id="redirect-url" type="hidden" name="redirect_url" value="{% if redirect_url is defined %}{{ redirect_url }}{% elif request.path|trim('/') not in ('login', 'create_account') %}{{ request.url }}{% else %}{{ url_for('game.index') }}{% endif %}" />
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-md-4">
+      <a class="btn btn-secondary" href="{{ url_for('auth.create_account') }}">Create account</a>
+    </div>
+  </div>
+</div>
 {% endblock %}
