@@ -92,6 +92,8 @@ function redraw() {
 function clearCanvas() {
   clickX = new Array();
   clickY = new Array();
+  clickColors = new Array();
+  clickSizes = new Array();
   clickDrag = new Array();
   redraw();
 }
