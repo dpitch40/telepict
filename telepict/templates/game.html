@@ -9,8 +9,8 @@
     var currentState;
 
     var handlers = {};
-    var httpHost = "{{ server }}:{{ config['HTTP_PORT'] }}";
-    var ws = new WebSocket("ws://localhost:{{ config['WS_PORT'] }}/" + game_id + "/" + player_id);
+    var httpHost = "http://{{ server }}:{{ config['HTTP_PORT'] }}";
+    var ws = new WebSocket("ws://{{ server }}:{{ config['WS_PORT'] }}/" + game_id + "/" + player_id);
 
     function resetDisplay() {
       while (disp.firstChild) {

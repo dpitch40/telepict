@@ -62,7 +62,10 @@ def image_upload():
 
 @app.context_processor
 def inject_external_url():
-    return {'server': url_for('game.index', _external=True).rsplit(':', 1)[0]}
+    pre_port_url = url_for('game.index', _external=True).rsplit(':', 1)[0]
+    # Strip protocol off
+    server = pre_port_url.split(':', 1)[1].lstrip('/')
+    return {'server': server}
 
 @app.errorhandler(FlashedError)
 def handle_flashed_error(exc):
