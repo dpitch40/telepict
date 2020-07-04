@@ -28,7 +28,7 @@
   </ul>
   <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post">
     <label for="invite-input">Invite player </label><input id="invite-input" type="text" name="player_name" required /><button type="submit">Invite</button>
-    <p>Or have them visit this URL: {{ url_for('game.accept_invitation', game_id=game.id_, _external=True) }}</p>
+    <p>Or have them visit this URL: {{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}</p>
   </form>
   <form action="{{ url_for('game.start_game', game_id=game.id_) }}" method='post'>
     <button type="submit">Start Game</button>

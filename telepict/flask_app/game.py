@@ -1,5 +1,7 @@
 #pylint: disable=no-value-for-parameter
 
+import operator
+
 from flask import Blueprint, request, render_template, session as flask_session, flash, \
     current_app, redirect, url_for
 
@@ -7,6 +9,7 @@ from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, S
 from .util import inject_current_player
 from .auth import require_logged_in
 from .exceptions import FlashedError
+from ..util import get_pending_stacks
 
 bp = Blueprint('game', __name__)
 
@@ -17,10 +20,15 @@ def index():
         with current_app.db.session_scope() as session:
             player = session.query(Player).filter_by(name=flask_session['username']).one_or_none()
             if player:
-                view_data['games'] = player.games
-                view_data['pending_games'] = player.pending_games
+                invited_games = [i.game for i in player.invitations]
+
+                view_data['games'] = sorted(player.games, key=operator.attrgetter('started'))
+                view_data['waiting_games'] = set([g.id_ for g in player.games if not g.complete and
+                                                  get_pending_stacks(g, player)])
+                view_data['pending_games'] = sorted(player.pending_games + invited_games,
+                                                    key=operator.attrgetter('created'))
                 view_data['player'] = player
-                view_data['invitations'] = player.invitations
+                view_data['invited_games'] = set(map(operator.attrgetter('id_'), invited_games))
                 return render_template('index.html', **view_data)
 
     return render_template('index.html')
@@ -87,14 +95,14 @@ def pending_game(session, current_player, game_id):
     session.commit()
     return redirect(url_for('game.pending_game', game_id=game_id), 303)
 
-@bp.route('/accept_invite/<int:game_id>', methods=['post'])
+@bp.route('/accept_invite/<int:game_id>', methods=['get', 'post'])
 @inject_current_player
 @require_logged_in
-def accept_invitation(session, current_player, game_id):
+def respond_invitation(session, current_player, game_id):
     game = session.query(PendingGame).get(game_id)
     invitation = session.query(Invitation).get({'game_id': game.id_,
                                                 'recipient_id': current_player.id_})
-    reject = request.args.get('reject', False)
+    reject = request.form.get('action', 'accept') == 'reject'
 
     if invitation is not None:
         session.delete(invitation)
@@ -103,10 +111,7 @@ def accept_invitation(session, current_player, game_id):
         session.add(PendingGamePlayerAssn(player_order=len(game.players),
                                           player=current_player, game=game))
     session.commit()
-    if reject:
-        return redirect(url_for('game.index'), 303)
-    else:
-        return redirect(url_for('game.pending_game', game_id=game_id), 303)
+    return redirect(url_for('game.index'), 303)
 
 @bp.route('/remove_player/<int:game_id>/<int:player_id>', methods=['post'])
 @inject_current_player
