@@ -80,9 +80,10 @@ var CanvasDraw = /** @class */ (function () {
                 _this.draw(x, y);
             }
         };
-        if (wrapper && wrapper.offsetHeight > 2 && wrapper.offsetWidth > 2) {
-            this.w = Math.round(wrapper.offsetWidth * this.pixelRatio);
-            this.h = Math.round(wrapper.offsetHeight * this.pixelRatio);
+        if (wrapper && wrapper.dataset.dimensions) {
+            var _a = wrapper.dataset.dimensions.split('x'), width = _a[0], height = _a[1];
+            this.w = Math.round(parseInt(width) * this.pixelRatio);
+            this.h = Math.round(parseInt(height) * this.pixelRatio);
         }
         if (!wrapper)
             wrapper = document.createElement('div');
