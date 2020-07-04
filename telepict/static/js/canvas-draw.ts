@@ -98,7 +98,7 @@ class CanvasDraw {
           "Thick",
         ]), " ",
       ]),
-      h('div', {style: {width: styleWidth, height: styleHeight, border: `1px solid gray`}}, [
+      h('div', {style: {width: styleWidth, height: styleHeight, border: `1px solid gray`, boxSizing: 'content-box'}}, [
         (this.drawingCanvas = h<HTMLCanvasElement>('canvas', {
           width: this.w,
           height: this.h,
