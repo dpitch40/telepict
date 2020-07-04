@@ -2,7 +2,6 @@
 {% block title %}Index{% endblock %}
 
 {% block content -%}
-  <div class="container">
   {% if 'username' in session -%}
     <div class="row">
       <div class="col-md-4">
@@ -74,5 +73,4 @@
       {%- endfor %}
     </table>
   {%- endif %}
-</div>
 {%- endblock %}

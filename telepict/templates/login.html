@@ -2,7 +2,6 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="container">
   <div class="row">
     <div class="col-md-4">
       <form action="{{ url_for('auth.login') }}" method='post'>
@@ -24,5 +23,4 @@
       <a class="btn btn-secondary" href="{{ url_for('auth.create_account') }}">Create account</a>
     </div>
   </div>
-</div>
 {% endblock %}

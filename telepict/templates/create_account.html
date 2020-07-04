@@ -2,7 +2,6 @@
 {% block title %}Create Account{% endblock %}
 
 {% block content %}
-<div class="container">
   <form action="{{ url_for('auth.create_account') }}" method='post'>
     <div class="form-group">
       <label for="input-name">Name </label>
@@ -20,5 +19,4 @@
     </div>
     <button type="submit" class="btn btn-primary">Create Account</button>
   </form>
-</div>
 {% endblock %}
