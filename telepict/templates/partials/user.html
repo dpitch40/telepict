@@ -1,5 +1,5 @@
 {% if 'username' in session -%}
-<li class="nav-item"><div class="navbar-text">Logged in as {{ session['username'] }}</div></li>
+<li class="nav-item"><div class="navbar-text">Logged in as {{ session['username'] }}({{ session['userdispname'] }})</div></li>
 <li class="nav-item">
   <a class="nav-link" href="{{ url_for('auth.edit_account') }}">Edit Account</a>
 </li>

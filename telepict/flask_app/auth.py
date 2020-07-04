@@ -38,7 +38,8 @@ def login():
         if not secrets.compare_digest(player_hash, input_hash):
             flash('Bad username or password', 'danger')
             return render_template('login.html', redirect_url=request.form['redirect_url'])
-    flask_session['username'] = name
+        flask_session['username'] = player.name
+        flask_session['userdispname'] = player.display_name
     return redirect(request.form['redirect_url'], 303)
 
 @bp.route('/logout')
@@ -80,5 +81,6 @@ def edit_account(session, player):
         changed = True
     if changed:
         session.commit()
+        flask_session['userdispname'] = player.display_name
         flash(f'Account changes applied', 'primary')
     return redirect(url_for('auth.edit_account'), 303)
