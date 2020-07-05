@@ -4,6 +4,6 @@
 {% block content %}
   {{ game }}
   <form action="{{ url_for('game.leave_pending_game', game_id=game.id_) }}" method='post'>
-      <button type="submit">Leave game</button>
+    <button type="submit" class="btn btn-secondary">Leave game</button>
   </form>
 {% endblock %}

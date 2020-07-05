@@ -3,7 +3,9 @@
 
 {% block content %}
   <form action="{{ url_for('game.delete_game', game_id=game.id_) }}" method='post'>
-    <label>Really delete?</label>
-    <button type="submit">Delete</button>
+    <div class="form-group">
+      <label>Really delete?</label>
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </div>
   </form>
 {% endblock %}
