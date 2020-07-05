@@ -10,7 +10,7 @@
 
     var handlers = {};
     var httpHost = "http://{{ server }}:{{ config['HTTP_PORT'] }}";
-    var ws = new WebSocket("ws://{{ server }}:{{ config['WS_PORT'] }}/" + game_id + "/" + player_id);
+    var ws = new WebSocket("ws://{{ server }}:{{ config['WS_PORT'] }}/game/" + game_id + "/" + player_id);
 
     function resetDisplay() {
       while (disp.firstChild) {
@@ -44,7 +44,8 @@
     };
 
     function passWriting() {
-      ws.send('WRITING:' + textInput.value);
+      ws.send(JSON.stringify({'action': 'writing',
+                              'text': textInput.value}));
     }
   </script>
 {% endblock %}
