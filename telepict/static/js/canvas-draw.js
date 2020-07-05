@@ -5,20 +5,26 @@
  * @author Guangcong Luo <guangcongluo@gmail.com>
  * @license MIT
  */
-function h(tagName, attrs, children) {
-    var elem = typeof tagName === 'string' ? document.createElement(tagName) : tagName;
-    var style = attrs === null || attrs === void 0 ? void 0 : attrs.style;
-    if (attrs) {
-        delete attrs.style;
-        Object.assign(elem, attrs);
+function h(tagName, attrs) {
+    var children = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        children[_i - 2] = arguments[_i];
     }
-    if (style)
-        Object.assign(elem.style, style);
-    if (children)
-        for (var _i = 0, children_1 = children; _i < children_1.length; _i++) {
-            var child = children_1[_i];
-            elem.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
-        }
+    var elem = typeof tagName === 'string' ? document.createElement(tagName) : tagName;
+    if (attrs) {
+        var style = attrs.style;
+        if (attrs.class)
+            elem.className = attrs.class;
+        delete attrs.style;
+        delete attrs.class;
+        Object.assign(elem, attrs);
+        if (style)
+            Object.assign(elem.style, style);
+    }
+    for (var _a = 0, children_1 = children; _a < children_1.length; _a++) {
+        var child = children_1[_a];
+        elem.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
+    }
     return elem;
 }
 var CanvasDraw = /** @class */ (function () {
@@ -90,80 +96,44 @@ var CanvasDraw = /** @class */ (function () {
         wrapper.innerHTML = '';
         var styleWidth = Math.round(this.w / this.pixelRatio) + "px";
         var styleHeight = Math.round(this.h / this.pixelRatio) + "px";
-        this.wrapper = h(wrapper, undefined, [
-            h('div', { className: 'top-controls', style: { marginBottom: '4px' } }, [
-                h('button', { name: 'undo', onclick: this.undo }, ["Undo"]),
+        wrapper.appendChild(h("div", null,
+            h("div", { class: "top-controls", style: { marginBottom: '4px' } },
+                h("button", { name: "undo", onclick: this.undo }, "Undo"),
                 " ",
-                h('button', { name: 'clear', onclick: this.clear }, ["Clear"]),
-            ]),
-            h('div', { className: 'left-controls', style: { marginBottom: '4px' } }, [
-                h('button', { onclick: this.clickColor, value: "black" }, [
-                    h('span', { className: 'color', style: { background: 'black', display: 'inline-block', width: '12px', height: '12px' } }),
-                ]),
+                h("button", { name: "clear", onclick: this.clear }, "Clear")),
+            h("div", { class: "left-controls", style: { marginBottom: '4px' } },
+                h("button", { onclick: this.clickColor, value: "black", title: "black" },
+                    h("span", { class: "color", style: { background: 'black', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h('button', { onclick: this.clickColor, value: "#F55252" }, [
-                    h('span', { className: 'color', style: { background: '#F55252', display: 'inline-block', width: '12px', height: '12px' } }),
-                ]),
+                h("button", { onclick: this.clickColor, value: "#F55252", title: "red" },
+                    h("span", { class: "color", style: { background: '#F55252', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h('button', { onclick: this.clickColor, value: "#F8BC01" }, [
-                    h('span', { className: 'color', style: { background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px' } }),
-                ]),
+                h("button", { onclick: this.clickColor, value: "#F8BC01", title: "yellow" },
+                    h("span", { class: "color", style: { background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h('button', { onclick: this.clickColor, value: "#3DC853" }, [
-                    h('span', { className: 'color', style: { background: '#3DC853', display: 'inline-block', width: '12px', height: '12px' } }),
-                ]),
+                h("button", { onclick: this.clickColor, value: "#3DC853", title: "green" },
+                    h("span", { class: "color", style: { background: '#3DC853', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h('button', { onclick: this.clickColor, value: "#42B0FF" }, [
-                    h('span', { className: 'color', style: { background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px' } }),
-                ]),
+                h("button", { onclick: this.clickColor, value: "#42B0FF", title: "blue" },
+                    h("span", { class: "color", style: { background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h('button', { onclick: this.clickColor, value: "#D512F9" }, [
-                    h('span', { className: 'color', style: { background: '#D512F9', display: 'inline-block', width: '12px', height: '12px' } }),
-                ]),
+                h("button", { onclick: this.clickColor, value: "#D512F9", title: "purple" },
+                    h("span", { class: "color", style: { background: '#D512F9', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h('button', { onclick: this.clickColor, value: "#8D6E63" }, [
-                    h('span', { className: 'color', style: { background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px' } }),
-                ]),
-                " | ",
-                h('button', { onclick: this.clickStrokeWidth, value: "1" }, [
-                    "Thin",
-                ]),
+                h("button", { onclick: this.clickColor, value: "#8D6E63", title: "brown" },
+                    h("span", { class: "color", style: { background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h('button', { onclick: this.clickStrokeWidth, value: "2" }, [
-                    "Normal",
-                ]),
+                "| ",
+                h("button", { onclick: this.clickStrokeWidth, value: "1" }, "Thin"),
                 " ",
-                h('button', { onclick: this.clickStrokeWidth, value: "4" }, [
-                    "Thick",
-                ]),
+                h("button", { onclick: this.clickStrokeWidth, value: "2" }, "Normal"),
                 " ",
-            ]),
-            h('div', { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } }, [
-                (this.drawingCanvas = h('canvas', {
-                    width: this.w,
-                    height: this.h,
-                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' },
-                })),
-                (this.currentStrokeCanvas = h('canvas', {
-                    width: this.w,
-                    height: this.h,
-                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' },
-                })),
-                (this.interfaceCanvas = h('canvas', {
-                    width: this.w,
-                    height: this.h,
-                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute', cursor: 'crosshair' },
-                    onmousedown: this.mousedown,
-                    onmousemove: this.mousemove,
-                    onmouseup: this.mouseup,
-                    onmouseout: this.mouseup,
-                    ontouchstart: this.mousedown,
-                    ontouchmove: this.mousemove,
-                    ontouchend: this.mouseup,
-                    ontouchcancel: this.mouseup,
-                })),
-            ]),
-        ]);
+                h("button", { onclick: this.clickStrokeWidth, value: "4" }, "Thick")),
+            h("div", { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } },
+                this.drawingCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
+                this.currentStrokeCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
+                this.interfaceCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute', cursor: 'crosshair' }, onmousedown: this.mousedown, onmousemove: this.mousemove, onmouseup: this.mouseup, onmouseout: this.mouseup, ontouchstart: this.mousedown, ontouchmove: this.mousemove, ontouchend: this.mouseup, ontouchcancel: this.mouseup }))));
+        this.wrapper = wrapper;
         this.interfaceContext = this.interfaceCanvas.getContext('2d');
         this.currentStrokeContext = this.currentStrokeCanvas.getContext('2d');
         this.drawingContext = this.drawingCanvas.getContext('2d');
@@ -231,8 +201,8 @@ var CanvasDraw = /** @class */ (function () {
     };
     CanvasDraw.prototype.updateButtons = function () {
         var buttons = this.wrapper.getElementsByTagName('button');
-        for (var _i = 0, _a = buttons; _i < _a.length; _i++) {
-            var button = _a[_i];
+        for (var _i = 0, buttons_1 = buttons; _i < buttons_1.length; _i++) {
+            var button = buttons_1[_i];
             if (button.name === 'undo' || button.name === 'clear') {
                 button.disabled = !this.strokes.length;
             }

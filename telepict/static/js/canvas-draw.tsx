@@ -12,19 +12,25 @@ interface Stroke {
 }
 
 function h<T extends HTMLElement = HTMLElement>(
-  tagName: string | T, attrs?: Omit<Partial<T>, 'style'> & {style?: Partial<T['style']>}, children?: (HTMLElement | string)[]
+  tagName: string | T, attrs?: any, ...children: (HTMLElement | string)[]
 ): T {
   const elem = typeof tagName === 'string' ? document.createElement(tagName) as T : tagName;
-  const style = attrs?.style;
   if (attrs) {
+    const style = attrs.style;
+    if (attrs.class) elem.className = attrs.class;
     delete attrs.style;
+    delete attrs.class;
     Object.assign(elem, attrs);
+    if (style) Object.assign(elem.style, style);
   }
-  if (style) Object.assign(elem.style, style);
-  if (children) for (const child of children) {
+  for (const child of children) {
     elem.appendChild(typeof child === 'string' ? document.createTextNode(child) : child);
   }
   return elem;
+}
+declare namespace JSX {
+  type Element = any;
+  interface IntrinsicElements { [k: string]: any; }
 }
 
 class CanvasDraw {
@@ -61,73 +67,71 @@ class CanvasDraw {
     const styleWidth = `${Math.round(this.w / this.pixelRatio)}px`;
     const styleHeight = `${Math.round(this.h / this.pixelRatio)}px`;
 
-    this.wrapper = h(wrapper, undefined, [
-      h('div', {className: 'top-controls', style: {marginBottom: '4px'}}, [
-        h<HTMLButtonElement>('button', {name: 'undo', onclick: this.undo}, ["Undo"]), " ",
-        h<HTMLButtonElement>('button', {name: 'clear', onclick: this.clear}, ["Clear"]),
-      ]),
-      h('div', {className: 'left-controls', style: {marginBottom: '4px'}}, [
-        h<HTMLButtonElement>('button', {onclick: this.clickColor, value: "black"}, [
-          h('span', {className: 'color', style: {background: 'black', display: 'inline-block', width: '12px', height: '12px'}}),
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickColor, value: "#F55252"}, [ // red
-          h('span', {className: 'color', style: {background: '#F55252', display: 'inline-block', width: '12px', height: '12px'}}),
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickColor, value: "#F8BC01"}, [ // yellow
-          h('span', {className: 'color', style: {background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px'}}),
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickColor, value: "#3DC853"}, [ // green
-          h('span', {className: 'color', style: {background: '#3DC853', display: 'inline-block', width: '12px', height: '12px'}}),
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickColor, value: "#42B0FF"}, [ // blue
-          h('span', {className: 'color', style: {background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px'}}),
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickColor, value: "#D512F9"}, [ // purple
-          h('span', {className: 'color', style: {background: '#D512F9', display: 'inline-block', width: '12px', height: '12px'}}),
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickColor, value: "#8D6E63"}, [ // brown
-          h('span', {className: 'color', style: {background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px'}}),
-        ]),
-        " | ",
-        h<HTMLButtonElement>('button', {onclick: this.clickStrokeWidth, value: "1"}, [
-          "Thin",
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickStrokeWidth, value: "2"}, [
-          "Normal",
-        ]), " ",
-        h<HTMLButtonElement>('button', {onclick: this.clickStrokeWidth, value: "4"}, [
-          "Thick",
-        ]), " ",
-      ]),
-      h('div', {style: {width: styleWidth, height: styleHeight, border: `1px solid gray`, boxSizing: `content-box`}}, [
-        (this.drawingCanvas = h<HTMLCanvasElement>('canvas', {
-          width: this.w,
-          height: this.h,
-          style: {width: styleWidth, height: styleHeight, display: 'block', position: 'absolute'},
-        })),
+    wrapper.appendChild(<div>
+      <div class="top-controls" style={{marginBottom: '4px'}}>
+        <button name="undo" onclick={this.undo}>Undo</button> {}
+        <button name="clear" onclick={this.clear}>Clear</button>
+      </div>
+      <div class="left-controls" style={{marginBottom: '4px'}}>
+        <button onclick={this.clickColor} value="black" title="black">
+          <span class="color" style={{background: 'black', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> {}
+        <button onclick={this.clickColor} value="#F55252" title="red">
+          <span class="color" style={{background: '#F55252', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> {}
+        <button onclick={this.clickColor} value="#F8BC01" title="yellow">
+          <span class="color" style={{background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> {}
+        <button onclick={this.clickColor} value="#3DC853" title="green">
+          <span class="color" style={{background: '#3DC853', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> {}
+        <button onclick={this.clickColor} value="#42B0FF" title="blue">
+          <span class="color" style={{background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> {}
+        <button onclick={this.clickColor} value="#D512F9" title="purple">
+          <span class="color" style={{background: '#D512F9', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> {}
+        <button onclick={this.clickColor} value="#8D6E63" title="brown">
+          <span class="color" style={{background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> {}
+        | {}
+        <button onclick={this.clickStrokeWidth} value="1">
+          Thin
+        </button> {}
+        <button onclick={this.clickStrokeWidth} value="2">
+          Normal
+        </button> {}
+        <button onclick={this.clickStrokeWidth} value="4">
+          Thick
+        </button>
+      </div>
+      <div style={{width: styleWidth, height: styleHeight, border: `1px solid gray`, boxSizing: `content-box`}}>
+        {this.drawingCanvas = <canvas
+          width={this.w} height={this.h}
+          style={{width: styleWidth, height: styleHeight, display: 'block', position: 'absolute'}}
+        ></canvas>}
 
-        (this.currentStrokeCanvas = h<HTMLCanvasElement>('canvas', {
-          width: this.w,
-          height: this.h,
-          style: {width: styleWidth, height: styleHeight, display: 'block', position: 'absolute'},
-        })),
+        {this.currentStrokeCanvas = <canvas
+          width={this.w} height={this.h}
+          style={{width: styleWidth, height: styleHeight, display: 'block', position: 'absolute'}}
+        ></canvas>}
     
-        (this.interfaceCanvas = h<HTMLCanvasElement>('canvas', {
-          width: this.w,
-          height: this.h,
-          style: {width: styleWidth, height: styleHeight, display: 'block', position: 'absolute', cursor: 'crosshair'},
-          onmousedown: this.mousedown,
-          onmousemove: this.mousemove,
-          onmouseup: this.mouseup,
-          onmouseout: this.mouseup,
-          ontouchstart: this.mousedown,
-          ontouchmove: this.mousemove,
-          ontouchend: this.mouseup,
-          ontouchcancel: this.mouseup,
-        })),
-      ]),
-    ]);
+        {this.interfaceCanvas = <canvas
+          width={this.w} height={this.h}
+          style={{width: styleWidth, height: styleHeight, display: 'block', position: 'absolute', cursor: 'crosshair'}}
+          onmousedown={this.mousedown}
+          onmousemove={this.mousemove}
+          onmouseup={this.mouseup}
+          onmouseout={this.mouseup}
+          ontouchstart={this.mousedown}
+          ontouchmove={this.mousemove}
+          ontouchend={this.mouseup}
+          ontouchcancel={this.mouseup}
+        ></canvas>}
+      </div>
+    </div>);
 
+    this.wrapper = wrapper;
     this.interfaceContext = this.interfaceCanvas.getContext('2d')!;
     this.currentStrokeContext = this.currentStrokeCanvas.getContext('2d')!;
     this.drawingContext = this.drawingCanvas.getContext('2d')!;
@@ -200,8 +204,8 @@ class CanvasDraw {
   }
 
   updateButtons() {
-    const buttons = this.wrapper.getElementsByTagName('button');
-    for (const button of buttons as any as HTMLButtonElement[]) {
+    const buttons = this.wrapper.getElementsByTagName('button') as any as HTMLButtonElement[];
+    for (const button of buttons) {
       if (button.name === 'undo' || button.name === 'clear') {
         button.disabled = !this.strokes.length;
       } else {
