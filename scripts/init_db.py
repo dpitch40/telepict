@@ -18,6 +18,7 @@ def populate_db(d):
     queue_game = Game(id_=4, players=[david, nathan, elwood])
     reverse_game = Game(id_=5, pass_left=False, players=[david, nathan, elwood])
     draw_first_game = Game(id_=6, write_first=False, players=[david, nathan, elwood])
+    partially_done_game = Game(id_=7, players=[david, nathan, elwood])
 
     # Pending games
     pending_game_1 = PendingGame(id_=1, pass_left=False,
@@ -53,6 +54,10 @@ def populate_db(d):
     d_stack_drawfirst = Stack(game=draw_first_game, owner=david)
     n_stack_drawfirst = Stack(game=draw_first_game, owner=nathan)
     e_stack_drawfirst = Stack(game=draw_first_game, owner=elwood)
+
+    pd_yesterday = Stack(game=partially_done_game, owner=david)
+    pd_enders_game = Stack(game=partially_done_game, owner=nathan)
+    pd_eiffel_tower = Stack(game=partially_done_game, owner=elwood)
 
     # Game
     dw_11 = Writing(text="Coming soon: yesterday",
@@ -193,6 +198,30 @@ def populate_db(d):
     # Draw first game
     df_ed = Drawing(drawing=open(os.path.join('data', 'drawings', 'nd_21.jpg'), 'rb').read(),
                     stack_pos=0, stack=e_stack_drawfirst, author=elwood)
+
+    # Partially done game
+    dw_11_pd = Writing(text="Coming soon: yesterday",
+                       stack_pos=0, stack=pd_yesterday, author=david)
+    dw_12_pd = Writing(text="Be kind, bake your VHS tapes at 400 degrees for "
+                            "20 minutes before returning",
+                       stack_pos=2, stack=pd_enders_game, author=david)
+
+    nw_11_pd = Writing(text="Ender's Game",
+                       stack_pos=0, stack=pd_enders_game, author=nathan)
+
+    ew_11_pd = Writing(text="An Awful Eiffel Tower",
+                       stack_pos=0, stack=pd_eiffel_tower, author=elwood)
+    ew_12_pd = Writing(text="Passing an hour on the fourth Monday.",
+                       stack_pos=2, stack=pd_yesterday, author=elwood)
+
+    dd_11_pd = Drawing(drawing=open(os.path.join('data', 'drawings', 'dd_11.jpg'), 'rb').read(),
+                       stack_pos=1, stack=pd_eiffel_tower, author=david)
+
+    nd_11_pd = Drawing(drawing=open(os.path.join('data', 'drawings', 'nd_11.jpg'), 'rb').read(),
+                       stack_pos=1, stack=pd_yesterday, author=nathan)
+
+    ed_11_pd = Drawing(drawing=open(os.path.join('data', 'drawings', 'ed_11.jpg'), 'rb').read(),
+                       stack_pos=1, stack=pd_enders_game, author=elwood)
 
     with d.session_scope() as session:
         for ent in [david, nathan, elwood, queue_game, reverse_game, draw_first_game,

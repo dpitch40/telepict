@@ -19,15 +19,9 @@
         <th>Players</th>
       </tr></thead>
       {% for game in games -%}
-      {% if game.complete -%}
-        {% set game_state = 'done' -%}
-      {% elif game.id_ is not in waiting_games -%}
-        {% set game_state = 'waiting' -%}
-      {% else -%}
-        {% set game_state = 'active' -%}
-      {% endif -%}
-      <tr class="{% if game_state == 'done' %}table-success{% elif game_state == 'active' %}table-warning{% else %}table-default{% endif %}">
-        <td><a href="{{ url_for('game.view_game', game_id=game.id_) }}" class="btn {% if game_state == 'done' %}btn-success{% elif game_state == 'active' %}btn-warning{% else %}btn-secondary{% endif %}">{% if game_state == 'done' %}View{% elif game_state == 'active' %}Continue{% else %}Waiting{% endif %}</a></td>
+      {% set game_state = game_states[game.id_] -%}
+      <tr class="{% if game_state == 'done' %}table-success{% elif game_state == 'done_own' %}table-default{% elif game_state == 'wait' %}table-default{% else %}table-warning{% endif %}">
+        <td><a href="{{ url_for('game.view_game', game_id=game.id_) }}" class="btn {% if game_state == 'done' %}btn-success{% elif game_state == 'done_own' %}btn-success{% elif game_state == 'wait' %}btn-secondary{% else %}btn-warning{% endif %}">{% if game_state == 'done' %}View All{% elif game_state == 'done_own' %}View Own{% elif game_state == 'wait' %}Waiting{% else %}Continue{% endif %}</a></td>
         <td>{{ game.started.strftime(config.TS_FORMAT) }}</td>
         <td>{% if game.last_move is not none %}{{ game.last_move.strftime(config.TS_FORMAT) }}{% endif %}</td>
         <td>{{ game.num_rounds }}</td>

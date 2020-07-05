@@ -9,7 +9,7 @@ from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, S
 from .util import inject_current_player
 from .auth import require_logged_in
 from .exceptions import FlashedError
-from ..util import get_pending_stacks
+from ..util import get_game_state
 
 bp = Blueprint('game', __name__)
 
@@ -23,8 +23,8 @@ def index():
                 invited_games = [i.game for i in player.invitations]
 
                 view_data['games'] = sorted(player.games, key=operator.attrgetter('started'))
-                view_data['waiting_games'] = set([g.id_ for g in player.games if not g.complete and
-                                                  get_pending_stacks(g, player)])
+                view_data['game_states'] = {g.id_: get_game_state(g, player, False)['state']
+                                            for g in player.games}
                 view_data['pending_games'] = sorted(player.pending_games + invited_games,
                                                     key=operator.attrgetter('created'))
                 view_data['player'] = player

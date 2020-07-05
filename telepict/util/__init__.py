@@ -42,7 +42,7 @@ def serialize_stack(stack):
         pages.append(page_dict)
     return stack_dict
 
-def get_game_state(game, player):
+def get_game_state(game, player, full=True):
     """Used to load the state of a game for a player for displaying on the page.
 
     If the game is complete, returns all stacks for enjoyment.
@@ -58,21 +58,23 @@ def get_game_state(game, player):
     """
 
     if game.complete:
-        # Return all stacks
-        stacks = list()
-        for stack in game.stacks:
-            stacks.append(serialize_stack(stack))
-        return {'stacks': stacks,
-                'action': 'view',
-                'state': 'done'}
+        state = {'action': 'view',
+                 'state': 'done'}
+        if full:
+            # Return all stacks
+            stacks = list()
+            for stack in game.stacks:
+                stacks.append(serialize_stack(stack))
+            state['stacks'] = stacks
+        return state
 
     pending_stacks = get_pending_stacks(game, player)
     prev_player = game.get_adjacent_player(player, False)
     if pending_stacks:
         current_stack = pending_stacks[0].stack
         first = not bool(current_stack)
+        prev = ''
         if first:
-            prev = ''
             text = ''
             ent_id = -1
             if game.write_first:
@@ -81,24 +83,29 @@ def get_game_state(game, player):
                 action = 'draw'
         elif len(current_stack) == game.num_rounds * len(game.players_):
             # This player is done
-            return {'action': 'view_own',
-                    'stack': serialize_stack(pending_stacks[0]),
-                    'state': 'done_own'}
+            state = {'action': 'view_own',
+                     'state': 'done_own'}
+            if full:
+                state['stack'] = serialize_stack(pending_stacks[0])
+            return state
         else:
             ent = current_stack[-1]
             ent_id = ent.id_
             action = 'write' if isinstance(ent, Drawing) else 'draw'
             text = f'{prev_player.display_name} passed:'
 
-            if action == 'draw':
-                prev = ent.text
-            else:
-                prev = ent.data_url
+            if full:
+                if action == 'draw':
+                    prev = ent.text
+                else:
+                    prev = ent.data_url
 
-        return {'prev': prev,
-                'action': action,
-                'text': text,
-                'state': f'{action} {ent_id}'}
+        state = {'action': action,
+                 'text': text,
+                 'state': f'{action} {ent_id}'}
+        if full:
+            state['prev'] = prev
+        return state
 
     return {'action': 'wait',
             'text': f'Waiting for {prev_player.display_name} to pass you something',
