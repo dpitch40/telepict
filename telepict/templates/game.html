@@ -43,21 +43,6 @@
       mainHandler(data);
     };
 
-    function makeText(text, type) {
-      if (type === undefined) {
-        type = 'div';
-      }
-      var element = document.createElement(type);
-      element.textContent = text;
-      return element;
-    }
-
-    function makeImg(dataUrl) {
-      var img = document.createElement('img');
-      img.src = dataUrl;
-      return img;
-    }
-
     function passWriting() {
       ws.send('WRITING:' + textInput.value);
     }
@@ -94,53 +79,51 @@
     handlers.view = function(data) {
       var pageData;
       for (const stack of data.stacks) {
-        disp.appendChild(makeText(stack.owner + "'s stack:", 'h2'));
+        disp.appendChild(h('h2', {}, stack.owner + "'s stack:"));
         for (const page of stack.pages) {
           pageData = page.content;
           if (page.type == 'Drawing') {
-            disp.appendChild(makeText(page.author + ' drew:'));
-            disp.appendChild(makeImg(pageData));
+            disp.appendChild(h('div', {}, page.author + ' drew:'));
+            disp.appendChild(h('img', {src: pageData}));
           } else {
-            disp.appendChild(makeText(page.author + ' wrote:'));
-            disp.appendChild(makeText(pageData));
+            disp.appendChild(h('div', {}, page.author + ' wrote:'));
+            disp.appendChild(h('div', {}, pageData));
           }
         }
       }
     };
     handlers.view_own = function(data) {
       var pageData;
-      disp.appendChild(makeText('Your stack is back!'));
+      disp.appendChild(h('div', {}, 'Your stack is back!'));
       for (const page of data.stack.pages) {
         pageData = page.content;
         if (page.type == 'Drawing') {
-          disp.appendChild(makeText(page.author + ' drew:'));
-          disp.appendChild(makeImg(pageData));
+          disp.appendChild(h('div', {}, page.author + ' drew:'));
+          disp.appendChild(h('img', {src: pageData}));
         } else {
-          disp.appendChild(makeText(page.author + ' wrote:'));
-          disp.appendChild(makeText(pageData));
+          disp.appendChild(h('div', {}, page.author + ' wrote:'));
+          disp.appendChild(h('div', {}, pageData));
         }
       }
     };
     handlers.write = function(data) {
       if (data.text != '') {
-        disp.appendChild(makeText(data.text));
+        disp.appendChild(h('div', {}, data.text));
       }
-      var img = document.createElement('img');
-      img.src = data.prev;
-      disp.appendChild(img);
-      disp.appendChild(makeText('Write something:'))
+      disp.appendChild(h('img', {src: data.prev}));
+      disp.appendChild(h('div', {}, 'Write something:'))
       textInputDiv.style.display = '';
     };
     handlers.draw = function(data) {
       if (data.text != '') {
-        disp.appendChild(makeText(data.text));
+        disp.appendChild(h('div', {}, data.text));
       }
-      disp.appendChild(makeText(data.prev));
-      disp.appendChild(makeText('Draw something:'))
+      disp.appendChild(h('div', {}, data.prev));
+      disp.appendChild(h('div', {}, 'Draw something:'))
       imageInputDiv.style.display = '';
     };
     handlers.wait = function(data) {
-      disp.appendChild(makeText(data.text));
+      disp.appendChild(h('div', {}, data.text));
     };
 
   </script>
