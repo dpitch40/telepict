@@ -3,37 +3,66 @@
 
 {% block content %}
   <form action="{{ url_for('game.pending_game', game_id=game.id_) }}" method='post'>
-    <label for="input-numrounds">Number of Rounds </label><input id="input-numrounds" type="text" name="numrounds" pattern="\d+" required value="{{ game.num_rounds }}" />
-    <br/>
-    <input id="pass-left" type="radio" name="direction" value="left" {% if game.pass_left %}checked{% endif %} /><label for="pass-left">Pass left</label>
-    <input id="pass-right" type="radio" name="direction" value="right" {% if not game.pass_left %}checked{% endif %} /><label for="pass-right">Pass right</label>
-    <br/>
-    <input id="write-first" type="radio" name="write_first" value="1" {% if game.write_first %}checked{% endif %} /><label for="write-first">Write first</label>
-    <input id="draw-first" type="radio" name="write_first" value="0" {% if not game.write_first %}checked{% endif %} /><label for="draw-first">Draw first</label>
-    <button type="submit">Update</button>
+    <div class="form-group">
+      <label for="input-numrounds">Number of Rounds </label>
+      <input id="input-numrounds" type="text" name="numrounds" pattern="\d+" class="form-control" required value="1" />
+    </div>
+
+    <div class="form-group">
+      <div class="form-check form-check-inline">
+        <input id="pass-left" class="form-check-input" type="radio" name="direction" value="left" checked /><label class="form-check-label" for="pass-left">Pass left</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input id="pass-right" class="form-check-input" type="radio" name="direction" value="right" /><label class="form-check-label" for="pass-right">Pass right</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-check form-check-inline">
+        <input id="write-first" class="form-check-input" type="radio" name="write_first" value="1" checked /><label class="form-check-label" for="write-first">Write first</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input id="draw-first" class="form-check-input" type="radio" name="write_first" value="0" /><label class="form-check-label" for="draw-first">Draw first</label>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Game</button>
   </form>
   <h2>Players</h2>
-  <ul>
-    {% for player in game.players -%}
-    <li>{{ player.name }} ({{ player.display_name }}){% if game.creator.id_ != player.id_ %} <form action="{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}" method='post'><button>Remove</button></form>{% endif %}
-      {%- if not loop.first %} <form action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}" method='post'><button>Move Up</button></form>{% endif %}
-      {%- if not loop.last %} <form action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}" method='post'><button>Move Down</button></form>{% endif %}</li>
-    {%- endfor %}
-  </ul>
+  <div class="row">
+    <div class="col-md-4">
+      <table class="table table-borderless table-sm">
+        <tbody>
+          {% for player in game.players -%}
+          <tr>
+            <td>{{ player.name }} ({{ player.display_name }})
+                {%- if game.creator.id_ != player.id_ %} <form class="form-inline" action="{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}" method='post'><button class="btn btn-secondary">Remove</button></form>{% endif -%}
+                {%- if not loop.first %} <form class="form-inline" action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}" method='post'><button class="btn btn-secondary">Move Up</button></form>{% endif -%}
+                {%- if not loop.last %} <form class="form-inline" action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}" method='post'><button class="btn btn-secondary">Move Down</button></form>{% endif -%}
+            </td>
+          </tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
   <strong>Invited:</strong>
   <ul>
     {% for invitation in game.invitations -%}
     <li>{{ invitation.recipient.name }} ({{ invitation.recipient.display_name }})</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button>Revoke</button></form>
     {%- endfor %}
   </ul>
-  <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post">
-    <label for="invite-input">Invite player </label><input id="invite-input" type="text" name="player_name" required /><button type="submit">Invite</button>
-    <p>Or have them visit this URL: {{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}</p>
+  <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post" class="form-inline">
+    <div class="form-group">
+      <label for="invite-input">Invite player </label>
+      <input id="invite-input" type="text" name="player_name" class="form-control" required />
+      <button type="submit" class="btn btn-secondary">Invite</button>
+      <p>Or have them visit this URL: {{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}</p>
+    </div>
   </form>
   <form action="{{ url_for('game.start_game', game_id=game.id_) }}" method='post'>
-    <button type="submit">Start Game</button>
+    <button type="submit" class="btn btn-primary">Start Game</button>
   </form>
   <form action="{{ url_for('game.delete_game', game_id=game.id_) }}" method='get'>
-    <button type="submit">Delete Pending Game</button>
+    <button type="submit" class="btn btn-danger">Delete Pending Game</button>
   </form>
 {% endblock %}

@@ -2,7 +2,24 @@
 {% block title %}Pending Game: {{ game.id_ }}{% endblock %}
 
 {% block content %}
-  {{ game }}
+  <table class="table">
+    <thead><tr>
+      <th>Creator</th>
+      <th>Created</th>
+      <th># Rounds</th>
+      <th>Direction</th>
+      <th>Start</th>
+      <th>Players</th>
+    </tr></thead>
+    <tr>
+      <td>{{ game.creator.display_name }}</td>
+      <td>{{ game.created.strftime(config.TS_FORMAT) }}</td>
+      <td>{{ game.num_rounds }}</td>
+      <td>{% if game.pass_left %}Left{% else %}Right{% endif %}</td>
+      <td>{% if game.write_first %}Write{% else %}Draw{% endif %}</td>
+      <td>{{ game.players|map(attribute='display_name')|join(', ') }}</td>
+    </tr>
+  </table>
   <form action="{{ url_for('game.leave_pending_game', game_id=game.id_) }}" method='post'>
     <button type="submit" class="btn btn-secondary">Leave game</button>
   </form>

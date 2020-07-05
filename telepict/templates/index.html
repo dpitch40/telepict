@@ -50,12 +50,13 @@
       </tr></thead>
       {% for game in pending_games -%}
       {% set invited = game.id_ in invited_games -%}
+      {% set owner = game.creator_id == player.id_ -%}
       <tr>
         <td>
           {%- if invited -%}
             <form action="{{ url_for('game.respond_invitation', game_id=game.id_, reject=True) }}" method='post' class="form-inline"><button class="btn btn-secondary" type="submit" name="action" value="reject">Reject</button><button class="btn btn-primary" type="submit" name="action" value="accept">Accept</button></form>
           {%- else -%}
-            <a href="{{ url_for('game.pending_game', game_id=game.id_) }}" class="btn btn-secondary">View</a>
+            <a href="{{ url_for('game.pending_game', game_id=game.id_) }}" class="btn {% if owner %}btn-primary{% else %}btn-secondary{% endif %}">{% if owner %}Edit{% else %}View{% endif %}</a>
           {%- endif %}</td>
         <td>{{ game.creator.display_name }}</td>
         <td>{{ game.created.strftime(config.TS_FORMAT) }}</td>
