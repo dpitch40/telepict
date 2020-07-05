@@ -1,6 +1,6 @@
 import functools
 
-from flask import render_template, current_app, session as flask_session
+from flask import current_app, session as flask_session
 from ..db import Player
 
 def inject_current_player(func):

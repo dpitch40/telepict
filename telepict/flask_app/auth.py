@@ -82,5 +82,5 @@ def edit_account(session, player):
     if changed:
         session.commit()
         flask_session['userdispname'] = player.display_name
-        flash(f'Account changes applied', 'primary')
+        flash('Account changes applied', 'primary')
     return redirect(url_for('auth.edit_account'), 303)
