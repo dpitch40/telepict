@@ -3,7 +3,7 @@
 import operator
 
 from flask import Blueprint, request, render_template, session as flask_session, flash, \
-    current_app, redirect, url_for
+    current_app, redirect, url_for, jsonify
 
 from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, Stack
 from .util import inject_current_player
@@ -113,6 +113,8 @@ def respond_invitation(session, current_player, game_id):
     session.commit()
     return redirect(url_for('game.index'), 303)
 
+# AJAX endpoints
+
 @bp.route('/remove_player/<int:game_id>/<int:player_id>', methods=['post'])
 @inject_current_player
 @require_logged_in
@@ -125,7 +127,7 @@ def remove_player(session, current_player, game_id, player_id):
                                                      'player_id': player.id_})
     session.delete(assn)
     session.commit()
-    return redirect(url_for('game.pending_game', game_id=game_id), 303)
+    return jsonify([p.id_ for p in game.players])
 
 @bp.route('/start_game/<int:game_id>', methods=['post'])
 @inject_current_player
@@ -205,4 +207,4 @@ def move_player(session, current_player, game_id, player_id, direction):
                                                                 player_order=po).one()
     assn.player_order, other_assn.player_order = other_assn.player_order, assn.player_order
     session.commit()
-    return redirect(url_for('game.pending_game', game_id=game_id), 303)
+    return jsonify({'moved': direction})

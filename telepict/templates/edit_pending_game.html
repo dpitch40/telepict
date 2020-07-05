@@ -29,15 +29,15 @@
   </form>
   <h2>Players</h2>
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
       <table class="table table-borderless table-sm">
-        <tbody>
+        <tbody id="player-list">
           {% for player in game.players -%}
           <tr>
             <td>{{ player.name }} ({{ player.display_name }})
-                {%- if game.creator.id_ != player.id_ %} <form class="form-inline" action="{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}" method='post'><button class="btn btn-secondary">Remove</button></form>{% endif -%}
-                {%- if not loop.first %} <form class="form-inline" action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}" method='post'><button class="btn btn-secondary">Move Up</button></form>{% endif -%}
-                {%- if not loop.last %} <form class="form-inline" action="{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}" method='post'><button class="btn btn-secondary">Move Down</button></form>{% endif -%}
+                {%- if game.creator.id_ != player.id_ %} <button class="btn btn-secondary" type="button" onclick="AJAXRequest(this, 'POST', '{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}', handleRemovePlayer)">Remove</button>{% endif -%}
+                <button class="btn btn-secondary up-button" type="button"{% if loop.first %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}', handleMovePlayer)">Move Up</button>
+                <button class="btn btn-secondary down-button" type="button"{% if loop.last %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}', handleMovePlayer)">Move Down</button>
             </td>
           </tr>
           {%- endfor %}
@@ -66,3 +66,68 @@
     <button type="submit" class="btn btn-danger">Delete Pending Game</button>
   </form>
 {% endblock %}
+
+{% block footer -%}
+  <script>
+    var tbody = document.querySelector('#player-list');
+
+    function AJAXRequest(button, method, url, handler) {
+      var httpRequest = new XMLHttpRequest();
+
+      function handlerWrapper() {
+        if (httpRequest.readyState === XMLHttpRequest.DONE) {
+          handler(httpRequest, button);
+        }
+      }
+
+      httpRequest.onreadystatechange = handlerWrapper;
+      httpRequest.open(method, url);
+      httpRequest.send();
+    }
+
+    function handleRemovePlayer(httpRequest, button) {
+      if (httpRequest.status == 200) {
+        var row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+      } else {
+        alert('Could not remove player');
+      }
+    }
+
+    function handleMovePlayer(httpRequest, button) {
+      if (httpRequest.status == 200) {
+        direction = JSON.parse(httpRequest.responseText).moved;
+
+        var row = button.parentNode.parentNode;
+        var other;
+        if (direction == 'up') {
+          other = row.previousElementSibling;
+          tbody.insertBefore(row, other);
+        } else {
+          other = row.nextElementSibling;
+          tbody.insertBefore(other, row);
+        }
+        updateMoveButtons();
+      } else {
+        alert('Could not move player');
+      }
+    }
+
+    function updateMoveButtons() {
+      var rows = tbody.children;
+      var row, upButton, downButton;
+      for (let i = 0; i < rows.length; i++) {
+        row = rows[i];
+        upButton = row.querySelector('.up-button');
+        downButton = row.querySelector('.down-button');
+        upButton.style.display = '';
+        downButton.style.display = '';
+        if (i == 0) {
+          upButton.style.display = 'none';
+        } else if (i == rows.length - 1) {
+          downButton.style.display = 'none';
+        }
+      }
+    }
+  </script>
+{% endblock -%}
