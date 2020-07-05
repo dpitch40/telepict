@@ -24,6 +24,7 @@
     }
 
     function mainHandler(data) {
+      renderOverview(data['overview']);
       if (currentState != data['state']) {
         var action = data.action;
         var handler = handlers[action];
@@ -49,8 +50,10 @@
     }
   </script>
 {% endblock %}
-
 {% block content %}
+  <div class="text-center">
+    <canvas id="overview-canvas" width="1px" height="1px"></canvas>
+  </div>
   <div id="game-display"></div>
   <div id="text-input-div" style="display: none">
     <input id="text-input" size="100" />
@@ -69,6 +72,7 @@
 {% block footer -%}
   <script src="{{ url_for('static', filename='js/canvas-draw.js') }}"></script>
   <script src="{{ url_for('static', filename='js/drawingCanvas.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/overview.js') }}"></script>
   <script>
     var disp = document.querySelector('#game-display');
     var textInput = document.querySelector('#text-input');

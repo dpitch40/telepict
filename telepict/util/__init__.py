@@ -42,6 +42,33 @@ def serialize_stack(stack):
         pages.append(page_dict)
     return stack_dict
 
+def get_game_overview(game, start_player):
+    start_index = [player.id_ for player in game.players].index(start_player.id_)
+    players_relative = game.players[start_index:] + game.players[:start_index]
+    player_ids_relative = list(map(operator.attrgetter('id_'), players_relative))
+    if game.write_first:
+        start_action, next_action = 'write', 'draw'
+    else:
+        start_action, next_action = 'draw', 'write'
+    circle = list()
+    for player in players_relative:
+        pending_stacks = get_pending_stacks(game, player)
+        player_stacks = list()
+        for stack in pending_stacks:
+            stack_len = len(stack)
+            if stack_len == game.num_rounds * len(game.players_):
+                action = 'done'
+            elif not stack_len % 2:
+                action = start_action
+            else:
+                action = next_action
+            player_stacks.append((len(stack), action, player_ids_relative.index(stack.owner.id_)))
+        circle.append((player.display_name, player_stacks))
+
+    return {'clockwise': game.pass_left,
+            'num_rounds': game.num_rounds,
+            'circle': circle}
+
 def get_game_state(game, player):
     """Used to load the state of a game for a player for displaying on the page.
 
@@ -106,5 +133,6 @@ def get_game_state_full(game, player):
                 state['prev'] = prev.data_url
         else:
             state['prev'] = ''
+    state['overview'] = get_game_overview(game, player)
 
     return state
