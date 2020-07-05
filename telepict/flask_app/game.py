@@ -23,7 +23,7 @@ def index():
                 invited_games = [i.game for i in player.invitations]
 
                 view_data['games'] = sorted(player.games, key=operator.attrgetter('started'))
-                view_data['game_states'] = {g.id_: get_game_state(g, player, False)['state']
+                view_data['game_states'] = {g.id_: get_game_state(g, player)['state']
                                             for g in player.games}
                 view_data['pending_games'] = sorted(player.pending_games + invited_games,
                                                     key=operator.attrgetter('created'))

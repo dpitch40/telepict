@@ -8,7 +8,7 @@ from PIL import Image
 
 from ..config import Config
 from ..db import Game, Player, Writing, Drawing
-from ..util import get_game_state, get_pending_stacks
+from ..util import get_game_state_full, get_pending_stacks
 from ..util.image import flatten_rgba_image
 from .handler import WebsocketHandler
 
@@ -33,7 +33,7 @@ class GameHandler(WebsocketHandler):
         with self.db.session_scope(expire_on_commit=False) as session:
             game = session.query(Game).get(game_id)
             player = session.query(Player).get(player_id)
-            state = get_game_state(game, player)
+            state = get_game_state_full(game, player)
             print(f'Sending {state["state"]!s} to {player.name}')
         await websocket.send(json.dumps(state))
 

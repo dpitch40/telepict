@@ -42,7 +42,7 @@ def serialize_stack(stack):
         pages.append(page_dict)
     return stack_dict
 
-def get_game_state(game, player, full=True):
+def get_game_state(game, player):
     """Used to load the state of a game for a player for displaying on the page.
 
     If the game is complete, returns all stacks for enjoyment.
@@ -60,53 +60,51 @@ def get_game_state(game, player, full=True):
     if game.complete:
         state = {'action': 'view',
                  'state': 'done'}
-        if full:
-            # Return all stacks
-            stacks = list()
-            for stack in game.stacks:
-                stacks.append(serialize_stack(stack))
-            state['stacks'] = stacks
-        return state
-
-    pending_stacks = get_pending_stacks(game, player)
-    prev_player = game.get_adjacent_player(player, False)
-    if pending_stacks:
-        current_stack = pending_stacks[0].stack
-        first = not bool(current_stack)
-        prev = ''
-        if first:
-            text = ''
-            ent_id = -1
-            if game.write_first:
-                action = 'write'
+    else:
+        pending_stacks = get_pending_stacks(game, player)
+        prev_player = game.get_adjacent_player(player, False)
+        if pending_stacks:
+            current_stack = pending_stacks[0].stack
+            first = not bool(current_stack)
+            if len(current_stack) == game.num_rounds * len(game.players_):
+                # This player is done
+                state = {'action': 'view_own',
+                         'state': 'done_own'}
+            elif first:
+                action = 'write' if game.write_first else 'draw'
+                state = {'action': action,
+                         'text': '',
+                         'state': f'{action} -1'}
             else:
-                action = 'draw'
-        elif len(current_stack) == game.num_rounds * len(game.players_):
-            # This player is done
-            state = {'action': 'view_own',
-                     'state': 'done_own'}
-            if full:
-                state['stack'] = serialize_stack(pending_stacks[0])
-            return state
+                ent = current_stack[-1]
+                action = 'write' if isinstance(ent, Drawing) else 'draw'
+                state = {'action': action,
+                         'text': f'{prev_player.display_name} passed:',
+                         'state': f'{action} {ent.id_}'}
         else:
-            ent = current_stack[-1]
-            ent_id = ent.id_
-            action = 'write' if isinstance(ent, Drawing) else 'draw'
-            text = f'{prev_player.display_name} passed:'
+            state = {'action': 'wait',
+                     'text': f'Waiting for {prev_player.display_name} to pass you something',
+                     'state': 'wait'}
 
-            if full:
-                if action == 'draw':
-                    prev = ent.text
-                else:
-                    prev = ent.data_url
+    return state
 
-        state = {'action': action,
-                 'text': text,
-                 'state': f'{action} {ent_id}'}
-        if full:
-            state['prev'] = prev
-        return state
+def get_game_state_full(game, player):
+    state = get_game_state(game, player)
 
-    return {'action': 'wait',
-            'text': f'Waiting for {prev_player.display_name} to pass you something',
-            'state': 'wait'}
+    if state['state'] == 'done':
+        state['stacks'] = [serialize_stack(s) for s in game.stacks]
+    elif state['state'] == 'done_own':
+        pending_stacks = get_pending_stacks(game, player)
+        state['stack'] = serialize_stack(pending_stacks[0])
+    elif state['state'] != 'wait':
+        pending_stacks = get_pending_stacks(game, player)
+        if len(pending_stacks[0]):
+            prev = pending_stacks[0].stack[-1]
+            if state['action'] == 'draw':
+                state['prev'] = prev.text
+            else:
+                state['prev'] = prev.data_url
+        else:
+            state['prev'] = ''
+
+    return state
