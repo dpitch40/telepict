@@ -110,16 +110,16 @@
     handlers.write = function(data) {
       if (data.text != '') {
         disp.appendChild(h('p', {}, data.text));
+        disp.appendChild(h('img', {class: 'img-fluid img-thumbnail', src: data.prev}));
       }
-      disp.appendChild(h('img', {class: 'img-fluid img-thumbnail', src: data.prev}));
       disp.appendChild(h('p', {}, 'Write something:'))
       textInputDiv.style.display = '';
     };
     handlers.draw = function(data) {
       if (data.text != '') {
         disp.appendChild(h('p', {}, data.text));
+        disp.appendChild(h('p', {class: 'card card-body'}, data.prev));
       }
-      disp.appendChild(h('p', {class: 'card card-body'}, data.prev));
       disp.appendChild(h('p', {}, 'Draw something:'))
       imageInputDiv.style.display = '';
     };
