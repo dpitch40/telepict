@@ -35,9 +35,9 @@
           {% for player in game.players -%}
           <tr>
             <td>{{ player.name }} ({{ player.display_name }})
-                {%- if game.creator.id_ != player.id_ %} <button class="btn btn-secondary" type="button" onclick="AJAXRequest(this, 'POST', '{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}', handleRemovePlayer)">Remove</button>{% endif -%}
-                <button class="btn btn-secondary up-button" type="button"{% if loop.first %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}', handleMovePlayer)">Move Up</button>
-                <button class="btn btn-secondary down-button" type="button"{% if loop.last %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}', handleMovePlayer)">Move Down</button>
+                {%- if game.creator.id_ != player.id_ %}<button class="btn btn-secondary ml-2" type="button" onclick="AJAXRequest(this, 'POST', '{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}', handleRemovePlayer)">Remove</button>{% endif -%}
+                <button class="btn btn-secondary ml-2 up-button" type="button"{% if loop.first %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}', handleMovePlayer)">Move Up</button>
+                <button class="btn btn-secondary ml-2 down-button" type="button"{% if loop.last %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}', handleMovePlayer)">Move Down</button>
             </td>
           </tr>
           {%- endfor %}
