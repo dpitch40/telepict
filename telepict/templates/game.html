@@ -83,11 +83,11 @@
         for (const page of stack.pages) {
           pageData = page.content;
           if (page.type == 'Drawing') {
-            disp.appendChild(h('div', {}, page.author + ' drew:'));
-            disp.appendChild(h('img', {src: pageData}));
+            disp.appendChild(h('p', {}, page.author + ' drew:'));
+            disp.appendChild(h('img', {class: 'img-fluid img-thumbnail', src: pageData}));
           } else {
-            disp.appendChild(h('div', {}, page.author + ' wrote:'));
-            disp.appendChild(h('div', {}, pageData));
+            disp.appendChild(h('p', {}, page.author + ' wrote:'));
+            disp.appendChild(h('p', {class: 'card card-body'}, pageData));
           }
         }
       }
@@ -98,32 +98,32 @@
       for (const page of data.stack.pages) {
         pageData = page.content;
         if (page.type == 'Drawing') {
-          disp.appendChild(h('div', {}, page.author + ' drew:'));
-          disp.appendChild(h('img', {src: pageData}));
+          disp.appendChild(h('p', {}, page.author + ' drew:'));
+          disp.appendChild(h('img', {class: 'img-fluid img-thumbnail', src: pageData}));
         } else {
-          disp.appendChild(h('div', {}, page.author + ' wrote:'));
-          disp.appendChild(h('div', {}, pageData));
+          disp.appendChild(h('p', {}, page.author + ' wrote:'));
+          disp.appendChild(h('p', {class: 'card card-body'}, pageData));
         }
       }
     };
     handlers.write = function(data) {
       if (data.text != '') {
-        disp.appendChild(h('div', {}, data.text));
+        disp.appendChild(h('p', {}, data.text));
       }
-      disp.appendChild(h('img', {src: data.prev}));
-      disp.appendChild(h('div', {}, 'Write something:'))
+      disp.appendChild(h('img', {class: 'img-fluid img-thumbnail', src: data.prev}));
+      disp.appendChild(h('p', {}, 'Write something:'))
       textInputDiv.style.display = '';
     };
     handlers.draw = function(data) {
       if (data.text != '') {
-        disp.appendChild(h('div', {}, data.text));
+        disp.appendChild(h('p', {}, data.text));
       }
-      disp.appendChild(h('div', {}, data.prev));
-      disp.appendChild(h('div', {}, 'Draw something:'))
+      disp.appendChild(h('p', {class: 'card card-body'}, data.prev));
+      disp.appendChild(h('p', {}, 'Draw something:'))
       imageInputDiv.style.display = '';
     };
     handlers.wait = function(data) {
-      disp.appendChild(h('div', {}, data.text));
+      disp.appendChild(h('p', {}, data.text));
     };
 
   </script>
