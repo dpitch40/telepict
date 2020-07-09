@@ -125,7 +125,7 @@ def get_game_state_full(game, player):
         state['stack'] = serialize_stack(pending_stacks[0])
     elif state['state'] != 'wait':
         pending_stacks = get_pending_stacks(game, player)
-        if len(pending_stacks[0]):
+        if pending_stacks[0]:
             prev = pending_stacks[0].stack[-1]
             if state['action'] == 'draw':
                 state['prev'] = prev.text

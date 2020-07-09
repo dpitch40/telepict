@@ -1,7 +1,7 @@
 [MASTER]
 
 variable-rgx=[a-z][a-z0-9_]{0,30}$
-attribute-rgx=[a-z][a-z0-9_]{0,30}$
+attr-rgx=[a-z][a-z0-9_]{0,30}$
 # pylint is bugged and thinks session objects are instances of a Session class that doesn't
 # have the correct members.
 ignored-classes=Session
@@ -22,7 +22,8 @@ disable=missing-module-docstring,
         missing-class-docstring,
         too-few-public-methods,
         fixme,
-        duplicate-code
+        duplicate-code,
+        arguments-differ
 
 [REPORTS]
 

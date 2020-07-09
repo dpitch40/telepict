@@ -1,15 +1,9 @@
 import asyncio
 import json
-import io
 from collections import defaultdict
 
-import numpy as np
-from PIL import Image
-
-from ..config import Config
-from ..db import Game, Player, Writing, Drawing
+from ..db import Game, Player, Writing
 from ..util import get_game_state_full, get_pending_stacks
-from ..util.image import flatten_rgba_image
 from .handler import WebsocketHandler
 
 class GameHandler(WebsocketHandler):
@@ -37,7 +31,7 @@ class GameHandler(WebsocketHandler):
             print(f'Sending {state["state"]!s} to {player.name}')
         await websocket.send(json.dumps(state))
 
-    async def update_all(self, game_id, player_id):
+    async def update_all(self, game_id, _):
         aws = [self._update(ws) for ws in self.websockets_by_game[game_id]]
         await asyncio.gather(*aws)
 

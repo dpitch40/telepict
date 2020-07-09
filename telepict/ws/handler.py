@@ -19,13 +19,13 @@ class WebsocketHandler(metaclass=HandlerMeta):
         self.db = DB()
         self.socket_args = dict()
 
-    def parse_args(self, *args):
+    def parse_args(self, *args): # pylint: disable=no-self-use
         return args
 
     def register_websocket(self, websocket, *args):
         self.socket_args[websocket] = args
 
-    def deregister_websocket(self, websocket, *args):
+    def deregister_websocket(self, websocket, *args): # pylint: disable=unused-argument
         self.socket_args.pop(websocket, None)
 
     async def update(self, websocket, *args):
@@ -34,7 +34,7 @@ class WebsocketHandler(metaclass=HandlerMeta):
     async def _update(self, websocket):
         await self.update(websocket, *self.socket_args[websocket])
 
-    async def update_all(self, *args):
+    async def update_all(self, *args): # pylint: disable=unused-argument
         aws = [self._update(ws) for ws in self.socket_args]
         await asyncio.gather(*aws)
 
