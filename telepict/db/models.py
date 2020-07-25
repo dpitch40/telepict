@@ -198,7 +198,7 @@ class Stack(Base):
         last_drawing = self._sort(self.drawings)[-1] if self.drawings else None
         if last_writing is None:
             return last_drawing
-        elif last_drawing is None:
+        if last_drawing is None:
             return last_writing
         return last_writing if last_writing.stack_pos > last_drawing.stack_pos \
             else last_drawing

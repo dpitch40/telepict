@@ -49,7 +49,8 @@ def image_upload():
                 height_factor = image.size[1] / current_app.config['MAX_IMAGE_HEIGHT']
                 max_factor = max(height_factor, width_factor)
                 if max_factor > 1:
-                    target_size = (int(image.size[0] // max_factor), int(image.size[1] // max_factor))
+                    target_size = (int(image.size[0] // max_factor),
+                                   int(image.size[1] // max_factor))
                     image = image.resize(target_size)
 
                 bio = io.BytesIO()
@@ -60,7 +61,8 @@ def image_upload():
                 session.add(drawings)
                 session.commit()
         else:
-            current_app.logger.error('%s trying to add a drawing with no pending stacks', player.name)
+            current_app.logger.error('%s trying to add a drawing with no pending stacks',
+                                     player.name)
 
     return jsonify({})
 
