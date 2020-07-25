@@ -22,21 +22,23 @@ function sendImage() {
 }
 
 function passDrawing() {
-  canvasDraw.drawingCanvas.toBlob(function (blob) {
-    var url = httpHost + '/img_upload';
+  if (!canvasDraw.empty()) {
+    canvasDraw.drawingCanvas.toBlob(function (blob) {
+      var url = httpHost + '/img_upload';
 
-    var formData = new FormData();
-    formData.set('file', blob, 'drawing.png');
-    formData.set('game_id', game_id);
-    formData.set('player_id', player_id);
+      var formData = new FormData();
+      formData.set('file', blob, 'drawing.png');
+      formData.set('game_id', game_id);
+      formData.set('player_id', player_id);
 
-    var request = new XMLHttpRequest();
-    request.open('POST', url, true);
-    request.send(formData);
-    request.onload = function(event) {
-      ws.send(JSON.stringify({'action': 'update'}));
-    }
-  });
+      var request = new XMLHttpRequest();
+      request.open('POST', url, true);
+      request.send(formData);
+      request.onload = function(event) {
+        ws.send(JSON.stringify({'action': 'update'}));
+      }
+    });
+  }
 }
 
 if (!HTMLCanvasElement.prototype.toBlob) {

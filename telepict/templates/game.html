@@ -45,8 +45,11 @@
     };
 
     function passWriting() {
-      ws.send(JSON.stringify({'action': 'writing',
-                              'text': textInput.value}));
+      var writing = textInput.value.trim();
+      if (writing != '') {
+        ws.send(JSON.stringify({'action': 'writing',
+                                'text': writing}));
+      }
     }
   </script>
 {% endblock %}
