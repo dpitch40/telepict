@@ -27,7 +27,9 @@
         <td>{{ game.num_rounds }}</td>
         <td>{% if game.pass_left %}Left{% else %}Right{% endif %}</td>
         <td>{% if game.write_first %}Write{% else %}Draw{% endif %}</td>
-        <td>{{ game.players|map(attribute='display_name')|join(', ') }}
+        <td>{% for player in game.players -%}
+          {{ player.display_name }} ({{ player.name }}){% if not loop.last %}, {% endif %}
+        {%- endfor %}</td>
       </tr>
       {%- endfor %}
     </table>
@@ -58,12 +60,14 @@
           {%- else -%}
             <a href="{{ url_for('game.pending_game', game_id=game.id_) }}" class="btn {% if owner %}btn-primary{% else %}btn-secondary{% endif %}">{% if owner %}Edit{% else %}View{% endif %}</a>
           {%- endif %}</td>
-        <td>{{ game.creator.display_name }}</td>
+        <td>{{ game.creator.display_name }} ({{ game.creator.name }})</td>
         <td>{{ game.created.strftime(config.TS_FORMAT) }}</td>
         <td>{{ game.num_rounds }}</td>
         <td>{% if game.pass_left %}Left{% else %}Right{% endif %}</td>
         <td>{% if game.write_first %}Write{% else %}Draw{% endif %}</td>
-        <td>{{ game.players|map(attribute='display_name')|join(', ') }}</td>
+        <td>{% for player in game.players -%}
+          {{ player.display_name }} ({{ player.name }}){% if not loop.last %}, {% endif %}
+        {%- endfor %}</td>
       </tr>
       {%- endfor %}
     </table>

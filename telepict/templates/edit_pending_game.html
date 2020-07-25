@@ -34,7 +34,7 @@
         <tbody id="player-list">
           {% for player in game.players -%}
           <tr>
-            <td>{{ player.name }} ({{ player.display_name }})
+            <td>{{ player.display_name }} ({{ player.name }})
                 {%- if game.creator.id_ != player.id_ %}<button class="btn btn-secondary ml-2" type="button" onclick="AJAXRequest(this, 'POST', '{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}', handleRemovePlayer)">Remove</button>{% endif -%}
                 <button class="btn btn-secondary ml-2 up-button" type="button"{% if loop.first %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}', handleMovePlayer)">Move Up</button>
                 <button class="btn btn-secondary ml-2 down-button" type="button"{% if loop.last %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}', handleMovePlayer)">Move Down</button>
@@ -48,7 +48,7 @@
   <strong>Invited:</strong>
   <ul>
     {% for invitation in game.invitations -%}
-    <li>{{ invitation.recipient.name }} ({{ invitation.recipient.display_name }})</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button class="btn btn-secondary">Revoke</button></form>
+    <li>{{ invitation.recipient.display_name }} ({{ invitation.recipient.name }})</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button class="btn btn-secondary">Revoke</button></form>
     {%- endfor %}
   </ul>
   <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post" class="form-inline">
