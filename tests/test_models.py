@@ -3,9 +3,10 @@ from telepict.auth import gen_password_hash
 
 def test_games(test_session, david, nathan, elwood):
     games = test_session.query(Game).all()
-    assert len(games) == 6
+    assert len(games) == 7
 
-    game, long_game, unfinished_game, queue_game, reverse_game, draw_first_game = games
+    game, long_game, unfinished_game, queue_game, reverse_game, draw_first_game,\
+        partially_done_game = games
     assert game.num_rounds == 2
     assert long_game.num_rounds == 4
     assert unfinished_game.num_rounds == 2
@@ -27,6 +28,7 @@ def test_games(test_session, david, nathan, elwood):
     assert not queue_game.complete
     assert not reverse_game.complete
     assert not draw_first_game.complete
+    assert not partially_done_game.complete
 
     assert game.get_adjacent_player(david).id_ == nathan.id_
     assert game.get_adjacent_player(nathan).id_ == elwood.id_
@@ -91,11 +93,11 @@ def test_players(test_session, david, nathan, elwood):
     assert nathan.password_hash == gen_password_hash('you_shall_not_password', nathan.password_salt)
     assert elwood.password_hash == gen_password_hash('really good password', elwood.password_salt)
 
-    assert len(david.games) == 6
-    assert len(nathan.games) == 6
-    assert len(elwood.games) == 5
-    assert [g.id_ for g in david.games] == [1, 2, 3, 4, 5, 6]
-    assert [g.id_ for g in elwood.games] == [1, 3, 4, 5, 6]
+    assert len(david.games) == 7
+    assert len(nathan.games) == 7
+    assert len(elwood.games) == 6
+    assert [g.id_ for g in david.games] == [1, 2, 3, 4, 5, 6, 7]
+    assert [g.id_ for g in elwood.games] == [1, 3, 4, 5, 6, 7]
 
     assert len(david.pending_games) == 3
     assert len(nathan.pending_games) == 2
