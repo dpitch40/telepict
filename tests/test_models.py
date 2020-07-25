@@ -156,6 +156,13 @@ def test_stacks(test_session, david, nathan, elwood):
                     assert isinstance(ent, Writing if (i % 2 != 0) else Drawing)
     game, long_game, unfinished_game = games[:3]
     david_stack_1, nathan_stack_1, elwood_stack_1 = game.stacks
+    assert isinstance(david_stack_1.last, Drawing)
+    assert david_stack_1.last.id_ == 9
+    assert isinstance(nathan_stack_1.last, Drawing)
+    assert nathan_stack_1.last.id_ == 3
+    assert isinstance(elwood_stack_1.last, Drawing)
+    assert elwood_stack_1.last.id_ == 6
+
     david_sstack_1, nathan_sstack_1, elwood_sstack_1 = [s.stack for s in game.stacks]
     assert david_sstack_1[0].author.id_ == david.id_
     assert david_sstack_1[1].author.id_ == nathan.id_

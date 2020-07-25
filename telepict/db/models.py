@@ -184,14 +184,18 @@ class Stack(Base):
     writings = relationship('Writing', back_populates='stack', cascade='all')
     drawings = relationship('Drawing', back_populates='stack', cascade='all')
 
+    @staticmethod
+    def _sort(stk):
+        return sorted(stk, key=operator.attrgetter('stack_pos'))
+
     @property
     def stack(self):
-        return sorted(self.writings + self.drawings, key=operator.attrgetter('stack_pos'))
+        return self._sort(self.writings + self.drawings)
 
     @property
     def last(self):
-        last_writing = self.writings[-1] if self.writings else None
-        last_drawing = self.drawings[-1] if self.drawings else None
+        last_writing = self._sort(self.writings)[-1] if self.writings else None
+        last_drawing = self._sort(self.drawings)[-1] if self.drawings else None
         if last_writing is None:
             return last_drawing
         elif last_drawing is None:
