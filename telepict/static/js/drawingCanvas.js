@@ -34,6 +34,7 @@ function passDrawing() {
       var request = new XMLHttpRequest();
       request.open('POST', url, true);
       request.send(formData);
+      updateDisplaySent('drawing');
       request.onload = function(event) {
         ws.send(JSON.stringify({'action': 'update'}));
       }
