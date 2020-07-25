@@ -188,6 +188,17 @@ class Stack(Base):
     def stack(self):
         return sorted(self.writings + self.drawings, key=operator.attrgetter('stack_pos'))
 
+    @property
+    def last(self):
+        last_writing = self.writings[-1] if self.writings else None
+        last_drawing = self.drawings[-1] if self.drawings else None
+        if last_writing is None:
+            return last_drawing
+        elif last_drawing is None:
+            return last_writing
+        return last_writing if last_writing.stack_pos > last_drawing.stack_pos \
+            else last_drawing
+
     def __len__(self):
         return len(self.writings) + len(self.drawings)
 

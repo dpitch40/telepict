@@ -42,10 +42,16 @@ class GameHandler(WebsocketHandler):
             pending_stacks = get_pending_stacks(game, player)
             if pending_stacks:
                 stack = pending_stacks[0]
-                writing = Writing(author=player, stack=stack, text=data.strip())
-                stack.writings.append(writing)
-                session.add(writing)
-                session.commit()
+                if isinstance(stack.last, Writing):
+                    current_app.logger.error('%s trying to add a writing to stack %d when '
+                                             'it already ended with a writing', player.name, stack.id_)
+                else:
+                    writing = Writing(author=player, stack=stack, text=data.strip())
+                    stack.writings.append(writing)
+                    session.add(writing)
+                    session.commit()
+            else:
+                current_app.logger.error('%s trying to add a drawing with no pending stacks', player.name)
 
     def handle_str(self, message, game_id, player_id):
         data = json.loads(message)
