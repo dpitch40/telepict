@@ -82,7 +82,14 @@ def pending_game(session, current_player, game_id):
     owner = game.creator_id == current_player.id_
     if request.method == 'GET' or not owner:
         if owner:
-            return render_template('edit_pending_game.html', game=game)
+            past_players = list()
+            for past_game in sorted(current_player.games, key=operator.attrgetter('started'),
+                                   reverse=True):
+                for player in past_game.players:
+                    if player != current_player and player not in past_players:
+                        past_players.append(player)
+            return render_template('edit_pending_game.html', game=game,
+                                   past_players=past_players)
 
         invitation = session.query(Invitation).get({'game_id': game.id_,
                                                     'recipient_id': current_player.id_})
@@ -157,14 +164,17 @@ def leave_pending_game(session, current_player, game_id):
     session.commit()
     return redirect(url_for('game.index'), 303)
 
-@bp.route('/invite_player/<int:game_id>', methods=['post'])
+@bp.route('/invite_player/<int:game_id>', methods=['get', 'post'])
 @inject_current_player
 @require_logged_in
 def invite_player(session, current_player, game_id):
     game = session.query(PendingGame).get(game_id)
     if game.creator_id != current_player.id_:
         raise FlashedError('Cannot edit a game you did not create')
-    player_name = request.form['player_name']
+    if request.method == 'GET':
+        player_name = request.args['name']
+    else:
+        player_name = request.form['player_name']
     player = session.query(Player).filter_by(name=player_name).one_or_none()
     if player is None:
         flash(f'No player named {player_name!r} exists', 'danger')

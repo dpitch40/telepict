@@ -1,6 +1,8 @@
 {%- extends "base.html" -%}
 {% block title %}Pending Game: {{ game.id_ }}{% endblock %}
 
+{% set included_players = [] %}
+
 {% block content %}
   <form action="{{ url_for('game.pending_game', game_id=game.id_) }}" method='post'>
     <div class="form-group">
@@ -27,12 +29,13 @@
     </div>
     <button type="submit" class="btn btn-primary">Update Game</button>
   </form>
-  <h2>Players</h2>
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8">
+      <h2>Players</h2>
       <table class="table table-borderless table-sm">
         <tbody id="player-list">
           {% for player in game.players -%}
+          {%- do included_players.append(player) -%}
           <tr>
             <td>{{ player.display_name }} ({{ player.name }})
                 {%- if game.creator.id_ != player.id_ %}<button class="btn btn-secondary ml-2" type="button" onclick="AJAXRequest(this, 'POST', '{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}', handleRemovePlayer)">Remove</button>{% endif -%}
@@ -43,27 +46,39 @@
           {%- endfor %}
         </tbody>
       </table>
+      <h3>Invited:</h3>
+      <ul>
+        {% for invitation in game.invitations -%}
+        {%- do included_players.append(invitation.recipient) -%}
+        <li>{{ invitation.recipient.display_name }} ({{ invitation.recipient.name }})</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button class="btn btn-secondary">Revoke</button></form>
+        {%- endfor %}
+      </ul>
+      <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post" class="form-inline">
+        <div class="form-group">
+          <label for="invite-input">Invite player </label>
+          <input id="invite-input" type="text" name="player_name" class="form-control ml-2" required />
+          <button type="submit" class="btn btn-secondary">Invite</button>
+        </div>
+      </form>
+      <div>Or have them visit this URL: <input type="text" value="{{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}" id="join-link" size="33" readonly /> <button class="btn btn-secondary" type="button" onclick="copyJoinLink()">Copy</button></div>
+    </div>
+    <div class="col-md-4">
+      <h3>Past Players</h3>
+      <ul>
+      {% for player in past_players -%}
+        <li>{{ player.display_name }} ({{ player.name }})
+          {%- if player not in included_players -%}
+            <a href="{{ url_for('game.invite_player', game_id=game.id_, name=player.name) }}" class="btn btn-secondary btn-sm ml-2">Invite</a>
+          {%- endif -%}
+        </li>
+      {%- endfor %}
+      </ul>
     </div>
   </div>
-  <strong>Invited:</strong>
-  <ul>
-    {% for invitation in game.invitations -%}
-    <li>{{ invitation.recipient.display_name }} ({{ invitation.recipient.name }})</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button class="btn btn-secondary">Revoke</button></form>
-    {%- endfor %}
-  </ul>
-  <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post" class="form-inline">
-    <div class="form-group">
-      <label for="invite-input">Invite player </label>
-      <input id="invite-input" type="text" name="player_name" class="form-control" required />
-      <button type="submit" class="btn btn-secondary">Invite</button>
-      <p> Or have them visit this URL: {{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}</p>
-    </div>
+  <form action="{{ url_for('game.start_game', game_id=game.id_) }}" class="form-inline mt-2" method='post'>
+    <button type="submit" class="btn btn-primary mr-2">Start Game</button>
+    <a href="{{ url_for('game.delete_game', game_id=game.id_) }}" class="btn btn-danger">Delete Pending Game</a>
   </form>
-  <form action="{{ url_for('game.start_game', game_id=game.id_) }}" method='post'>
-    <button type="submit" class="btn btn-primary">Start Game</button>
-  </form>
-  <form action="{{ url_for('game.delete_game', game_id=game.id_) }}" method='get'>
-    <button type="submit" class="btn btn-danger">Delete Pending Game</button>
   </form>
 {% endblock %}
 
@@ -128,6 +143,17 @@
           downButton.style.display = 'none';
         }
       }
+    }
+
+    function copyJoinLink() {
+      var joinLinkInput = document.querySelector('#join-link');
+
+      /* Select the text field */
+      joinLinkInput.select();
+      joinLinkInput.setSelectionRange(0, 99999); /*For mobile devices*/
+
+      /* Copy the text inside the text field */
+      document.execCommand("copy");
     }
   </script>
 {% endblock -%}
