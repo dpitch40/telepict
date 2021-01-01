@@ -133,9 +133,21 @@ var CanvasDraw = /** @class */ (function () {
                 " ",
                 h("button", { onclick: this.clickStrokeWidth, value: "4" }, "Thick")),
             h("div", { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } },
-                this.drawingCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
-                this.currentStrokeCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
-                this.interfaceCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute', cursor: 'crosshair' }, onmousedown: this.mousedown, onmousemove: this.mousemove, onmouseup: this.mouseup, onmouseout: this.mouseup, ontouchstart: this.mousedown, ontouchmove: this.mousemove, ontouchend: this.mouseup, ontouchcancel: this.mouseup }))));
+                this.drawingCanvas = h("canvas", { width: this.w, height: this.h,
+                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
+                this.currentStrokeCanvas = h("canvas", { width: this.w, height: this.h,
+                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
+                this.interfaceCanvas = h("canvas", { width: this.w, height: this.h,
+                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute',
+                             cursor: 'crosshair' },
+                    onmousedown: this.mousedown, onmousemove: this.mousemove, onmouseup: this.mouseup,
+                    onmouseout: this.mouseup, ontouchstart: this.mousedown, ontouchmove: this.mousemove,
+                    ontouchend: this.mouseup, ontouchcancel: this.mouseup }))));
+        window.addEventListener("beforeunload", function( event ) {
+          if (!_this.empty()) {
+            event.preventDefault();
+          }
+        });
         this.wrapper = wrapper;
         this.interfaceContext = this.interfaceCanvas.getContext('2d');
         this.currentStrokeContext = this.currentStrokeCanvas.getContext('2d');
