@@ -115,8 +115,10 @@ def respond_invitation(session, current_player, game_id):
         session.delete(invitation)
 
     if not reject:
-        session.add(PendingGamePlayerAssn(player_order=len(game.players),
-                                          player=current_player, game=game))
+        if session.query(PendingGamePlayerAssn).filter_by(player=current_player, game=game). \
+                one_or_none() is None:
+            session.add(PendingGamePlayerAssn(player_order=len(game.players),
+                                              player=current_player, game=game))
     session.commit()
     return redirect(url_for('game.index'), 303)
 
