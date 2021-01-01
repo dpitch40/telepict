@@ -14,9 +14,24 @@
     </div>
     <div class="form-group">
     <label for="input-pwd">Password</label>
-    <input id="input-pwd" type="password" name="password" autocomplete="new-password" class="form-control" pattern=".{8,}" />
+    <input id="input-pwd" type="password" name="password" autocomplete="new-password" class="form-control" pattern=".{8,}" required />
       <small class="form-text text-muted">At least 8 characters</small>
+    </div>
+    <div class="form-group">
+    <label for="input-pwd">Confirm Password</label>
+    <input id="input-pwd-confirm" type="password" class="form-control" pattern=".{8,}" required />
     </div>
     <button type="submit" class="btn btn-primary">Create Account</button>
   </form>
+  <script>
+    const passwordInput = document.getElementById("input-pwd");
+    const passwordInputConfirm = document.getElementById("input-pwd-confirm");
+    passwordInputConfirm.addEventListener("input", function(event) {
+      if (passwordInput.value != passwordInputConfirm.value) {
+        passwordInputConfirm.setCustomValidity("Passwords don't match");
+      } else {
+        passwordInputConfirm.setCustomValidity("");
+      }
+    });
+  </script>
 {% endblock %}
