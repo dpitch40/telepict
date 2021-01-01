@@ -65,6 +65,9 @@ var CanvasDraw = /** @class */ (function () {
             return _this.strokes.length == 0;
         }
         this.mousedown = function (ev) {
+            if (ev.type == "mousedown" && ev.button != 0) {
+                return;
+            }
             ev.preventDefault();
             var _a = _this.getPosition(ev), x = _a[0], y = _a[1];
             _this.currentStroke = {
@@ -82,6 +85,9 @@ var CanvasDraw = /** @class */ (function () {
             _this.draw(x, y);
         };
         this.mouseup = function (ev) {
+            if (ev.type == "mouseup" && ev.button != 0) {
+                return;
+            }
             if (_this.currentStroke) {
                 var _a = _this.getPosition(ev), x = _a[0], y = _a[1];
                 _this.currentStroke.points.push([x, y]);
