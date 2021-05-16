@@ -13,7 +13,8 @@ import logging_tree
 
 from ..config import Config, LoggingConfig, LOG_LEVEL
 from .auth import bp as auth_bp, require_logged_in
-from .game import bp as pending_bp
+from .game import bp as game_bp
+from .image import bp as image_bp
 from ..db import DB, Player, Game, PendingGame, PendingGamePlayerAssn, Invitation, Stack, Drawing
 from .exceptions import FlashedError
 from ..util import get_pending_stacks, configure_logging
@@ -56,51 +57,8 @@ if 'LOG_DIR' in os.environ and werkzeug_logger.handlers:
     werkzeug_logger.addHandler(access_handler)
 
 app.register_blueprint(auth_bp)
-app.register_blueprint(pending_bp)
-
-@app.route('/img_upload', methods=['POST'])
-def image_upload():
-    game_id = int(request.form['game_id'])
-    player_id = int(request.form['player_id'])
-
-    with current_app.db.session_scope() as session:
-        game = session.query(Game).get(game_id)
-        player = session.query(Player).get(player_id)
-        pending_stacks = get_pending_stacks(game, player)
-
-        if pending_stacks:
-            stack = pending_stacks[0]
-            if isinstance(stack.last, Drawing):
-                current_app.logger.error('%s trying to add a drawing to stack %d when '
-                                         'it already ended with a drawing', player.name, stack.id_)
-            else:
-                f = request.files['file']
-                image = Image.open(f)
-                if image.mode == 'RGBA':
-                    image = flatten_rgba_image(image)
-                # Scale image if necessary
-                width_factor = image.size[0] / current_app.config['MAX_IMAGE_WIDTH']
-                height_factor = image.size[1] / current_app.config['MAX_IMAGE_HEIGHT']
-                max_factor = max(height_factor, width_factor)
-                if max_factor > 1:
-                    target_size = (int(image.size[0] // max_factor),
-                                   int(image.size[1] // max_factor))
-                    image = image.resize(target_size)
-
-                bio = io.BytesIO()
-                image.save(bio, format='JPEG', quality=Config.JPEG_QUALITY)
-
-                drawings = Drawing(author=player, stack=stack, drawing=bio.getvalue())
-                stack.drawings.append(drawings)
-                session.add(drawings)
-                session.commit()
-        else:
-            current_app.logger.error('%s trying to add a drawing with no pending stacks',
-                                     player.name)
-
-    return jsonify({})
-
-
+app.register_blueprint(game_bp)
+app.register_blueprint(image_bp)
 
 @app.context_processor
 def inject_external_url():
