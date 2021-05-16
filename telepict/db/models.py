@@ -39,7 +39,7 @@ class Game(Base):
     @ property
     def complete(self):
         target_len = len(self.players_) * self.num_rounds
-        return all([len(s.stack) == target_len for s in self.stacks])
+        return all(len(s.stack) == target_len for s in self.stacks)
 
     @property
     def players(self):
@@ -80,7 +80,7 @@ class Game(Base):
             players_ = kwargs['players_'] = list()
             for i, player in enumerate(players):
                 players_.append(GamePlayerAssn(player_order=i, player=player, game=self))
-        super(Game, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
@@ -112,7 +112,7 @@ class PendingGame(Base):
             players_ = kwargs['players_'] = list()
             for i, player in enumerate(players):
                 players_.append(PendingGamePlayerAssn(player_order=i, player=player, game=self))
-        super(PendingGame, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.players}, {self.num_rounds}, ' \
@@ -162,7 +162,7 @@ class Player(Base):
             pwd = kwargs.pop('password')
             hash_, salt = gen_password_hash_and_salt(pwd)
             kwargs.update({'password_hash': hash_, 'password_salt': salt})
-        super(Player, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'{self.name}({self.display_name})'
@@ -242,7 +242,7 @@ class Writing(Base, PaperMixin):
     def __init__(self, *args, **kwargs):
         if 'stack' in kwargs and 'stack_pos' not in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
-        super(Writing, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'Writing({self.author.name}, {self.text!r}, pos={self.stack_pos})'
@@ -262,7 +262,7 @@ class Drawing(Base, PaperMixin):
     def __init__(self, *args, **kwargs):
         if 'stack' in kwargs and 'stack_pos' not in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
-        super(Drawing, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return f'Drawing({self.author.name}, pos={self.stack_pos})'

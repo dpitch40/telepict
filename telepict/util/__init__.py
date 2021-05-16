@@ -7,7 +7,8 @@ import operator
 from ..db import Drawing
 
 def configure_logging(config_class):
-    logging_config = {k: getattr(config_class, k) for k in dir(config_class) if not k.startswith('__')}
+    logging_config = {k: getattr(config_class, k) for k in dir(config_class)
+                      if not k.startswith('__')}
     if 'file' in logging_config['handlers']:
         logfile = logging_config['handlers']['file']['filename']
         log_dir = os.path.abspath(os.path.dirname(logfile))

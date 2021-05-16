@@ -1,25 +1,19 @@
-import io
 import os
-import re
 import os.path
+import re
 import logging
 import logging.config
 import logging.handlers
 
-from flask import Flask, render_template, request, flash, redirect, session as flask_session, \
-    current_app, url_for, jsonify
-from PIL import Image
-import logging_tree
+from flask import Flask, request, flash, redirect, url_for
 
 from ..config import Config, LoggingConfig, LOG_LEVEL
 from .auth import bp as auth_bp, require_logged_in
 from .game import bp as game_bp
 from .image import bp as image_bp
-from ..db import DB, Player, Game, PendingGame, PendingGamePlayerAssn, Invitation, Stack, Drawing
+from ..db import DB
 from .exceptions import FlashedError
-from ..util import get_pending_stacks, configure_logging
-from ..util.image import flatten_rgba_image
-from .util import inject_current_player
+from ..util import configure_logging
 
 get_resource_re = re.compile(r'GET\s+([^\s]+) HTTP')
 ignore_uri_re = re.compile(r'min\.(js|css)', flags=re.I)

@@ -1,6 +1,6 @@
 import logging
 
-from ..config import Config, LoggingConfig
+from ..config import LoggingConfig
 from ..util import configure_logging
 
 configure_logging(LoggingConfig)

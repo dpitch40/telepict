@@ -23,7 +23,8 @@ disable=missing-module-docstring,
         too-few-public-methods,
         fixme,
         duplicate-code,
-        arguments-differ
+        arguments-differ,
+        no-member
 
 [REPORTS]
 

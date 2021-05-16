@@ -1,8 +1,16 @@
+import io
+
 from flask import Blueprint, current_app, request, jsonify
+from PIL import Image
+
+from ..config import Config
+from ..util import get_pending_stacks
+from ..util.image import flatten_rgba_image
+from ..db import Game, Player, Drawing
 
 bp = Blueprint('image', __name__)
 
-@app.route('/img_upload', methods=['POST'])
+@bp.route('/img_upload', methods=['POST'])
 def image_upload():
     game_id = int(request.form['game_id'])
     player_id = int(request.form['player_id'])
@@ -43,4 +51,3 @@ def image_upload():
                                      player.name)
 
     return jsonify({})
-

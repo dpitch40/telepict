@@ -15,13 +15,13 @@ class GameHandler(WebsocketHandler):
     websockets_by_game = defaultdict(set)
 
     def register_websocket(self, websocket, game_id, player_id):
-        super(GameHandler, self).register_websocket(websocket, game_id, player_id)
+        super().register_websocket(websocket, game_id, player_id)
 
         self.websockets_by_game[game_id].add(websocket)
         print(f'join {game_id}: {player_id}')
 
     def deregister_websocket(self, websocket, game_id, player_id):
-        super(GameHandler, self).deregister_websocket(websocket, game_id, player_id)
+        super().deregister_websocket(websocket, game_id, player_id)
 
         self.websockets_by_game[game_id].discard(websocket)
         print(f'leave {game_id}: {player_id}')
