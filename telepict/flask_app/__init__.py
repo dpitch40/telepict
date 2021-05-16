@@ -1,20 +1,23 @@
 import io
 import os.path
+import logging.config
 
 from flask import Flask, render_template, request, flash, redirect, session as flask_session, \
     current_app, url_for, jsonify
 from PIL import Image
 
-from ..config import Config
+from ..config import Config, LoggingConfig
 from .auth import bp as auth_bp, require_logged_in
 from .game import bp as pending_bp
 from ..db import DB, Player, Game, PendingGame, PendingGamePlayerAssn, Invitation, Stack, Drawing
 from .exceptions import FlashedError
-from ..util import get_pending_stacks
+from ..util import get_pending_stacks, configure_logging
 from ..util.image import flatten_rgba_image
 from .util import inject_current_player
 
 app_dir = os.path.dirname(os.path.dirname(__file__))
+
+configure_logging(LoggingConfig)
 
 app = Flask('Telepict', template_folder=os.path.join(app_dir, 'templates'),
             static_folder=os.path.join(app_dir, 'static'))

@@ -1,4 +1,8 @@
 import os
+import os.path
+import logging
+
+LOG_LEVEL = logging.INFO
 
 class Config:
     DB_URL = None
@@ -15,3 +19,38 @@ class Config:
     MAX_WS_MESSAGE_SIZE = 2 ** 21
 
     TS_FORMAT = "%b %d, %Y, %H:%M"
+
+
+
+class LoggingConfig:
+    version = 1
+    disable_existing_loggers = False
+    formatters = {
+        'default': {
+            'format': '%(asctime)s %(name)s %(pathname)s.%(lineno)d %(levelname)s: %(message)s'
+        }
+    }
+    handlers = {
+        'stream': {
+            'class': 'logging.StreamHandler',
+            'level': LOG_LEVEL,
+            'formatter': 'default',
+            'stream': 'ext://sys.stdout'
+        }
+    }
+    root = {
+        'level': LOG_LEVEL,
+        'handlers': ['stream']
+    }
+
+    @classmethod
+    def setup_logfile(cls, logfile):
+        cls.handlers['file'] = {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': LOG_LEVEL,
+            'formatter': 'default',
+            'filename': logfile,
+            'maxBytes': 2 ** 20,
+            'backupCount': 10,
+        }
+        cls.root['handlers'].append('file')
