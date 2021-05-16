@@ -18,7 +18,7 @@ app_dir = os.path.dirname(os.path.dirname(__file__))
 
 app = Flask('Telepict', template_folder=os.path.join(app_dir, 'templates'),
             static_folder=os.path.join(app_dir, 'static'))
-app.jinja_options['extensions'].append('jinja2.ext.do')
+app.jinja_env.add_extension('jinja2.ext.do')
 app.config.from_object(Config)
 app.db = DB()
 
