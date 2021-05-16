@@ -229,14 +229,21 @@ def populate_db(d):
             session.add(ent)
 
 if __name__ == '__main__':
+    confirm = input('This will delete the current database. Continue? (y/n)\n')
+    if confirm.lower().strip() != 'y':
+        print('Cancelled')
+        raise SystemExit
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--populate', action='store_true',
                         help='Populate with test data')
     args = parser.parse_args()
 
+    print('Creating database')
     if os.path.isfile(Config.DBFILE):
         os.remove(Config.DBFILE)
     d = DB()
     d.create_schema()
     if args.populate:
+        print('Populating database')
         populate_db(d)
