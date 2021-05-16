@@ -1,6 +1,9 @@
 import os
+import logging
 
 from .base import Config, LoggingConfig
+
+LOG_LEVEL = logging.INFO
 
 class ConfigProd(Config):
     DB_URL = None

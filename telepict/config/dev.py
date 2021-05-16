@@ -1,6 +1,9 @@
 import os
+import logging
 
 from .base import Config, LoggingConfig
+
+LOG_LEVEL = logging.DEBUG
 
 class ConfigDev(Config):
     DBFILE = 'telepict.db'
@@ -11,5 +14,8 @@ class ConfigDev(Config):
 class LoggingConfigDev(LoggingConfig):
     pass
 
-if 'LOGFILE' in os.environ:
-    LoggingConfigDev.setup_logfile(os.environ['LOGFILE'])
+LoggingConfigDev.handlers['stream']['level'] = LOG_LEVEL
+LoggingConfigDev.root['level'] = LOG_LEVEL
+
+if 'LOG_DIR' in os.environ:
+    LoggingConfigDev.setup_logfile(os.environ['LOG_DIR'], LOG_LEVEL)

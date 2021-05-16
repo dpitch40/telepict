@@ -44,12 +44,12 @@ class LoggingConfig:
     }
 
     @classmethod
-    def setup_logfile(cls, logfile):
+    def setup_logfile(cls, log_dir, log_level=LOG_LEVEL):
         cls.handlers['file'] = {
             'class': 'logging.handlers.RotatingFileHandler',
-            'level': LOG_LEVEL,
+            'level': log_level,
             'formatter': 'default',
-            'filename': logfile,
+            'filename': os.path.join(log_dir, 'flask.log'),
             'maxBytes': 2 ** 20,
             'backupCount': 10,
         }

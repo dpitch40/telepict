@@ -1,4 +1,8 @@
+import logging
+
 from .base import Config, LoggingConfig
+
+LOG_LEVEL = logging.INFO
 
 class ConfigTest(Config):
     DB_URL = "sqlite://"
