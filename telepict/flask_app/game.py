@@ -22,11 +22,15 @@ def index():
             if player:
                 invited_games = [i.game for i in player.invitations]
 
-                view_data['games'] = sorted(player.games, key=operator.attrgetter('started'))
-                view_data['game_states'] = {g.id_: get_game_state(g, player)['state']
-                                            for g in player.games}
+                games = sorted(player.games, key=operator.attrgetter('started'), reverse=True)
+                game_states = {g.id_: get_game_state(g, player)['state']
+                               for g in player.games}
+                view_data['game_states'] = game_states
+                view_data['active_games'] =sorted([g for g in games if game_states[g.id_] != 'done'],
+                    key=operator.attrgetter('last_move'), reverse=True)
+                view_data['done_games'] = [g for g in games if game_states[g.id_] == 'done']
                 view_data['pending_games'] = sorted(player.pending_games + invited_games,
-                                                    key=operator.attrgetter('created'))
+                                                    key=operator.attrgetter('created'), reverse=True)
                 view_data['player'] = player
                 view_data['invited_games'] = set(map(operator.attrgetter('id_'), invited_games))
                 return render_template('index.html', **view_data)

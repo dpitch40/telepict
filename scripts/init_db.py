@@ -1,9 +1,13 @@
 import os
 import os.path
 import argparse
+from datetime import datetime, timedelta
 
 from telepict.db import DB, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
 from telepict.config import Config
+
+def hours_ago(n):
+    return datetime.now() - timedelta(hours=n)
 
 def populate_db(d):
     # Players
@@ -13,22 +17,22 @@ def populate_db(d):
     
     # Games
     game = Game(id_=1, num_rounds=2, players=[david, nathan, elwood])
-    long_game = Game(id_=2, num_rounds=4, players=[david, nathan])
-    unfinished_game = Game(id_=3, num_rounds=2, players=[david, elwood, nathan])
-    queue_game = Game(id_=4, players=[david, nathan, elwood])
-    reverse_game = Game(id_=5, pass_left=False, players=[david, nathan, elwood])
-    draw_first_game = Game(id_=6, write_first=False, players=[david, nathan, elwood])
-    partially_done_game = Game(id_=7, players=[david, nathan, elwood])
+    long_game = Game(id_=2, num_rounds=4, players=[david, nathan], started=hours_ago(1))
+    unfinished_game = Game(id_=3, num_rounds=2, players=[david, elwood, nathan], started=hours_ago(2))
+    queue_game = Game(id_=4, players=[david, nathan, elwood], started=hours_ago(3))
+    reverse_game = Game(id_=5, pass_left=False, players=[david, nathan, elwood], started=hours_ago(4))
+    draw_first_game = Game(id_=6, write_first=False, players=[david, nathan, elwood], started=hours_ago(5))
+    partially_done_game = Game(id_=7, players=[david, nathan, elwood], started=hours_ago(6))
 
     # Pending games
     pending_game_1 = PendingGame(id_=1, pass_left=False,
                                  creator=david, players=[david, nathan, elwood])
     pending_game_2 = PendingGame(id_=2, num_rounds=3, write_first=False,
-                                 creator=elwood, players=[david, elwood])
+                                 creator=elwood, players=[david, elwood], created=hours_ago(1))
     pending_game_3 = PendingGame(id_=3, num_rounds=5, write_first=False,
-                                 creator=nathan, players=[nathan, elwood])
+                                 creator=nathan, players=[nathan, elwood], created=hours_ago(2))
     pending_game_4 = PendingGame(id_=4, num_rounds=7,
-                                 creator=david, players=[david])
+                                 creator=david, players=[david], created=hours_ago(3))
     invitation = Invitation(recipient=nathan, game=pending_game_2)
     invitation2 = Invitation(recipient=david, game=pending_game_3)
     invitation3 = Invitation(recipient=elwood, game=pending_game_4)
@@ -175,7 +179,7 @@ def populate_db(d):
     ed_31 = Drawing(id_=22, drawing=open(os.path.join('data', 'drawings', 'ed_31.jpg'), 'rb').read(),
                     stack_pos=1, stack=olympics, author=elwood)
     ed_32 = Drawing(id_=23, drawing=open(os.path.join('data', 'drawings', 'ed_32.jpg'), 'rb').read(),
-                    stack_pos=3, stack=fire_dice, author=elwood)
+                    stack_pos=3, stack=fire_dice, author=elwood, created=hours_ago(-1))
 
     # Queue game
     q_dw = Writing(id_=24, text="Coming soon: yesterday",
@@ -185,7 +189,7 @@ def populate_db(d):
     q_ew = Writing(id_=26, text="An Awful Eiffel Tower",
                    stack_pos=0, stack=q_eiffel_tower, author=elwood)
     q_nd = Drawing(id_=24, drawing=open(os.path.join('data', 'drawings', 'nd_11.jpg'), 'rb').read(),
-                   stack_pos=1, stack=q_yesterday, author=nathan)
+                   stack_pos=1, stack=q_yesterday, author=nathan, created=hours_ago(-2))
 
     # Reverse game
     r_dw = Writing(id_=27, text="Europeans waiting in line for food and communism",
