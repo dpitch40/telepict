@@ -5,6 +5,8 @@
  * @author Guangcong Luo <guangcongluo@gmail.com>
  * @license MIT
  */
+var colorSelector = document.getElementById('color-picker');
+
 function h(tagName, attrs) {
     var children = [];
     for (var _i = 2; _i < arguments.length; _i++) {
@@ -37,13 +39,12 @@ var CanvasDraw = /** @class */ (function () {
         this.h = 320 * this.pixelRatio;
         this.strokeWidth = 2;
         this.strokeColor = 'black';
-        this.clickColor = function (ev) {
-            var value = ev.currentTarget.value;
-            _this.strokeColor = value;
-            _this.updateButtons();
+        this.erase = false;
+        colorSelector.onchange = function () {
+            _this.strokeColor = this.dataset.currentColor;
         };
         this.clickEraser = function (ev) {
-            _this.strokeColor = "";
+            _this.erase = !_this.erase;
             _this.updateButtons();
         };
         this.clickStrokeWidth = function (ev) {
@@ -71,6 +72,7 @@ var CanvasDraw = /** @class */ (function () {
             _this.currentStroke = {
                 points: [[x, y]],
                 color: _this.strokeColor,
+                erase: _this.erase,
                 width: _this.strokeWidth,
             };
             _this.draw(x, y);
@@ -101,32 +103,7 @@ var CanvasDraw = /** @class */ (function () {
         var styleWidth = Math.round(this.w / this.pixelRatio) + "px";
         var styleHeight = Math.round(this.h / this.pixelRatio) + "px";
         wrapper.appendChild(h("div", null,
-            h("div", { class: "top-controls", style: { marginBottom: '4px' } },
-                h("button", { class: "btn btn-primary", name: "undo", onclick: this.undo }, "Undo"),
-                " ",
-                h("button", { class: "btn btn-primary", name: "clear", onclick: this.clear }, "Clear")),
             h("div", { class: "left-controls", style: { marginBottom: '4px' } },
-                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "black", title: "black" },
-                    h("span", { class: "color", style: { background: 'black', display: 'inline-block', width: '12px', height: '12px' } })),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#F55252", title: "red" },
-                    h("span", { class: "color", style: { background: '#F55252', display: 'inline-block', width: '12px', height: '12px' } })),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#F8BC01", title: "yellow" },
-                    h("span", { class: "color", style: { background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px' } })),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#3DC853", title: "green" },
-                    h("span", { class: "color", style: { background: '#3DC853', display: 'inline-block', width: '12px', height: '12px' } })),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#42B0FF", title: "blue" },
-                    h("span", { class: "color", style: { background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px' } })),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#D512F9", title: "purple" },
-                    h("span", { class: "color", style: { background: '#D512F9', display: 'inline-block', width: '12px', height: '12px' } })),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#8D6E63", title: "brown" },
-                    h("span", { class: "color", style: { background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px' } })),
-                " | ",
                 h("button", { class: "btn btn-primary", onclick: this.clickEraser, title: "eraser" }, "Erase"),
                 " ",
                 "| ",
@@ -134,7 +111,11 @@ var CanvasDraw = /** @class */ (function () {
                 " ",
                 h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "2" }, "Normal"),
                 " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "4" }, "Thick")),
+                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "4" }, "Thick"),
+                " | ",
+                h("button", { class: "btn btn-primary", name: "undo", onclick: this.undo }, "Undo"),
+                " ",
+                h("button", { class: "btn btn-primary", name: "clear", onclick: this.clear }, "Clear")),
             h("div", { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } },
                 this.drawingCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
                 this.currentStrokeCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
@@ -178,7 +159,7 @@ var CanvasDraw = /** @class */ (function () {
         this.drawingContext.fillRect(0, 0, this.w, this.h);
         for (var _i = 0, _a = this.strokes; _i < _a.length; _i++) {
             var stroke = _a[_i];
-            if (stroke.color == "") {
+            if (stroke.erase === true) {
                 this.drawingContext.globalCompositeOperation = 'destination-out';
             }
             else {
@@ -188,7 +169,7 @@ var CanvasDraw = /** @class */ (function () {
         }
     };
     CanvasDraw.prototype.drawStroke = function (context, stroke) {
-        if (stroke.color == "") {
+        if (stroke.erase === true) {
             context.strokeStyle = "white";
         }
         else {
@@ -210,7 +191,7 @@ var CanvasDraw = /** @class */ (function () {
     CanvasDraw.prototype.commitStroke = function () {
         if (!this.currentStroke)
             return;
-        if (this.currentStroke.color == "") {
+        if (this.currentStroke.erase === true) {
             this.drawingContext.globalCompositeOperation = 'destination-out';
         }
         else {
@@ -231,8 +212,8 @@ var CanvasDraw = /** @class */ (function () {
                 active = !this.strokes.length;
             }
             else {
-                active = (button.value === this.strokeColor || button.value === "" + this.strokeWidth ||
-                    (button.title == "eraser" && this.strokeColor == ""));
+                active = (button.value === "" + this.strokeWidth ||
+                    (button.title == "eraser" && this.erase == true));
             }
             if (active) {
                 button.classList.add("active");
@@ -244,4 +225,3 @@ var CanvasDraw = /** @class */ (function () {
     };
     return CanvasDraw;
 }());
-//# sourceMappingURL=canvas-draw.js.map

@@ -69,16 +69,18 @@
     <button type="button" onclick="passWriting()">Submit</button>
   </div>
   <div id="image-input-div" style="display: none">
+    <input id="color-picker" data-jscolor="" onChange="" value="#000000" />
     <div id="image-canvas" data-dimensions="{{ config['CANVAS_WIDTH'] }}x{{ config['CANVAS_HEIGHT'] }}"></div>
-    <button type="button" onclick="passDrawing()">Submit</button>
+    <button class="btn btn-primary" type="button" onclick="passDrawing()">Submit</button>
     <br/>
     <p>Or upload a file:</p>
-    <input type="file" id="img-upload">
-    <button type="button" onclick="sendImage()">Upload</button>
+    <input class="form-control" type="file" id="img-upload">
+    <button class="btn btn-primary" type="button" onclick="sendImage()">Upload</button>
   </div>
 {% endblock %}
 
 {% block footer -%}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.5/jscolor.min.js"></script>
   <script src="{{ url_for('static', filename='js/canvas-draw.js') }}"></script>
   <script src="{{ url_for('static', filename='js/drawingCanvas.js') }}"></script>
   <script src="{{ url_for('static', filename='js/overview.js') }}"></script>
