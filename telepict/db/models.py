@@ -28,7 +28,7 @@ class Game(Base):
     __tablename__ = 'games'
 
     id_ = Column('id', Integer, primary_key=True)
-    started = Column('started', DateTime, default=datetime.now)
+    started = Column('started', DateTime, default=datetime.utcnow)
     num_rounds = Column('num_rounds', SmallInteger, default=1)
     pass_left = Column('pass_left', Boolean, default=True)
     write_first = Column('write_first', Boolean, default=True)
@@ -91,7 +91,7 @@ class PendingGame(Base):
     __tablename__ = 'pending_games'
 
     id_ = Column('id', Integer, primary_key=True)
-    created = Column('created', DateTime, default=datetime.now)
+    created = Column('created', DateTime, default=datetime.utcnow)
     creator_id = Column('creator', Integer, ForeignKey('players.id'), nullable=False)
     creator = relationship('Player')
     num_rounds = Column('num_rounds', SmallInteger, default=1)
@@ -122,7 +122,7 @@ class PendingGame(Base):
 class Invitation(Base):
     __tablename__ = 'invitations'
 
-    created = Column('created', DateTime, default=datetime.now)
+    created = Column('created', DateTime, default=datetime.utcnow)
     game_id = Column('game_id', Integer, ForeignKey('pending_games.id'), primary_key=True)
     game = relationship('PendingGame', back_populates='invitations')
 
@@ -137,12 +137,12 @@ class Player(Base):
     __tablename__ = 'players'
 
     id_ = Column('id', Integer, primary_key=True)
-    created = Column('created', DateTime, default=datetime.now)
+    created = Column('created', DateTime, default=datetime.utcnow)
     name = Column('name', String(64), nullable=False, unique=True, index=True)
     display_name = Column('display_name', String(64), nullable=False)
     password_hash = Column('password_hash', LargeBinary(64), nullable=False)
     password_salt = Column('password_salt', LargeBinary(64), nullable=False)
-    # email = Column('email', String(128), nullable=False)
+    timezone = Column('timezone', String(32), nullable=False, default='UTC')
 
     games_ = relationship('GamePlayerAssn', back_populates='player', cascade='all')
     pending_games_ = relationship('PendingGamePlayerAssn', back_populates='player', cascade='all')
@@ -215,7 +215,7 @@ class Stack(Base):
 
 class PaperMixin:
     id_ = Column('id', Integer, primary_key=True)
-    created = Column('created', DateTime, default=datetime.now)
+    created = Column('created', DateTime, default=datetime.utcnow)
     @declared_attr
     def author_id(self):
         return Column('author_id', Integer, ForeignKey('players.id'), nullable=False)

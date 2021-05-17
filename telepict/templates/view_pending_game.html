@@ -13,7 +13,7 @@
     </tr></thead>
     <tr>
       <td>{{ game.creator.display_name }} ({{ game.creator.name }})</td>
-      <td>{{ game.created.strftime(config.TS_FORMAT) }}</td>
+      <td>{{ game.created | render_timestamp }}</td>
       <td>{{ game.num_rounds }}</td>
       <td>{% if game.pass_left %}Left{% else %}Right{% endif %}</td>
       <td>{% if game.write_first %}Write{% else %}Draw{% endif %}</td>

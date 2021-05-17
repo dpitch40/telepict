@@ -32,7 +32,7 @@
             <a href="{{ url_for('game.pending_game', game_id=game.id_) }}" class="btn {% if owner %}btn-primary{% else %}btn-secondary{% endif %}">{% if owner %}Edit{% else %}View{% endif %}</a>
           {%- endif %}</td>
         <td>{{ game.creator.display_name }} ({{ game.creator.name }})</td>
-        <td>{{ game.created.strftime(config.TS_FORMAT) }}</td>
+        <td>{{ game.created | render_timestamp }}</td>
         <td>{{ game.num_rounds }}</td>
         <td>{% if game.pass_left %}Left{% else %}Right{% endif %}</td>
         <td>{% if game.write_first %}Write{% else %}Draw{% endif %}</td>
@@ -62,8 +62,8 @@
       {% set game_state = game_states[game.id_] -%}
       <tr class="{% if game_state == 'done_own' %}table-success{% elif game_state == 'wait' %}table-default{% else %}table-warning{% endif %}">
         <td><a href="{{ url_for('game.view_game', game_id=game.id_) }}" class="btn {% if game_state == 'done_own' %}btn-success{% elif game_state == 'wait' %}btn-secondary{% else %}btn-warning{% endif %}">{% if game_state == 'done_own' %}View Own{% elif game_state == 'wait' %}Waiting{% else %}Continue{% endif %}</a></td>
-        <td>{{ game.started.strftime(config.TS_FORMAT) }}</td>
-        <td>{% if game.last_move is not none %}{{ game.last_move.strftime(config.TS_FORMAT) }}{% endif %}</td>
+        <td>{{ game.started | render_timestamp }}</td>
+        <td>{% if game.last_move is not none %}{{ game.last_move | render_timestamp }}{% endif %}</td>
         <td>{{ game.num_rounds }}</td>
         <td>{% if game.pass_left %}Left{% else %}Right{% endif %}</td>
         <td>{% if game.write_first %}Write{% else %}Draw{% endif %}</td>
@@ -92,8 +92,8 @@
       {% for game in done_games -%}
       <tr class="table-success">
         <td><a href="{{ url_for('game.view_game', game_id=game.id_) }}" class="btn btn-success">View All</a></td>
-        <td>{{ game.started.strftime(config.TS_FORMAT) }}</td>
-        <td>{% if game.last_move is not none %}{{ game.last_move.strftime(config.TS_FORMAT) }}{% endif %}</td>
+        <td>{{ game.started | render_timestamp }}</td>
+        <td>{% if game.last_move is not none %}{{ game.last_move | render_timestamp }}{% endif %}</td>
         <td>{{ game.num_rounds }}</td>
         <td>{% if game.pass_left %}Left{% else %}Right{% endif %}</td>
         <td>{% if game.write_first %}Write{% else %}Draw{% endif %}</td>

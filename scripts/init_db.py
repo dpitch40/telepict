@@ -7,13 +7,16 @@ from telepict.db import DB, Game, Player, Stack, Writing, Drawing, PendingGame, 
 from telepict.config import Config
 
 def hours_ago(n):
-    return datetime.now() - timedelta(hours=n)
+    return datetime.utcnow() - timedelta(hours=n)
 
 def populate_db(d):
     # Players
-    david = Player(id_=1, name='david', display_name='DarthMarth', password='12345678')
-    nathan = Player(id_=2, name='Nathan', display_name='humcalc', password='you_shall_not_password')
-    elwood = Player(id_=3, name='Elwood', display_name='Kalen', password='really good password')
+    david = Player(id_=1, name='david', display_name='DarthMarth', password='12345678',
+        timezone='US/Central')
+    nathan = Player(id_=2, name='Nathan', display_name='humcalc', password='you_shall_not_password',
+        timezone='US/Eastern')
+    elwood = Player(id_=3, name='Elwood', display_name='Kalen', password='really good password',
+        timezone='US/Central')
     
     # Games
     game = Game(id_=1, num_rounds=2, players=[david, nathan, elwood])
