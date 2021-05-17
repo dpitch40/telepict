@@ -1,7 +1,7 @@
 import logging
+import logging.config
 
-from ..config import LoggingConfig
-from ..util import configure_logging
+from ..config import Config
 
-configure_logging(LoggingConfig)
+logging.config.dictConfig(Config.LOGGING_CONFIG)
 logger = logging.getLogger('Websocket')

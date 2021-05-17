@@ -26,6 +26,7 @@ def populate_db(d):
     reverse_game = Game(id_=5, pass_left=False, players=[david, nathan, elwood], started=hours_ago(4))
     draw_first_game = Game(id_=6, write_first=False, players=[david, nathan, elwood], started=hours_ago(5))
     partially_done_game = Game(id_=7, players=[david, nathan, elwood], started=hours_ago(6))
+    very_long_game = Game(id_=8, players=[david, nathan, elwood], num_rounds=4, started=hours_ago(7))
 
     # Pending games
     pending_game_1 = PendingGame(id_=1, pass_left=False,
@@ -65,6 +66,10 @@ def populate_db(d):
     pd_yesterday = Stack(id_=18, game=partially_done_game, owner=david)
     pd_enders_game = Stack(id_=19, game=partially_done_game, owner=nathan)
     pd_eiffel_tower = Stack(id_=20, game=partially_done_game, owner=elwood)
+
+    vlg_david_stack = Stack(id_=21, game=very_long_game, owner=david)
+    vlg_nathan_stack = Stack(id_=22, game=very_long_game, owner=nathan)
+    vlg_elwood_stack = Stack(id_=23, game=very_long_game, owner=elwood)
 
     # Game
     dw_11 = Writing(id_=1, text="Coming soon: yesterday",
@@ -230,9 +235,46 @@ def populate_db(d):
     ed_11_pd = Drawing(id_=28, drawing=open(os.path.join('data', 'drawings', 'ed_11.jpg'), 'rb').read(),
                        stack_pos=1, stack=pd_enders_game, author=elwood)
 
+    # Very long game
+    dw_0_vlg = Writing(text="dw_0_vlg", stack_pos=0, stack=vlg_david_stack, author=david)
+    dw_2_vlg = Writing(text="dw_2_vlg", stack_pos=2, stack=vlg_elwood_stack, author=david)
+    dw_4_vlg = Writing(text="dw_4_vlg", stack_pos=4, stack=vlg_nathan_stack, author=david)
+    dw_6_vlg = Writing(text="dw_6_vlg", stack_pos=6, stack=vlg_david_stack, author=david)
+    dw_8_vlg = Writing(text="dw_8_vlg", stack_pos=8, stack=vlg_elwood_stack, author=david)
+
+    nw_0_vlg = Writing(text="nw_0_vlg", stack_pos=0, stack=vlg_nathan_stack, author=nathan)
+    nw_2_vlg = Writing(text="nw_2_vlg", stack_pos=2, stack=vlg_david_stack, author=nathan)
+    nw_4_vlg = Writing(text="nw_4_vlg", stack_pos=4, stack=vlg_elwood_stack, author=nathan)
+    nw_6_vlg = Writing(text="nw_6_vlg", stack_pos=6, stack=vlg_nathan_stack, author=nathan)
+    nw_8_vlg = Writing(text="nw_8_vlg", stack_pos=8, stack=vlg_david_stack, author=nathan)
+
+    ew_0_vlg = Writing(text="ew_0_vlg", stack_pos=0, stack=vlg_elwood_stack, author=elwood)
+    ew_2_vlg = Writing(text="ew_2_vlg", stack_pos=2, stack=vlg_nathan_stack, author=elwood)
+    ew_4_vlg = Writing(text="ew_4_vlg", stack_pos=4, stack=vlg_david_stack, author=elwood)
+    ew_6_vlg = Writing(text="ew_6_vlg", stack_pos=6, stack=vlg_elwood_stack, author=elwood)
+    ew_8_vlg = Writing(text="ew_8_vlg", stack_pos=8, stack=vlg_nathan_stack, author=elwood)
+
+    tower = open(os.path.join('data', 'drawings', 'dd_11.jpg'), 'rb').read()
+    dd_1_vlg = Drawing(drawing=tower, stack_pos=1, stack=vlg_elwood_stack, author=david)
+    dd_3_vlg = Drawing(drawing=tower, stack_pos=3, stack=vlg_nathan_stack, author=david)
+    dd_5_vlg = Drawing(drawing=tower, stack_pos=5, stack=vlg_david_stack, author=david)
+    dd_7_vlg = Drawing(drawing=tower, stack_pos=7, stack=vlg_elwood_stack, author=david)
+    dd_9_vlg = Drawing(drawing=tower, stack_pos=9, stack=vlg_nathan_stack, author=david)
+
+    nd_1_vlg = Drawing(drawing=tower, stack_pos=1, stack=vlg_david_stack, author=nathan)
+    nd_3_vlg = Drawing(drawing=tower, stack_pos=3, stack=vlg_elwood_stack, author=nathan)
+    nd_5_vlg = Drawing(drawing=tower, stack_pos=5, stack=vlg_nathan_stack, author=nathan)
+    nd_7_vlg = Drawing(drawing=tower, stack_pos=7, stack=vlg_david_stack, author=nathan)
+    nd_9_vlg = Drawing(drawing=tower, stack_pos=9, stack=vlg_elwood_stack, author=nathan)
+
+    ed_1_vlg = Drawing(drawing=tower, stack_pos=1, stack=vlg_nathan_stack, author=elwood)
+    ed_3_vlg = Drawing(drawing=tower, stack_pos=3, stack=vlg_david_stack, author=elwood)
+    ed_5_vlg = Drawing(drawing=tower, stack_pos=5, stack=vlg_elwood_stack, author=elwood)
+    ed_7_vlg = Drawing(drawing=tower, stack_pos=7, stack=vlg_nathan_stack, author=elwood)
+
     with d.session_scope() as session:
         for ent in [david, nathan, elwood, queue_game, reverse_game, draw_first_game,
-                    pending_game_1, pending_game_2]:
+                    pending_game_1, pending_game_2, very_long_game]:
             session.add(ent)
 
 if __name__ == '__main__':

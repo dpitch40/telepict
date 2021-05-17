@@ -7,7 +7,7 @@ import logging.handlers
 from . import Config
 
 get_resource_re = re.compile(r'GET\s+([^\s]+) HTTP')
-ignore_uri_re = re.compile(r'min\.(js|css)', flags=re.I)
+ignore_uri_re = re.compile(r'(?:min\.(?:js|css)|\.ico)', flags=re.I)
 
 def filter_werkzeug_access(record):
     # Ignores access messages for common/trivial resources

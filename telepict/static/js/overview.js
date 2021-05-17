@@ -110,8 +110,9 @@ function drawStackIndicator(x, y, width, number, color) {
 function drawNames(overview) {
   const circle = overview.circle
   var player, angle, x, y, text, textWidth, origWidth, indicatorWidth;
-  var indicatorWidths = [];
+  var indicatorWidths;
   for (let i = 0; i < circle.length; i++) {
+    indicatorWidths = [];
     player = circle[i];
 
     angle = Math.PI * (-1 / 2 - 2 * i / circle.length);
