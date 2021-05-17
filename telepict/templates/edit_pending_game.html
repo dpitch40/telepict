@@ -62,7 +62,7 @@
       </form>
       <div>Or have them visit this URL: <input type="text" value="{{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}" id="join-link" size="33" readonly /> <button class="btn btn-secondary" type="button" onclick="copyJoinLink()">Copy</button></div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4 overflow-auto border" style="max-height: 400px">
       <h3>Past Players</h3>
       <ul>
       {% for player in past_players -%}
