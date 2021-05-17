@@ -3,11 +3,22 @@ import functools
 
 from flask import Blueprint, render_template, request, current_app, flash, \
     session as flask_session, url_for, redirect
+from pytz import common_timezones, country_timezones
 
 from ..db import Player
 from ..auth import gen_password_hash
 from .exceptions import FlashedError
 from .util import inject_current_player
+
+common_timezones = common_timezones[:]
+utc = ['UTC']
+american_tzs = country_timezones('us')
+european_tzs = [tz for tz in common_timezones if tz.startswith('Europe/')]
+australian_tzs = country_timezones('au')
+extra_tzs = utc + american_tzs + european_tzs + australian_tzs
+for tz in extra_tzs:
+    common_timezones.remove(tz)
+common_timezones = extra_tzs + common_timezones
 
 bp = Blueprint('auth', __name__)
 
@@ -51,17 +62,18 @@ def logout():
 @bp.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'GET':
-        return render_template('create_account.html')
+        return render_template('create_account.html', timezones=common_timezones)
 
-    name, dispname, password = request.form['name'], request.form['dispname'], \
-        request.form['password']
+    name, dispname, password, timezone = request.form['name'], request.form['dispname'], \
+        request.form['password'], request.form['timezone']
     with current_app.db.session_scope() as session:
         player = session.query(Player).filter_by(name=name).one_or_none()
         if player is not None:
             raise FlashedError('Username already exists')
-        player = Player(name=name, display_name=dispname, password=password)
+        player = Player(name=name, display_name=dispname, password=password, timezone=timezone)
         session.add(player)
         session.commit()
+        current_app.logger.info('Created player %s (%s)', name, dispname)
     flash(f'Account {name} created successfully!', 'primary')
     return redirect(url_for('auth.login'), 303)
 
@@ -70,15 +82,22 @@ def create_account():
 @inject_current_player
 def edit_account(session, player):
     if request.method == 'GET':
-        return render_template('edit_account.html', player=player)
+        return render_template('edit_account.html', player=player, timezones=common_timezones)
 
-    dispname, new_password = request.form['dispname'], request.form['password']
+    dispname, new_password, timezone = request.form['dispname'], request.form['password'], \
+        request.form['timezone']
     changed = False
-    if dispname != player.display_name:
+    if dispname and dispname != player.display_name:
         player.display_name = dispname
+        current_app.logger.info('Player %s changed display name to %s', player.name, dispname)
         changed = True
     if new_password:
         player.password_hash = gen_password_hash(new_password, player.password_salt)
+        current_app.logger.info('Player %s changed password', player.name)
+        changed = True
+    if timezone != player.timezone:
+        player.timezone = timezone
+        current_app.logger.info('Player %s changed timezone to %s', player.name, timezone)
         changed = True
     if changed:
         session.commit()

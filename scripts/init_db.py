@@ -12,11 +12,11 @@ def hours_ago(n):
 def populate_db(d):
     # Players
     david = Player(id_=1, name='david', display_name='DarthMarth', password='12345678',
-        timezone='US/Central')
+        timezone='America/Chicago')
     nathan = Player(id_=2, name='Nathan', display_name='humcalc', password='you_shall_not_password',
-        timezone='US/Eastern')
+        timezone='America/New York')
     elwood = Player(id_=3, name='Elwood', display_name='Kalen', password='really good password',
-        timezone='US/Central')
+        timezone='America/Chicago')
     
     # Games
     game = Game(id_=1, num_rounds=2, players=[david, nathan, elwood])
