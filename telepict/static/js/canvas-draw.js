@@ -43,7 +43,7 @@ var CanvasDraw = /** @class */ (function () {
             _this.updateButtons();
         };
         this.clickEraser = function (ev) {
-            _this.strokeColor = null;
+            _this.strokeColor = "";
             _this.updateButtons();
         };
         this.clickStrokeWidth = function (ev) {
@@ -52,26 +52,20 @@ var CanvasDraw = /** @class */ (function () {
             _this.updateButtons();
         };
         this.undo = function () {
-            if (_this.empty())
+            if (!_this.strokes.length)
                 return;
             _this.strokes.pop();
             _this.redraw();
             _this.updateButtons();
         };
         this.clear = function () {
-            if (_this.empty())
+            if (!_this.strokes.length)
                 return;
             _this.strokes = [];
             _this.redraw();
             _this.updateButtons();
         };
-        this.empty = function() {
-            return _this.strokes.length == 0;
-        }
         this.mousedown = function (ev) {
-            if (ev.type == "mousedown" && ev.button != 0) {
-                return;
-            }
             ev.preventDefault();
             var _a = _this.getPosition(ev), x = _a[0], y = _a[1];
             _this.currentStroke = {
@@ -89,9 +83,6 @@ var CanvasDraw = /** @class */ (function () {
             _this.draw(x, y);
         };
         this.mouseup = function (ev) {
-            if (ev.type == "mouseup" && ev.button != 0) {
-                return;
-            }
             if (_this.currentStroke) {
                 var _a = _this.getPosition(ev), x = _a[0], y = _a[1];
                 _this.currentStroke.points.push([x, y]);
@@ -115,62 +106,39 @@ var CanvasDraw = /** @class */ (function () {
                 " ",
                 h("button", { class: "btn btn-primary", name: "clear", onclick: this.clear }, "Clear")),
             h("div", { class: "left-controls", style: { marginBottom: '4px' } },
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickColor, value: "black", title: "black" },
+                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "black", title: "black" },
                     h("span", { class: "color", style: { background: 'black', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickColor, value: "#F55252", title: "red" },
+                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#F55252", title: "red" },
                     h("span", { class: "color", style: { background: '#F55252', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickColor, value: "#F8BC01", title: "yellow" },
+                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#F8BC01", title: "yellow" },
                     h("span", { class: "color", style: { background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickColor, value: "#3DC853", title: "green" },
+                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#3DC853", title: "green" },
                     h("span", { class: "color", style: { background: '#3DC853', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickColor, value: "#42B0FF", title: "blue" },
+                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#42B0FF", title: "blue" },
                     h("span", { class: "color", style: { background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickColor, value: "#D512F9", title: "purple" },
+                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#D512F9", title: "purple" },
                     h("span", { class: "color", style: { background: '#D512F9', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickColor, value: "#8D6E63", title: "brown" },
+                h("button", { class: "btn btn-primary", onclick: this.clickColor, value: "#8D6E63", title: "brown" },
                     h("span", { class: "color", style: { background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px' } })),
                 " | ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickEraser, title: "eraser" }, "Erase"),
+                h("button", { class: "btn btn-primary", onclick: this.clickEraser, title: "eraser" }, "Erase"),
                 " ",
                 "| ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickStrokeWidth, value: "1" }, "Thin"),
+                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "1" }, "Thin"),
                 " ",
-                h("button", { class: "btn btn-primary",
-                    onclick: this.clickStrokeWidth, value: "2" }, "Normal"),
+                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "2" }, "Normal"),
                 " ",
-                h("button", {  class: "btn btn-primary",
-                    onclick: this.clickStrokeWidth, value: "4" }, "Thick")),
+                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "4" }, "Thick")),
             h("div", { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } },
-                this.drawingCanvas = h("canvas", { width: this.w, height: this.h,
-                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
-                this.currentStrokeCanvas = h("canvas", { width: this.w, height: this.h,
-                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
-                this.interfaceCanvas = h("canvas", { width: this.w, height: this.h,
-                    style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute',
-                             cursor: 'crosshair' },
-                    onmousedown: this.mousedown, onmousemove: this.mousemove, onmouseup: this.mouseup,
-                    onmouseout: this.mouseup, ontouchstart: this.mousedown, ontouchmove: this.mousemove,
-                    ontouchend: this.mouseup, ontouchcancel: this.mouseup }))));
-        window.addEventListener("beforeunload", function( event ) {
-          if (!_this.empty()) {
-            event.preventDefault();
-          }
-        });
+                this.drawingCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
+                this.currentStrokeCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
+                this.interfaceCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute', cursor: 'crosshair' }, onmousedown: this.mousedown, onmousemove: this.mousemove, onmouseup: this.mouseup, onmouseout: this.mouseup, ontouchstart: this.mousedown, ontouchmove: this.mousemove, ontouchend: this.mouseup, ontouchcancel: this.mouseup }))));
         this.wrapper = wrapper;
         this.interfaceContext = this.interfaceCanvas.getContext('2d');
         this.currentStrokeContext = this.currentStrokeCanvas.getContext('2d');
@@ -210,39 +178,42 @@ var CanvasDraw = /** @class */ (function () {
         this.drawingContext.fillRect(0, 0, this.w, this.h);
         for (var _i = 0, _a = this.strokes; _i < _a.length; _i++) {
             var stroke = _a[_i];
-            if (stroke.color === null) {
+            if (stroke.color == "") {
                 this.drawingContext.globalCompositeOperation = 'destination-out';
-            } else {
+            }
+            else {
                 this.drawingContext.globalCompositeOperation = 'source-over';
             }
             this.drawStroke(this.drawingContext, stroke);
         }
     };
     CanvasDraw.prototype.drawStroke = function (context, stroke) {
-        var _a;
-        if (stroke.color === null) {
+        if (stroke.color == "") {
             context.strokeStyle = "white";
-        } else {
+        }
+        else {
             context.strokeStyle = stroke.color;
         }
         context.lineWidth = stroke.width * 2 * this.pixelRatio;
         context.lineCap = 'round';
         context.lineJoin = 'round';
-        var _b = stroke.points[0], x = _b[0], y = _b[1];
+        var _a = stroke.points[0], x = _a[0], y = _a[1];
         context.beginPath();
         context.moveTo(x, y);
         for (var i = 1; i < stroke.points.length; i++) {
-            _a = stroke.points[i], x = _a[0], y = _a[1];
+            _b = stroke.points[i], x = _b[0], y = _b[1];
             context.lineTo(x, y);
         }
         context.stroke();
+        var _b;
     };
     CanvasDraw.prototype.commitStroke = function () {
         if (!this.currentStroke)
             return;
-        if (this.currentStroke.color === null) {
+        if (this.currentStroke.color == "") {
             this.drawingContext.globalCompositeOperation = 'destination-out';
-        } else {
+        }
+        else {
             this.drawingContext.globalCompositeOperation = 'source-over';
         }
         this.strokes.push(this.currentStroke);
@@ -260,13 +231,13 @@ var CanvasDraw = /** @class */ (function () {
                 active = !this.strokes.length;
             }
             else {
-                active = (button.value === this.strokeColor ||
-                          button.value === "" + this.strokeWidth ||
-                          (button.title == "eraser" && this.strokeColor === null));
+                active = (button.value === this.strokeColor || button.value === "" + this.strokeWidth ||
+                    (button.title == "eraser" && this.strokeColor == ""));
             }
             if (active) {
                 button.classList.add("active");
-            } else {
+            }
+            else {
                 button.classList.remove("active");
             }
         }

@@ -1,0 +1,13 @@
+{
+  "include": ["canvas-draw.tsx"],
+  "compilerOptions": {
+    "target": "es5",
+    "module": "none",
+    "lib": ["esnext", "dom"],
+    "jsx": "react",
+    "jsxFactory": "h",
+    "strict": true,
+    "sourceMap": true,
+    "esModuleInterop": true
+  }
+}

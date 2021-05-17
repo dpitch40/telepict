@@ -69,39 +69,42 @@ class CanvasDraw {
 
     wrapper.appendChild(<div>
       <div class="top-controls" style={{marginBottom: '4px'}}>
-        <button name="undo" onclick={this.undo}>Undo</button> {}
-        <button name="clear" onclick={this.clear}>Clear</button>
+        <button class="btn btn-primary" name="undo" onclick={this.undo}>Undo</button> {}
+        <button class="btn btn-primary" name="clear" onclick={this.clear}>Clear</button>
       </div>
       <div class="left-controls" style={{marginBottom: '4px'}}>
-        <button onclick={this.clickColor} value="black" title="black">
+        <button class="btn btn-primary" onclick={this.clickColor} value="black" title="black">
           <span class="color" style={{background: 'black', display: 'inline-block', width: '12px', height: '12px'}}></span>
         </button> {}
-        <button onclick={this.clickColor} value="#F55252" title="red">
+        <button class="btn btn-primary" onclick={this.clickColor} value="#F55252" title="red">
           <span class="color" style={{background: '#F55252', display: 'inline-block', width: '12px', height: '12px'}}></span>
         </button> {}
-        <button onclick={this.clickColor} value="#F8BC01" title="yellow">
+        <button class="btn btn-primary" onclick={this.clickColor} value="#F8BC01" title="yellow">
           <span class="color" style={{background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px'}}></span>
         </button> {}
-        <button onclick={this.clickColor} value="#3DC853" title="green">
+        <button class="btn btn-primary" onclick={this.clickColor} value="#3DC853" title="green">
           <span class="color" style={{background: '#3DC853', display: 'inline-block', width: '12px', height: '12px'}}></span>
         </button> {}
-        <button onclick={this.clickColor} value="#42B0FF" title="blue">
+        <button class="btn btn-primary" onclick={this.clickColor} value="#42B0FF" title="blue">
           <span class="color" style={{background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px'}}></span>
         </button> {}
-        <button onclick={this.clickColor} value="#D512F9" title="purple">
+        <button class="btn btn-primary" onclick={this.clickColor} value="#D512F9" title="purple">
           <span class="color" style={{background: '#D512F9', display: 'inline-block', width: '12px', height: '12px'}}></span>
         </button> {}
-        <button onclick={this.clickColor} value="#8D6E63" title="brown">
+        <button class="btn btn-primary" onclick={this.clickColor} value="#8D6E63" title="brown">
           <span class="color" style={{background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px'}}></span>
+        </button> | {}
+        <button class="btn btn-primary" onclick={this.clickEraser} title="eraser">
+          Erase
         </button> {}
         | {}
-        <button onclick={this.clickStrokeWidth} value="1">
+        <button class="btn btn-primary" onclick={this.clickStrokeWidth} value="1">
           Thin
         </button> {}
-        <button onclick={this.clickStrokeWidth} value="2">
+        <button class="btn btn-primary" onclick={this.clickStrokeWidth} value="2">
           Normal
         </button> {}
-        <button onclick={this.clickStrokeWidth} value="4">
+        <button class="btn btn-primary" onclick={this.clickStrokeWidth} value="4">
           Thick
         </button>
       </div>
@@ -176,11 +179,20 @@ class CanvasDraw {
     this.drawingContext.fillStyle = 'white';
     this.drawingContext.fillRect(0, 0, this.w, this.h);
     for (const stroke of this.strokes) {
+      if (stroke.color == "") {
+          this.drawingContext.globalCompositeOperation = 'destination-out';
+      } else {
+          this.drawingContext.globalCompositeOperation = 'source-over';
+      }
       this.drawStroke(this.drawingContext, stroke);
     }
   }
   drawStroke(context: CanvasRenderingContext2D, stroke: Stroke) {
-    context.strokeStyle = stroke.color;
+    if (stroke.color == "") {
+        context.strokeStyle = "white";
+    } else {
+        context.strokeStyle = stroke.color;
+    }
     context.lineWidth = stroke.width * 2 * this.pixelRatio;
     context.lineCap = 'round';
     context.lineJoin = 'round';
@@ -196,6 +208,11 @@ class CanvasDraw {
   }
   commitStroke() {
     if (!this.currentStroke) return;
+    if (this.currentStroke.color == "") {
+        this.drawingContext.globalCompositeOperation = 'destination-out';
+    } else {
+        this.drawingContext.globalCompositeOperation = 'source-over';
+    }
     this.strokes.push(this.currentStroke);
     this.currentStroke = null;
     this.drawingContext.drawImage(this.currentStrokeCanvas, 0, 0, this.w, this.h);
@@ -206,16 +223,27 @@ class CanvasDraw {
   updateButtons() {
     const buttons = this.wrapper.getElementsByTagName('button') as any as HTMLButtonElement[];
     for (const button of buttons) {
+      var active;
       if (button.name === 'undo' || button.name === 'clear') {
-        button.disabled = !this.strokes.length;
+        active = !this.strokes.length;
       } else {
-        button.disabled = (button.value === this.strokeColor || button.value === `${this.strokeWidth}`);
+        active = (button.value === this.strokeColor || button.value === `${this.strokeWidth}` ||
+                          (button.title == "eraser" && this.strokeColor == ""));
+      }
+      if (active) {
+          button.classList.add("active");
+      } else {
+          button.classList.remove("active");
       }
     }
   }
   clickColor = (ev: Event) => {
     const value = (ev.currentTarget as HTMLButtonElement).value;
     this.strokeColor = value;
+    this.updateButtons();
+  };
+  clickEraser = (ev: Event) => {
+    this.strokeColor = "";
     this.updateButtons();
   };
   clickStrokeWidth = (ev: Event) => {
