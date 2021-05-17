@@ -12,10 +12,11 @@ from .util import inject_current_player
 
 common_timezones = common_timezones[:]
 utc = ['UTC']
+us_tzs = [tz for tz in common_timezones if tz.startswith('US/')]
 american_tzs = country_timezones('us')
 european_tzs = [tz for tz in common_timezones if tz.startswith('Europe/')]
 australian_tzs = country_timezones('au')
-extra_tzs = utc + american_tzs + european_tzs + australian_tzs
+extra_tzs = utc + us_tzs + american_tzs + european_tzs + australian_tzs
 for tz in extra_tzs:
     common_timezones.remove(tz)
 common_timezones = extra_tzs + common_timezones
