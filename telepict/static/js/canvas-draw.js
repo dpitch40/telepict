@@ -42,6 +42,10 @@ var CanvasDraw = /** @class */ (function () {
             _this.strokeColor = value;
             _this.updateButtons();
         };
+        this.clickEraser = function (ev) {
+            _this.strokeColor = null;
+            _this.updateButtons();
+        };
         this.clickStrokeWidth = function (ev) {
             var value = ev.currentTarget.value;
             _this.strokeWidth = parseInt(value);
@@ -107,37 +111,50 @@ var CanvasDraw = /** @class */ (function () {
         var styleHeight = Math.round(this.h / this.pixelRatio) + "px";
         wrapper.appendChild(h("div", null,
             h("div", { class: "top-controls", style: { marginBottom: '4px' } },
-                h("button", { name: "undo", onclick: this.undo }, "Undo"),
+                h("button", { class: "btn btn-primary", name: "undo", onclick: this.undo }, "Undo"),
                 " ",
-                h("button", { name: "clear", onclick: this.clear }, "Clear")),
+                h("button", { class: "btn btn-primary", name: "clear", onclick: this.clear }, "Clear")),
             h("div", { class: "left-controls", style: { marginBottom: '4px' } },
-                h("button", { onclick: this.clickColor, value: "black", title: "black" },
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickColor, value: "black", title: "black" },
                     h("span", { class: "color", style: { background: 'black', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { onclick: this.clickColor, value: "#F55252", title: "red" },
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickColor, value: "#F55252", title: "red" },
                     h("span", { class: "color", style: { background: '#F55252', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { onclick: this.clickColor, value: "#F8BC01", title: "yellow" },
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickColor, value: "#F8BC01", title: "yellow" },
                     h("span", { class: "color", style: { background: '#F8BC01', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { onclick: this.clickColor, value: "#3DC853", title: "green" },
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickColor, value: "#3DC853", title: "green" },
                     h("span", { class: "color", style: { background: '#3DC853', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { onclick: this.clickColor, value: "#42B0FF", title: "blue" },
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickColor, value: "#42B0FF", title: "blue" },
                     h("span", { class: "color", style: { background: '#42B0FF', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { onclick: this.clickColor, value: "#D512F9", title: "purple" },
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickColor, value: "#D512F9", title: "purple" },
                     h("span", { class: "color", style: { background: '#D512F9', display: 'inline-block', width: '12px', height: '12px' } })),
                 " ",
-                h("button", { onclick: this.clickColor, value: "#8D6E63", title: "brown" },
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickColor, value: "#8D6E63", title: "brown" },
                     h("span", { class: "color", style: { background: '#8D6E63', display: 'inline-block', width: '12px', height: '12px' } })),
+                " | ",
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickEraser, title: "eraser" }, "Erase"),
                 " ",
                 "| ",
-                h("button", { onclick: this.clickStrokeWidth, value: "1" }, "Thin"),
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickStrokeWidth, value: "1" }, "Thin"),
                 " ",
-                h("button", { onclick: this.clickStrokeWidth, value: "2" }, "Normal"),
+                h("button", { class: "btn btn-primary",
+                    onclick: this.clickStrokeWidth, value: "2" }, "Normal"),
                 " ",
-                h("button", { onclick: this.clickStrokeWidth, value: "4" }, "Thick")),
+                h("button", {  class: "btn btn-primary",
+                    onclick: this.clickStrokeWidth, value: "4" }, "Thick")),
             h("div", { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } },
                 this.drawingCanvas = h("canvas", { width: this.w, height: this.h,
                     style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
@@ -193,12 +210,21 @@ var CanvasDraw = /** @class */ (function () {
         this.drawingContext.fillRect(0, 0, this.w, this.h);
         for (var _i = 0, _a = this.strokes; _i < _a.length; _i++) {
             var stroke = _a[_i];
+            if (stroke.color === null) {
+                this.drawingContext.globalCompositeOperation = 'destination-out';
+            } else {
+                this.drawingContext.globalCompositeOperation = 'source-over';
+            }
             this.drawStroke(this.drawingContext, stroke);
         }
     };
     CanvasDraw.prototype.drawStroke = function (context, stroke) {
         var _a;
-        context.strokeStyle = stroke.color;
+        if (stroke.color === null) {
+            context.strokeStyle = "white";
+        } else {
+            context.strokeStyle = stroke.color;
+        }
         context.lineWidth = stroke.width * 2 * this.pixelRatio;
         context.lineCap = 'round';
         context.lineJoin = 'round';
@@ -214,6 +240,11 @@ var CanvasDraw = /** @class */ (function () {
     CanvasDraw.prototype.commitStroke = function () {
         if (!this.currentStroke)
             return;
+        if (this.currentStroke.color === null) {
+            this.drawingContext.globalCompositeOperation = 'destination-out';
+        } else {
+            this.drawingContext.globalCompositeOperation = 'source-over';
+        }
         this.strokes.push(this.currentStroke);
         this.currentStroke = null;
         this.drawingContext.drawImage(this.currentStrokeCanvas, 0, 0, this.w, this.h);
@@ -224,11 +255,19 @@ var CanvasDraw = /** @class */ (function () {
         var buttons = this.wrapper.getElementsByTagName('button');
         for (var _i = 0, buttons_1 = buttons; _i < buttons_1.length; _i++) {
             var button = buttons_1[_i];
+            var active;
             if (button.name === 'undo' || button.name === 'clear') {
-                button.disabled = !this.strokes.length;
+                active = !this.strokes.length;
             }
             else {
-                button.disabled = (button.value === this.strokeColor || button.value === "" + this.strokeWidth);
+                active = (button.value === this.strokeColor ||
+                          button.value === "" + this.strokeWidth ||
+                          (button.title == "eraser" && this.strokeColor === null));
+            }
+            if (active) {
+                button.classList.add("active");
+            } else {
+                button.classList.remove("active");
             }
         }
     };
