@@ -29,14 +29,15 @@ def login():
     name, password = request.form['name'], request.form['password']
     with current_app.db.session_scope() as session:
         player = session.query(Player).filter_by(name=name).one_or_none()
-        # TODO: Log failed login attempts
         if player is None:
             flash('Bad username or password', 'danger')
+            current_app.logger.warning('Failed login attempt: no player named %r', name)
             return render_template('login.html', redirect_url=request.form['redirect_url'])
         player_hash = player.password_hash
         input_hash = gen_password_hash(password, player.password_salt)
         if not secrets.compare_digest(player_hash, input_hash):
             flash('Bad username or password', 'danger')
+            current_app.logger.warning('Failed login attempt: invalid password for %r', name)
             return render_template('login.html', redirect_url=request.form['redirect_url'])
         flask_session['username'] = player.name
         flask_session['userdispname'] = player.display_name
