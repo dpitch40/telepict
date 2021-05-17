@@ -3,6 +3,7 @@ import io
 from flask import Blueprint, current_app, request, jsonify
 from PIL import Image
 
+from .auth import require_logged_in
 from ..config import Config
 from ..util import get_pending_stacks
 from ..util.image import flatten_rgba_image
@@ -11,6 +12,7 @@ from ..db import Game, Player, Drawing
 bp = Blueprint('image', __name__)
 
 @bp.route('/img_upload', methods=['POST'])
+@require_logged_in
 def image_upload():
     game_id = int(request.form['game_id'])
     player_id = int(request.form['player_id'])

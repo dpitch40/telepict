@@ -20,37 +20,36 @@ class Config:
 
     TS_FORMAT = "%b %d, %Y, %H:%M"
 
-
-
-class LoggingConfig:
-    version = 1
-    disable_existing_loggers = False
-    formatters = {
-        'default': {
-            'format': '%(asctime)s %(name)s %(pathname)s.%(lineno)d %(levelname)s: %(message)s'
+def make_logging_config(level, log_dir=None):
+    config = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'default': {
+                'format': '%(asctime)s %(name)s %(pathname)s.%(lineno)d %(levelname)s: %(message)s'
+            }
+        },
+        'handlers': {
+            'stream': {
+                'class': 'logging.StreamHandler',
+                'level': level,
+                'formatter': 'default',
+                'stream': 'ext://sys.stdout'
+            }
+        },
+        'root': {
+            'level': level,
+            'handlers': ['stream']
         }
     }
-    handlers = {
-        'stream': {
-            'class': 'logging.StreamHandler',
-            'level': LOG_LEVEL,
-            'formatter': 'default',
-            'stream': 'ext://sys.stdout'
-        }
-    }
-    root = {
-        'level': LOG_LEVEL,
-        'handlers': ['stream']
-    }
-
-    @classmethod
-    def setup_logfile(cls, log_dir, log_level=LOG_LEVEL):
-        cls.handlers['file'] = {
+    if log_dir is not None:
+        config['handlers']['file'] = {
             'class': 'logging.handlers.RotatingFileHandler',
-            'level': log_level,
+            'level': level,
             'formatter': 'default',
             'filename': os.path.join(log_dir, 'flask.log'),
             'maxBytes': 2 ** 20,
             'backupCount': 10,
         }
-        cls.root['handlers'].append('file')
+        config['root']['handlers'].append('file')
+    return config

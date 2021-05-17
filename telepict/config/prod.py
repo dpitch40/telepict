@@ -1,15 +1,8 @@
 import os
 import logging
 
-from .base import Config, LoggingConfig
-
-LOG_LEVEL = logging.INFO
+from .base import Config, make_logging_config
 
 class ConfigProd(Config):
-    DB_URL = None
-
-class LoggingConfigProd(LoggingConfig):
-    pass
-
-if 'LOGFILE' in os.environ:
-    LoggingConfigProd.setup_logfile(os.environ['LOGFILE'])
+    LOG_LEVEL = logging.INFO
+    LOGGING_CONFIG = make_logging_config(LOG_LEVEL, os.getenv('LOG_DIR'))

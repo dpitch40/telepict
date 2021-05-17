@@ -1,20 +1,7 @@
-import os
-import os.path
-import logging.config
 import base64
 import operator
 
 from ..db import Drawing
-
-def configure_logging(config_class):
-    logging_config = {k: getattr(config_class, k) for k in dir(config_class)
-                      if not k.startswith('__')}
-    if 'file' in logging_config['handlers']:
-        logfile = logging_config['handlers']['file']['filename']
-        log_dir = os.path.abspath(os.path.dirname(logfile))
-        if not os.path.isdir(log_dir):
-            os.makedirs(log_dir)
-    logging.config.dictConfig(logging_config)
 
 def get_pending_stacks(game, player):
     player_order = None
