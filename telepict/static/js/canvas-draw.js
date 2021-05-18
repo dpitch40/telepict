@@ -47,10 +47,10 @@ var CanvasDraw = /** @class */ (function () {
             _this.erase = !_this.erase;
             _this.updateButtons();
         };
-        this.clickStrokeWidth = function (ev) {
-            var value = ev.currentTarget.value;
-            _this.strokeWidth = parseInt(value);
-            _this.updateButtons();
+        this.widthAdjust = function (ev) {
+            var value = ev.target.value;
+            _this.widthLabel.innerHTML = "Width: " + value;
+            _this.strokeWidth = parseFloat(value);
         };
         this.undo = function () {
             if (!_this.strokes.length)
@@ -105,16 +105,14 @@ var CanvasDraw = /** @class */ (function () {
         wrapper.appendChild(h("div", null,
             h("div", { class: "left-controls", style: { marginBottom: '4px' } },
                 h("button", { class: "btn btn-primary", onclick: this.clickEraser, title: "eraser" }, "Erase"),
-                " ",
-                "| ",
-                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "1" }, "Thin"),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "2" }, "Normal"),
-                " ",
-                h("button", { class: "btn btn-primary", onclick: this.clickStrokeWidth, value: "4" }, "Thick"),
-                " | ",
+                "  ",
+                h("label", { id: "width-input-label", for: "width-input", class: "form-label",
+                            style: {width: "6em"}}, "Width: 3"),
+                h("input", { id: "width-input", type: "range", min: "0.5", max: "15", value: "3",
+                            step: "0.5", class: "form-range w-25", oninput: this.widthAdjust}),
+                "  ",
                 h("button", { class: "btn btn-primary", name: "undo", onclick: this.undo }, "Undo"),
-                " ",
+                "  ",
                 h("button", { class: "btn btn-primary", name: "clear", onclick: this.clear }, "Clear")),
             h("div", { style: { width: styleWidth, height: styleHeight, border: "1px solid gray", boxSizing: "content-box" } },
                 this.drawingCanvas = h("canvas", { width: this.w, height: this.h, style: { width: styleWidth, height: styleHeight, display: 'block', position: 'absolute' } }),
@@ -124,6 +122,7 @@ var CanvasDraw = /** @class */ (function () {
         this.interfaceContext = this.interfaceCanvas.getContext('2d');
         this.currentStrokeContext = this.currentStrokeCanvas.getContext('2d');
         this.drawingContext = this.drawingCanvas.getContext('2d');
+        this.widthLabel = document.getElementById('width-input-label');
         this.updateButtons();
         this.redraw();
     }
@@ -212,8 +211,7 @@ var CanvasDraw = /** @class */ (function () {
                 active = !this.strokes.length;
             }
             else {
-                active = (button.value === "" + this.strokeWidth ||
-                    (button.title == "eraser" && this.erase == true));
+                active = button.title == "eraser" && this.erase == true;
             }
             if (active) {
                 button.classList.add("active");
