@@ -10,7 +10,6 @@
 
     var handlers = {};
     var httpHost = "http://{{ server }}:{{ config['HTTP_PORT'] }}";
-    var ws = new WebSocket("ws://{{ server }}:{{ config['WS_PORT'] }}/game/" + game_id + "/" + player_id);
 
     function resetDisplay() {
       while (disp.firstChild) {
@@ -36,20 +35,6 @@
         } else {
           console.log("No handler found for action " + action, data, handlers);
         }
-      }
-    }
-
-    ws.onmessage = function (event) {
-      var data = JSON.parse(event.data);
-      mainHandler(data);
-    };
-
-    function passWriting() {
-      var writing = textInput.value.trim();
-      if (writing != '') {
-        ws.send(JSON.stringify({'action': 'writing',
-                                'text': writing}));
-        updateDisplaySent('writing');
       }
     }
 
@@ -95,6 +80,22 @@
 
     var imageInputDiv = document.querySelector('#image-input-div');
     var imgUpload = document.querySelector('#img-upload');
+
+    var ws = new WebSocket("ws://{{ server }}:{{ config['WS_PORT'] }}/game/" + game_id + "/" + player_id);
+
+    ws.onmessage = function (event) {
+      var data = JSON.parse(event.data);
+      mainHandler(data);
+    };
+
+    function passWriting() {
+      var writing = textInput.value.trim();
+      if (writing != '') {
+        ws.send(JSON.stringify({'action': 'writing',
+                                'text': writing}));
+        updateDisplaySent('writing');
+      }
+    }
 
     handlers.view = function(data) {
       var pageData;
