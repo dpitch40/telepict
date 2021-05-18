@@ -45,10 +45,16 @@
   </script>
 {% endblock %}
 {% block content %}
-  <div class="text-center">
-    <canvas id="overview-canvas" width="1px" height="1px"></canvas>
+  <div class="row flex-row-reverse">
+    <div class="col-lg">
+      <div class="text-center">
+        <canvas id="overview-canvas" width="1px" height="1px"></canvas>
+      </div>
+    </div>
+    <div class="col-lg">
+      <div id="game-display"></div>
+    </div>
   </div>
-  <div id="game-display"></div>
   <div id="text-input-div" style="display: none">
     <input id="text-input" size="100" />
     <button type="button" onclick="passWriting()">Submit</button>
