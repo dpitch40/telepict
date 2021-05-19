@@ -217,6 +217,7 @@ class Stack(Base):
 
     writings = relationship('Writing', back_populates='stack', cascade='all')
     drawings = relationship('Drawing', back_populates='stack', cascade='all')
+    passes = relationship('Pass', back_populates='stack', cascade='all')
 
     @staticmethod
     def _sort(stk):
@@ -240,7 +241,7 @@ class Stack(Base):
             else last_drawing
 
     def __len__(self):
-        return len(self.writings) + len(self.drawings)
+        return len(self.writings) + len(self.drawings) + len(self.passes)
 
     def __repr__(self):
         return f'Stack({self.owner.name}, {self.stack!s})'
@@ -301,3 +302,11 @@ class Drawing(Base, PaperMixin):
         super().__init__(*args, **kwargs)
 
 
+class Pass(Base, PaperMixin):
+    __tablename____ = 'passes'
+
+    def __init__(self, *args, **kwargs):
+        stack = relationship('Stack', back_populates='passes')
+        if 'stack' in kwargs and 'stack_pos' not in kwargs:
+            kwargs['stack_pos'] = len(kwargs['stack'])
+        super().__init__(*args, **kwargs)
