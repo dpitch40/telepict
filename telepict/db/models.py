@@ -10,7 +10,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from .base import Base
 from ..auth import gen_password_hash_and_salt
 
-def assn(game_class):
+def assn(game_class, **extra_fields):
     d = {'__tablename__': f'{game_class.__tablename__}_players',
          'player_order': Column('player_order', SmallInteger, nullable=False, default=1),
          'game_id': Column('game_id', Integer, ForeignKey(f'{game_class.__tablename__}.id'),
@@ -20,6 +20,7 @@ def assn(game_class):
          'player': relationship('Player', back_populates=f'{game_class.__tablename__}_'),
          '__repr__':lambda s: f'{s.__class__.__name__}{s.game_id}/'
                               f'{s.player.name}#{s.player_order}'}
+    d.update(extra_fields)
 
     return type(f'{game_class.__name__}PlayerAssn', (Base,), d)
 
@@ -44,6 +45,15 @@ class Game(Base):
     @property
     def players(self):
         return [a.player for a in sorted(self.players_, key=operator.attrgetter('player_order'))]
+
+    def left_game(self, player):
+        players = self.players
+        try:
+            i = players.index(player)
+            return self.players_[i].left_game
+        except ValueError:
+            # Player not in this game
+            return None
 
     @property
     def stacks(self):
@@ -170,7 +180,8 @@ class Player(Base):
     def __eq__(self, other):
         return isinstance(other, Player) and self.id_ == other.id_
 
-GamePlayerAssn = assn(Game)
+GamePlayerAssn = assn(Game,left_game=Column('left_game', Boolean,
+    nullable=False, default=False))
 PendingGamePlayerAssn = assn(PendingGame)
 
 
@@ -197,6 +208,8 @@ class Stack(Base):
 
     @property
     def last(self):
+        """Gets the last entry in the stack
+        """
         last_writing = self._sort(self.writings)[-1] if self.writings else None
         last_drawing = self._sort(self.drawings)[-1] if self.drawings else None
         if last_writing is None:

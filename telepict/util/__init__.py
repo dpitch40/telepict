@@ -103,7 +103,7 @@ def get_game_state(game, player):
                          'text': '',
                          'state': f'{action} -1'}
             else:
-                ent = current_stack[-1]
+                ent = current_stack.last
                 action = 'write' if isinstance(ent, Drawing) else 'draw'
                 state = {'action': action,
                          'text': f'{prev_player.display_name} passed:',
@@ -126,7 +126,7 @@ def get_game_state_full(game, player):
     elif state['state'] != 'wait':
         pending_stacks = get_pending_stacks(game, player)
         if pending_stacks[0]:
-            prev = pending_stacks[0].stack[-1]
+            prev = pending_stacks[0].stack.last
             if state['action'] == 'draw':
                 state['prev'] = prev.text
             else:
