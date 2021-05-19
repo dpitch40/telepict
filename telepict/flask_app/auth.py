@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, current_app, flash, \
 from pytz import common_timezones, country_timezones
 
 from ..db import Player
-from ..auth import gen_password_hash
+from ..auth import gen_password_hash, verify_access_code
 from .exceptions import FlashedError
 from .util import inject_current_player
 
@@ -67,6 +67,10 @@ def create_account():
 
     name, dispname, password, timezone = request.form['name'], request.form['dispname'], \
         request.form['password'], request.form['timezone']
+    if current_app.config['REQUIRE_ACCESS_CODE']:
+        access_code = request.form['accessCode']
+        if not verify_access_code(name, access_code):
+            raise FlashedError('Invalid access code')
     with current_app.db.session_scope() as session:
         player = session.query(Player).filter_by(name=name).one_or_none()
         if player is not None:

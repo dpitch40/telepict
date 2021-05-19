@@ -38,10 +38,19 @@
       </div>
       <div class="col-md-4">
         <div class="form-group">
-          <label for="input-pwd">Confirm Password</label>
+          <label for="input-pwd-confirm">Confirm Password</label>
           <input id="input-pwd-confirm" type="password" class="form-control" pattern=".{8,}" required />
         </div>
       </div>
+      {% if config.REQUIRE_ACCESS_CODE -%}
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="access-code">Access Code</label>
+          <input id="access-code" type="text" name="accessCode" class="form-control" required />
+          <small class="form-text text-muted">Given to you by the host</small>
+        </div>
+      </div>
+      {%- endif %}
     </div>
 
     <button type="submit" class="btn btn-primary">Create Account</button>

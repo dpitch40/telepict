@@ -10,6 +10,9 @@ class Config:
     WS_PORT = 8765
     SECRET_KEY = None
     HASH_ITERATIONS = 500000
+    ACCESS_CODE_FILE = 'access_code'
+    REQUIRE_ACCESS_CODE = False
+    MAX_ACCESS_CODE_AGE = 3600
 
     MAX_IMAGE_WIDTH = 1080
     MAX_IMAGE_HEIGHT = 700
