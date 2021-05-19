@@ -4,6 +4,8 @@ import operator
 from ..db import Drawing
 
 def get_pending_stacks(game, player):
+    """Gets a player's "queue" of stacks in the current game, in order of increasing size
+    """
     player_order = None
     for assn in game.players_:
         if assn.player_id == player.id_:
@@ -56,12 +58,15 @@ def get_game_overview(game, start_player):
         player_stacks = list()
         for stack in pending_stacks:
             stack_len = len(stack)
+            last = stack.last
             if stack_len == game.num_rounds * len(game.players_):
                 action = 'done'
-            elif not stack_len % 2:
+            elif not last:
                 action = start_action
+            elif isinstance(last, Writing):
+                action = 'draw'
             else:
-                action = next_action
+                action = 'write'
             player_stacks.append((len(stack), action, player_ids_relative.index(stack.owner.id_)))
         circle.append((player.display_name, player_stacks))
 

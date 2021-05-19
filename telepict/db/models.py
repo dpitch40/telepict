@@ -37,9 +37,13 @@ class Game(Base):
     players_ = relationship('GamePlayerAssn', back_populates='game', cascade='all')
     stacks_ = relationship('Stack', back_populates='game')
 
-    @ property
+    @property
+    def target_len(self):
+        return len(self.players_) * self.num_rounds
+
+    @property
     def complete(self):
-        target_len = len(self.players_) * self.num_rounds
+        target_len = self.target_len
         return all(len(s.stack) == target_len for s in self.stacks)
 
     @property
@@ -70,13 +74,29 @@ class Game(Base):
         return max_time
 
     def get_adjacent_player(self, player, next_=True):
-        player_ids = [p.id_ for p in self.players]
-        idx = player_ids.index(player.id_)
+        idx = None
+        for i, assn in enumerate(self.players_):
+            if assn.player is player:
+                idx = i
+                break
         if idx is None:
             return None
 
         target_idx = idx + (1 if self.pass_left else -1) * (1 if next_ else -1)
         return self.players[target_idx % len(self.players_)]
+
+    def player_assns_after(self, player):
+        for i, assn in enumerate(self.players_):
+            if assn.player is player:
+                if self.pass_left:
+                    yield from self.players_[i+1:] + self.players_[:i]
+                else:
+                    yield from self.players_[i-1::-1] + self.players_[:i:-1]
+                break
+
+    def players_after(self, player):
+        for assn in self.player_assns_after(player):
+            yield assn.player
 
     def player_stack(self, player):
         for s in self.stacks_:
@@ -245,6 +265,9 @@ class PaperMixin:
     def game(self):
         return self.stack.game
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.author.name}, pos={self.stack_pos})'
+
 
 class Writing(Base, PaperMixin):
     __tablename__ = 'writings'
@@ -277,5 +300,4 @@ class Drawing(Base, PaperMixin):
             kwargs['stack_pos'] = len(kwargs['stack'])
         super().__init__(*args, **kwargs)
 
-    def __repr__(self):
-        return f'Drawing({self.author.name}, pos={self.stack_pos})'
+
