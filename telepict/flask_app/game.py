@@ -5,11 +5,13 @@ import operator
 from flask import Blueprint, request, render_template, session as flask_session, flash, \
     current_app, redirect, url_for, jsonify
 
-from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, Stack
-from .util import inject_current_player
+from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, Stack, \
+    GamePlayerAssn, Pass
+from .util import inject_current_player, websocket_send
 from .auth import require_logged_in
 from .exceptions import FlashedError
-from ..util import get_game_state
+from ..util import get_game_state, get_pending_stacks, get_game_summary
+from ..util.upload import add_to_stack
 
 bp = Blueprint('game', __name__)
 
@@ -22,19 +24,24 @@ def index():
             if player:
                 invited_games = [i.game for i in player.invitations]
 
-                games = sorted(player.games, key=operator.attrgetter('started'), reverse=True)
-                game_states = {g.id_: get_game_state(g, player)['state']
-                               for g in player.games}
-                view_data['game_states'] = game_states
-                view_data['active_games'] = sorted(
-                    [g for g in games if game_states[g.id_] != 'done'],
-                    key=operator.attrgetter('last_move'), reverse=True)
-                view_data['done_games'] = [g for g in games if game_states[g.id_] == 'done']
+                view_data['game_states'] = game_states = {g.id_: get_game_state(g, player)['state']
+                                                          for g in player.games}
+                active_games = view_data['active_games'] = list()
+                past_games = view_data['past_games'] = list()
+                for assn in player.games_:
+                    if assn.left_game or game_states[assn.game.id_] == 'done':
+                        past_games.append(assn)
+                    else:
+                        active_games.append(assn)
+
+                active_games.sort(key=operator.attrgetter('game.started'), reverse=True)
+                past_games.sort(key=operator.attrgetter('game.last_move'), reverse=True)
+
+                view_data['player'] = player
+                view_data['invited_games'] = set(map(operator.attrgetter('id_'), invited_games))
                 view_data['pending_games'] = sorted(player.pending_games + invited_games,
                                                     key=operator.attrgetter('created'),
                                                     reverse=True)
-                view_data['player'] = player
-                view_data['invited_games'] = set(map(operator.attrgetter('id_'), invited_games))
                 return render_template('index.html', **view_data)
 
     return render_template('index.html')
@@ -43,6 +50,8 @@ def index():
 @inject_current_player
 @require_logged_in
 def view_game(session, current_player, game_id):
+    game_summary = get_game_summary(session, game_id)
+    current_app.logger.debug(game_summary)
     game = session.query(Game).get(game_id)
     if game is None:
         raise FlashedError('Not a player in this game')
@@ -127,6 +136,36 @@ def respond_invitation(session, current_player, game_id):
                                               player=current_player, game=game))
     session.commit()
     return redirect(url_for('game.index'), 303)
+
+@bp.route('/leave_game/<int:game_id>', methods=['post'])
+@inject_current_player
+@require_logged_in
+def leave_game(session, current_player, game_id):
+    game = session.query(Game).get(game_id)
+    if game is None:
+        raise FlashedError('Not a player in this game')
+    assn = session.query(GamePlayerAssn).filter_by(game_id=game_id, player_id=current_player.id_).one()
+    assn.left_game = True
+    for stack in get_pending_stacks(game, current_player):
+        add_to_stack(session, stack, Pass(author=current_player, stack=stack))
+    session.commit()
+    current_app.logger.info('%r left game %d', current_player, game_id)
+    websocket_send(game_id, current_player.id_, {'action': 'update'})
+    return redirect(url_for('game.index'), 303)
+
+@bp.route('/rejoin_game/<int:game_id>', methods=['post'])
+@inject_current_player
+@require_logged_in
+def rejoin_game(session, current_player, game_id):
+    game = session.query(Game).get(game_id)
+    if game is None:
+        raise FlashedError('Not a player in this game')
+    assn = session.query(GamePlayerAssn).filter_by(game_id=game_id, player_id=current_player.id_).one()
+    assn.left_game = False
+    session.commit()
+    current_app.logger.info('%r rejoined game %d', current_player, game_id)
+    websocket_send(game_id, current_player.id_, {'action': 'update'})
+    return redirect(url_for('game.view_game', game_id=game_id, player_id=current_player.id_), 303)
 
 # AJAX endpoints
 

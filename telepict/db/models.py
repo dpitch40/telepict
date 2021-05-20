@@ -47,8 +47,12 @@ class Game(Base):
         return all(len(s.stack) == target_len for s in self.stacks)
 
     @property
+    def player_assns(self):
+        return sorted(self.players_, key=operator.attrgetter('player_order'))
+
+    @property
     def players(self):
-        return [a.player for a in sorted(self.players_, key=operator.attrgetter('player_order'))]
+        return list(map(operator.attrgetter('player'), self.player_assns))
 
     def left_game(self, player):
         players = self.players
@@ -75,7 +79,8 @@ class Game(Base):
 
     def get_adjacent_player(self, player, next_=True):
         idx = None
-        for i, assn in enumerate(self.players_):
+        assns = self.player_assns
+        for i, assn in enumerate(assns):
             if assn.player is player:
                 idx = i
                 break
@@ -83,19 +88,22 @@ class Game(Base):
             return None
 
         target_idx = idx + (1 if self.pass_left else -1) * (1 if next_ else -1)
-        return self.players[target_idx % len(self.players_)]
+        return assns[target_idx % len(assns)].player
 
-    def player_assns_after(self, player):
-        for i, assn in enumerate(self.players_):
+    def player_assns_after(self, player, inclusive=False):
+        if inclusive:
+            yield player
+        assns = self.player_assns
+        for i, assn in enumerate(assns):
             if assn.player is player:
                 if self.pass_left:
-                    yield from self.players_[i+1:] + self.players_[:i]
+                    yield from assns[i+1:] + assns[:i]
                 else:
-                    yield from self.players_[i-1::-1] + self.players_[:i:-1]
+                    yield from assns[i-1::-1] + assns[:i:-1]
                 break
 
-    def players_after(self, player):
-        for assn in self.player_assns_after(player):
+    def players_after(self, player, inclusive=False):
+        for assn in self.player_assns_after(player, inclusive):
             yield assn.player
 
     def player_stack(self, player):
@@ -225,7 +233,7 @@ class Stack(Base):
 
     @property
     def stack(self):
-        return self._sort(self.writings + self.drawings)
+        return self._sort(self.writings + self.drawings + self.passes)
 
     @property
     def last(self):
@@ -303,10 +311,11 @@ class Drawing(Base, PaperMixin):
 
 
 class Pass(Base, PaperMixin):
-    __tablename____ = 'passes'
+    __tablename__ = 'passes'
+
+    stack = relationship('Stack', back_populates='passes')
 
     def __init__(self, *args, **kwargs):
-        stack = relationship('Stack', back_populates='passes')
         if 'stack' in kwargs and 'stack_pos' not in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
         super().__init__(*args, **kwargs)

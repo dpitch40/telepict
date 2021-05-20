@@ -9,9 +9,9 @@ from ..config import Config
 from .handler import main_handler
 
 def main():
-    start_server = websockets.serve(main_handler, "0.0.0.0", Config.WS_PORT,
+    start_server = websockets.serve(main_handler, Config.WS_HOST, Config.WS_PORT,
                                     max_size=Config.MAX_WS_MESSAGE_SIZE)
-    logger.info('Running on ws://0.0.0.0:%s', Config.WS_PORT)
+    logger.info('Running on ws://%s:%s', Config.WS_HOST, Config.WS_PORT)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()

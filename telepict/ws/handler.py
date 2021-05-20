@@ -28,35 +28,36 @@ class WebsocketHandler(metaclass=HandlerMeta):
     def deregister_websocket(self, websocket, *args): # pylint: disable=unused-argument
         self.socket_args.pop(websocket, None)
 
-    async def update(self, websocket, *args):
+    async def update(self, session, websocket, *args):
         pass
 
-    async def _update(self, websocket):
-        await self.update(websocket, *self.socket_args[websocket])
+    async def _update(self, session, websocket):
+        await self.update(session, websocket, *self.socket_args[websocket])
 
-    async def update_all(self, *args): # pylint: disable=unused-argument
-        aws = [self._update(ws) for ws in self.socket_args]
+    async def update_all(self, session, *args): # pylint: disable=unused-argument
+        aws = [self._update(session, ws) for ws in self.socket_args]
         await asyncio.gather(*aws)
 
-    def handle_str(self, message, *args):
+    def handle_str(self, session, message, *args):
         pass
 
-    def handle_bytes(self, message, *args):
+    def handle_bytes(self, session, message, *args):
         pass
 
     async def handle(self, websocket, *args):
         args = self.parse_args(*args)
         self.register_websocket(websocket, *args)
         try:
-            await self._update(websocket)
-            async for message in websocket:
-                if isinstance(message, str):
-                    self.handle_str(message, *args)
-                else:
-                    self.handle_bytes(message, *args)
+            with self.db.session_scope(expire_on_commit=False) as session:
+                await self._update(session, websocket)
+                async for message in websocket:
+                    if isinstance(message, str):
+                        self.handle_str(session, message, *args)
+                    else:
+                        self.handle_bytes(session, message, *args)
 
-                # Update all players
-                await self.update_all(*args)
+                    # Update all players
+                    await self.update_all(session, *args)
         finally:
             self.deregister_websocket(websocket, *args)
 

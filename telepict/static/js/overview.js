@@ -18,11 +18,22 @@ var circleCenterY;
 var circleRadiusX;
 var circleRadiusY;
 
-const colors = ['black', 'red', 'green', 'blue', 'orange', 'teal', 'darkviolet',
-                'salmon', 'seagreen', 'slateblue', 'grey', 'maroon', 'olive', 'navy'];
+const colors = ['#000000', '#ff0000', '#0000ff', '#00ff00', '#ffa500',
+                '#808080', '#ffd700', '#800000', '#3cb371', '#9370db',
+                '#fa9090', '#daa520', '#008000', '#dda0dd', '#000080',
+                '#9400d3', '#008080', '#cd853f', '#800080', '#808000'];
 
-function indexColor(i) {
+const secondaryColors = ['#b2b2b2', '#f2b2b2', '#b2b2f2', '#b2f2b2', '#f2dbb2',
+                         '#d2d2d2', '#f2e8b2', '#d2b2b2', '#c1dfce', '#d7cee9',
+                         '#f1d6d6', '#e9dbba', '#b2d2b2', '#e9dae9', '#b2b2d2',
+                         '#d7b2e7', '#b2d2d2', '#e5d3c2', '#d2b2d2', '#d2d2b2']
+
+function mainColor(i) {
   return colors[i % colors.length];
+}
+
+function secondaryColor(i) {
+  return secondaryColors[i % secondaryColors.length];
 }
 
 function clearOverview() {
@@ -109,22 +120,25 @@ function drawStackIndicator(x, y, width, number, color) {
 
 function drawNames(overview) {
   const circle = overview.circle
-  var player, angle, x, y, text, textWidth, origWidth, indicatorWidth;
+  var player, dispName, leftGame, stacks, angle, x, y, text, textWidth, origWidth, indicatorWidth;
   var indicatorWidths;
   for (let i = 0; i < circle.length; i++) {
     indicatorWidths = [];
     player = circle[i];
+    dispName = player[0];
+    leftGame = player[1];
+    stacks = player[2];
 
     angle = Math.PI * (-1 / 2 - 2 * i / circle.length);
 
     overviewCtx.font = overviewFont;
-    text = overviewCtx.measureText(player[0]);
+    text = overviewCtx.measureText(dispName);
     textWidth = text.width;
     origWidth = textWidth;
 
     // Add width of stack indicators
     overviewCtx.font = stackFont;
-    for (const stack of player[1]) {
+    for (const stack of stacks) {
       indicatorWidth = overviewCtx.measureText(' ' + stack[0]).width;
       indicatorWidths.push(indicatorWidth);
       textWidth += indicatorWidth;
@@ -134,13 +148,17 @@ function drawNames(overview) {
     y = circleCenterY - Math.sin(angle) * circleRadiusY + fontHeight / 2;
 
     overviewCtx.font = overviewFont;
-    overviewCtx.fillStyle = indexColor(i);
-    overviewCtx.fillText(player[0], x, y);
+    if (leftGame === true) {
+        overviewCtx.fillStyle = secondaryColor(i);
+    } else {
+        overviewCtx.fillStyle = mainColor(i);
+    }
+    overviewCtx.fillText(dispName, x, y);
 
     x += origWidth;
     overviewCtx.font = stackFont;
-    for (let j = 0; j < player[1].length; j++) {
-      drawStackIndicator(x, y, indicatorWidths[j], player[1][j][0], indexColor(player[1][j][2]));
+    for (let j = 0; j < stacks.length; j++) {
+      drawStackIndicator(x, y, indicatorWidths[j], stacks[j][0], mainColor(stacks[j][2]));
       x += indicatorWidths[j];
     }
   }

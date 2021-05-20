@@ -2,11 +2,14 @@ import os
 import os.path
 import logging
 
+logging.getLogger('websockets').setLevel(logging.INFO)
+
 LOG_LEVEL = logging.INFO
 
 class Config:
     DB_URL = None
     HTTP_PORT = int(os.environ.get('FLASK_RUN_PORT', 8764))
+    WS_HOST = '0.0.0.0'
     WS_PORT = 8765
     SECRET_KEY = None
     HASH_ITERATIONS = 500000
@@ -40,8 +43,15 @@ def make_logging_config(level, log_dir=None):
                 'stream': 'ext://sys.stdout'
             }
         },
+        'loggers': {
+            'Telepict': {
+                'level': level,
+                'propagate': False,
+                'handlers': ['stream']
+            }
+        },
         'root': {
-            'level': level,
+            'level': logging.INFO,
             'handlers': ['stream']
         }
     }
@@ -55,4 +65,5 @@ def make_logging_config(level, log_dir=None):
             'backupCount': 10,
         }
         config['root']['handlers'].append('file')
+        config['loggers']['Telepict']['handlers'].append('file')
     return config

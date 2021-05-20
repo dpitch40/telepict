@@ -19,14 +19,14 @@ app_dir = os.path.dirname(os.path.dirname(__file__))
 
 logging.config.dictConfig(Config.LOGGING_CONFIG)
 
-# import logging_tree
-# logging_tree.printout()
-
 app = Flask('Telepict', template_folder=os.path.join(app_dir, 'templates'),
             static_folder=os.path.join(app_dir, 'static'))
 app.jinja_env.add_extension('jinja2.ext.do')
 app.config.from_object(Config)
 app.db = DB()
+
+# import logging_tree
+# logging_tree.printout()
 
 update_werkzeug_logger()
 

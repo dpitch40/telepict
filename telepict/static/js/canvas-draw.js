@@ -66,6 +66,9 @@ var CanvasDraw = /** @class */ (function () {
             _this.redraw();
             _this.updateButtons();
         };
+        this.empty = function() {
+            return _this.strokes.length == 0;
+        };
         this.mousedown = function (ev) {
             ev.preventDefault();
             var _a = _this.getPosition(ev), x = _a[0], y = _a[1];
