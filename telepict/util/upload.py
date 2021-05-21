@@ -15,12 +15,6 @@ from ..db import Game, Player, Writing, Drawing, Pass
 logger = logging.getLogger('upload')
 
 def add_to_stack(session, stack, item):
-    if isinstance(item, Writing):
-        stack.writings.append(item)
-    elif isinstance(item, Drawing):
-        stack.drawings.append(item)
-    else:
-        stack.passes.append(item)
     session.add(item)
 
     # Add passes until the next player is still in the game, or the stack is complete

@@ -177,8 +177,8 @@ def get_game_summary(session, game_id, max_width=120):
                 l.append([repr(player), f'{stack.id_} ({len(stack)})', repr(stack.owner),
                           stack_items[0]])
             else:
-                l.append(['', f'{stack.id_} ({len(stack)})', repr(stack.owner,
-                          stack_items[0])])
+                l.append(['', f'{stack.id_} ({len(stack)})', repr(stack.owner),
+                          stack_items[0]])
             l.extend([['', '', '', w] for w in stack_items[1:]])
 
     return '\n' + ascii_table(l)    
