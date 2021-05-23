@@ -54,8 +54,21 @@ def view_game(session, current_player, game_id):
     current_app.logger.debug(game_summary)
     game = session.query(Game).get(game_id)
     if game is None:
+        raise FlashedError('Game not found')
+    elif current_player.id_ not in map(operator.attrgetter('player_id'), game.players_):
         raise FlashedError('Not a player in this game')
     return render_template('game.html', game_id=game_id, player_id=current_player.id_)
+
+@bp.route('/game/spectate/<int:game_id>')
+@inject_current_player
+@require_logged_in
+def spectate_game(session, current_player, game_id):
+    game_summary = get_game_summary(session, game_id)
+    current_app.logger.debug(game_summary)
+    game = session.query(Game).get(game_id)
+    if game is None:
+        raise FlashedError('Game not found')
+    return render_template('game_spectate.html', game_id=game_id, player_id=current_player.id_)
 
 @bp.route('/create_game', methods=['get', 'post'])
 @inject_current_player

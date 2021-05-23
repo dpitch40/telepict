@@ -1,15 +1,14 @@
-{%- extends "base.html" -%}
-{% block title %}Index{% endblock %}
+{%- extends "game_base.html" -%}
 
 {% block head %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.5/jscolor.min.js"></script>
   {{ super() }}
   <script>
-    var game_id = {{ game_id }};
-    var player_id = {{ player_id }};
-    var currentState;
-
-    var handlers = {};
-    var httpHost = "http://{{ server }}:{{ config['HTTP_PORT'] }}";
+    endpoint = 'game';
+    function updateDisplaySent(type) {
+      resetDisplay();
+      disp.appendChild(h('p', {}, 'Passing ' + type + '...'));
+    }
 
     function resetDisplay() {
       while (disp.firstChild) {
@@ -20,28 +19,7 @@
       canvasDraw.clear();
       textInput.value = "";
       imgUpload.value = "";
-    }
-
-    function mainHandler(data) {
-      renderOverview(data['overview']);
-      if (currentState != data['state']) {
-        var action = data.action;
-        var handler = handlers[action];
-
-        resetDisplay();
-        if (handler !== undefined) {
-          handler(data);
-          currentState = data['state'];
-        } else {
-          console.log("No handler found for action " + action, data, handlers);
-        }
-      }
-    }
-
-    function updateDisplaySent(type) {
-      resetDisplay();
-      disp.appendChild(h('p', {}, 'Passing ' + type + '...'));
-    }
+    };
   </script>
 {% endblock %}
 {% block content %}
@@ -68,6 +46,7 @@
       <canvas id="overview-canvas" width="1px" height="1px"></canvas>
       <br/>
       <button class="btn btn-secondary" type="button" data-bs-toggle="modal" data-bs-target="#leaveGameModal">Leave Game</button>
+      <span>Spectate URL: {{ server_full }}{{ url_for('game.spectate_game', game_id=game_id) }}</span>
     </div>
     <div class="col-lg">
       <div id="game-display"></div>
@@ -93,18 +72,16 @@
 {% endblock %}
 
 {% block footer -%}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.5/jscolor.min.js"></script>
   <script src="{{ url_for('static', filename='js/canvas-draw.js') }}"></script>
   <script src="{{ url_for('static', filename='js/drawingCanvas.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/overview.js') }}"></script>
   <script>
-    var disp = document.querySelector('#game-display');
     var textInput = document.querySelector('#text-input');
     var textInputDiv = document.querySelector('#text-input-div');
-
     var imageInputDiv = document.querySelector('#image-input-div');
     var imgUpload = document.querySelector('#img-upload');
-
+  </script>
+  {{ super() }}
+  <script>
     jscolor.presets.default = {
         position: 'right',
         palette: ['#FFFFFF', '#FF0000', '#FF8000', '#FFFF00', '#80FF00', '#00FF00', '#00FF80', '#00FFFF', '#0080FF', '#0000FF', '#8000FF', '#FF00FF', '#FF0080', '#BFBFBF', '#FF8080', '#FFBF80', '#FFFF80', '#BFFF80', '#80FF80', '#80FFBF', '#80FFFF', '#80BFFF', '#8080FF', '#BF80FF', '#FF80FF', '#FF80BF', '#808080', '#BF0000', '#BF6000', '#BFBF00', '#60BF00', '#00BF00', '#00BF60', '#00BFBF', '#0060BF', '#0000BF', '#6000BF', '#BF00BF', '#BF0060', '#000000', '#800000', '#804000', '#808000', '#408000', '#008000', '#008040', '#008080', '#004080', '#000080', '#400080', '#800080', '#800040'],
@@ -112,13 +89,6 @@
         paletteHeight: 25,
         width: 300,
         hideOnPaletteClick: true,
-    };
-
-    var ws = new WebSocket("ws://{{ server }}:{{ config['WS_PORT'] }}/game/" + game_id + "/" + player_id);
-
-    ws.onmessage = function (event) {
-      var data = JSON.parse(event.data);
-      mainHandler(data);
     };
 
     function passWriting() {
@@ -129,26 +99,6 @@
         updateDisplaySent('writing');
       }
     }
-
-    handlers.view = function(data) {
-      var pageData;
-      for (const stack of data.stacks) {
-        disp.appendChild(h('h2', {}, stack.owner + "'s stack:"));
-        for (const page of stack.pages) {
-          pageData = page.content;
-          if (page.type == 'Drawing') {
-            disp.appendChild(h('p', {}, page.author + ' drew:'));
-            disp.appendChild(h('img', {class: 'img-fluid img-thumbnail mb-3', src: pageData}));
-          } else if (page.type == 'Writing') {
-            disp.appendChild(h('p', {}, page.author + ' wrote:'));
-            disp.appendChild(h('p', {class: 'card card-body'}, pageData));
-          } else {
-            // Player passed due to leaving
-            disp.appendChild(h('p', {}, page.author + ' was not in the game'));
-          }
-        }
-      }
-    };
     handlers.view_own = function(data) {
       var pageData;
       disp.appendChild(h('div', {}, 'Your stack is back!'));

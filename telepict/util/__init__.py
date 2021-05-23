@@ -64,7 +64,10 @@ def get_game_overview(game, start_player):
     }
     """
     start_action = 'write' if game.write_first else 'draw'
-    start_index = [player.id_ for player in game.players].index(start_player.id_)
+    if start_player is None:
+        start_index = 0
+    else:
+        start_index = [player.id_ for player in game.players].index(start_player.id_)
     player_assns = game.player_assns
     player_assns_relative = player_assns[start_index:] + player_assns[:start_index]
     player_ids_relative = list(map(operator.attrgetter('player.id_'), player_assns_relative))
@@ -107,7 +110,11 @@ def get_game_state(game, player):
     (displays a wait message).
     """
 
-    if game.complete:
+    if player is None: # Spectator
+        num_pages = sum(len(stack) for stack in game.stacks)
+        state = {'action': 'view',
+                 'state': f'spectate {num_pages}'}
+    elif game.complete:
         state = {'action': 'view',
                  'state': 'done'}
     else:
@@ -140,7 +147,7 @@ def get_game_state(game, player):
 def get_game_state_full(game, player):
     state = get_game_state(game, player)
 
-    if state['state'] == 'done':
+    if state['state'] == 'done' or state['state'].startswith('spectate'):
         state['stacks'] = [serialize_stack(s) for s in game.stacks]
     elif state['state'] == 'done_own':
         pending_stacks = get_pending_stacks(game, player)
@@ -173,12 +180,17 @@ def get_game_summary(session, game_id, max_width=120):
             stack_repr = repr(stack)
             stack_items = stack.stack
 
-            if i == 0:
-                l.append([repr(player), f'{stack.id_} ({len(stack)})', repr(stack.owner),
-                          stack_items[0]])
+            if stack_items:
+                if i == 0:
+                    l.append([repr(player), f'{stack.id_} ({len(stack)})', repr(stack.owner),
+                              stack_items[0]])
+                else:
+                    l.append(['', f'{stack.id_} ({len(stack)})', repr(stack.owner),
+                              stack_items[0]])
+                l.extend([['', '', '', w] for w in stack_items[1:]])
             else:
-                l.append(['', f'{stack.id_} ({len(stack)})', repr(stack.owner),
-                          stack_items[0]])
-            l.extend([['', '', '', w] for w in stack_items[1:]])
+                l.append([repr(player), f'{stack.id_} ({len(stack)})', repr(stack.owner), ''])
+        if not pending_stacks:
+                l.append([repr(player), '', '', ''])
 
     return '\n' + ascii_table(l)    

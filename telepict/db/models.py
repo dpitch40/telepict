@@ -66,7 +66,7 @@ class Game(Base):
     @property
     def stacks(self):
         stack_mapping = {s.owner_id: s for s in self.stacks_}
-        return [stack_mapping[player.id_] for player in self.players]
+        return [stack_mapping[assn.player_id] for assn in self.player_assns]
 
     @property
     def last_move(self):
