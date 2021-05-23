@@ -1,6 +1,6 @@
 import pytest
 
-from telepict.util import get_pending_stacks, get_game_state, serialize_stack, get_game_overview
+from telepict.util.game import get_pending_stacks, get_game_state, serialize_stack, get_game_overview
 from telepict.db import Game, Player, Writing, Drawing, Stack
 
 def test_get_pending_stacks(test_session, david, nathan, elwood):

@@ -2,6 +2,8 @@ import os
 import os.path
 import logging
 
+from ..util.image.file_based import FileImageBackend
+
 logging.getLogger('websockets').setLevel(logging.INFO)
 
 LOG_LEVEL = logging.INFO
@@ -23,6 +25,7 @@ class Config:
     CANVAS_HEIGHT = 414
     JPEG_QUALITY = 80
     MAX_WS_MESSAGE_SIZE = 2 ** 21
+    IMAGE_BACKEND = FileImageBackend
 
     TS_FORMAT = "%b %d, %Y, %H:%M"
 

@@ -10,7 +10,7 @@ from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, S
 from .util import inject_current_player, websocket_send
 from .auth import require_logged_in
 from .exceptions import FlashedError
-from ..util import get_game_state, get_pending_stacks, get_game_summary
+from ..util.game import get_game_state, get_pending_stacks, get_game_summary
 from ..util.upload import add_to_stack
 
 bp = Blueprint('game', __name__)

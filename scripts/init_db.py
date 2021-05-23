@@ -2,6 +2,7 @@ import os
 import os.path
 import argparse
 from datetime import datetime, timedelta
+import shutil
 
 from telepict.db import DB, Game, Player, Stack, Writing, Drawing, PendingGame, Invitation
 from telepict.config import Config
@@ -272,10 +273,19 @@ def populate_db(d):
     ed_5_vlg = Drawing(drawing=tower, stack_pos=5, stack=vlg_elwood_stack, author=elwood)
     ed_7_vlg = Drawing(drawing=tower, stack_pos=7, stack=vlg_nathan_stack, author=elwood)
 
+    games = [game, long_game, unfinished_game, queue_game, reverse_game,
+             draw_first_game, partially_done_game, very_long_game]
     with d.session_scope() as session:
-        for ent in [david, nathan, elwood, queue_game, reverse_game, draw_first_game,
-                    pending_game_1, pending_game_2, very_long_game]:
+        for ent in [david, nathan, elwood] +  games + [pending_game_1, pending_game_2,
+                                                       pending_game_3, pending_game_4]:
             session.add(ent)
+
+        session.flush()
+
+        for game in games:
+            for stack in game.stacks_:
+                for drawing in stack.drawings:
+                    drawing.save_image()
 
 if __name__ == '__main__':
     confirm = input('This will delete the current database. Continue? (y/n)\n')
@@ -288,6 +298,9 @@ if __name__ == '__main__':
                         help='Populate with test data')
     args = parser.parse_args()
 
+    print('Resetting drawing storage')
+    for fname in os.listdir('drawings'):
+        os.remove(os.path.join('drawings', fname))
     print('Creating database')
     if os.path.isfile(Config.DBFILE):
         os.remove(Config.DBFILE)

@@ -5,7 +5,7 @@ import json
 from collections import defaultdict
 
 from ..db import Game, Player, Writing
-from ..util import get_game_state_full, get_game_summary
+from ..util.game import get_game_state_full, get_game_summary
 from ..util.upload import handle_text
 from .handler import WebsocketHandler
 

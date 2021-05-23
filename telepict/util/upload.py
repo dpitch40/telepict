@@ -7,7 +7,7 @@ import logging
 from flask import current_app
 from PIL import Image
 
-from . import get_pending_stacks
+from .game import get_pending_stacks
 from .image import flatten_rgba_image
 from ..config import Config
 from ..db import Game, Player, Writing, Drawing, Pass
@@ -47,7 +47,7 @@ def handle_text(session, data, game_id, player_id):
             add_to_stack(session, stack, writing)
             session.commit()
     else:
-        logger.error('%s trying to add a drawing with no pending stacks', player.name)
+        logger.error('%s trying to add a writing with no pending stacks', player.name)
 
 def handle_image(session, img_file, game_id, player_id):
     game = session.query(Game).get(game_id)
@@ -77,7 +77,8 @@ def handle_image(session, img_file, game_id, player_id):
 
             drawing = Drawing(author=player, stack=stack, drawing=bio.getvalue())
             add_to_stack(session, stack, drawing)
-            session.commit()
+            session.flush()
+            drawing.save_image()
     else:
         logger.error('%s trying to add a drawing with no pending stacks',
                      player.name)

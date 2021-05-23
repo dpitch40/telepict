@@ -4,3 +4,4 @@ __pycache__/
 *.db
 *.log
 access_code
+drawings/

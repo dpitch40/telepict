@@ -7,6 +7,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Text, SmallInteger, 
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 
+from ..config import Config
 from .base import Base
 from ..auth import gen_password_hash_and_salt
 
@@ -297,14 +298,33 @@ class Drawing(Base, PaperMixin):
     __tablename__ = 'drawings'
 
     stack = relationship('Stack', back_populates='drawings')
-    drawing = Column('drawing', LargeBinary, nullable=False)
+
+    @property
+    def drawing(self):
+        if getattr(self, 'drawing_', None) is None:
+            self.drawing_ = self.load_image()
+        return self.drawing_
 
     @property
     def data_url(self):
         img_data = base64.b64encode(self.drawing).decode('utf8')
         return f'data:image/jpeg;base64,{img_data}'
 
+    def load_image(self):
+        backend = Config.IMAGE_BACKEND(self)
+        return backend.load()
+
+    def save_image(self):
+        if getattr(self, 'drawing_', None) is None:
+            raise RuntimeError('Trying to save a Drawing with no image data')
+        backend = Config.IMAGE_BACKEND(self)
+        backend.save()
+
     def __init__(self, *args, **kwargs):
+        self.drawing_ = None
+        if 'drawing' in kwargs:
+            self.drawing_ = kwargs.pop('drawing')
+
         if 'stack' in kwargs and 'stack_pos' not in kwargs:
             kwargs['stack_pos'] = len(kwargs['stack'])
         super().__init__(*args, **kwargs)
