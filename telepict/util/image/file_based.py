@@ -12,10 +12,10 @@ class FileImageBackend(ImageBackend):
     def generate_fname(self):
         return os.path.join(self.storage_dir, self.generate_key() + '.jpg')
 
-    async def load(self):
+    async def _load(self):
         with open(self.generate_fname(), 'rb') as fobj:
             return fobj.read()
 
-    def save(self):
+    def _save(self):
         with open(self.generate_fname(), 'wb') as fobj:
             fobj.write(self.drawing.drawing)
