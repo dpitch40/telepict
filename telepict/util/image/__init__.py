@@ -9,7 +9,7 @@ class ImageBackend:
     def __init__(self, drawing):
         self.drawing = drawing
 
-    def load(self):
+    async def load(self):
         raise NotImplementedError
 
     def save(self):

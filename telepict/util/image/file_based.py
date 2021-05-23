@@ -12,7 +12,7 @@ class FileImageBackend(ImageBackend):
     def generate_fname(self):
         return os.path.join(self.storage_dir, self.generate_key() + '.jpg')
 
-    def load(self):
+    async def load(self):
         with open(self.generate_fname(), 'rb') as fobj:
             return fobj.read()
 

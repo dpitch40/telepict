@@ -1,5 +1,6 @@
 import base64
 import operator
+import asyncio
 
 from ..db import Drawing, Writing, Game
 from .text_table import ascii_table
@@ -30,15 +31,20 @@ def get_pending_stacks(game, player):
     pending_stacks.sort(key=operator.methodcaller('__len__'))
     return pending_stacks
 
-def serialize_stack(stack):
+async def _update_page_dict(page_dict, awaitable):
+    content = await awaitable()
+    page_dict['content'] = content
+
+async def serialize_stack(stack):
     pages = list()
     stack_dict = {'owner': stack.owner.display_name,
                   'pages': pages}
+    awaitables = list()
     for page in stack.stack:
         page_dict = {'author': page.author.display_name}
         if isinstance(page, Drawing):
             page_dict['type'] = 'Drawing'
-            page_dict['content'] = page.data_url
+            awaitables.append(_update_page_dict(page_dict, page.data_url))
         elif isinstance(page, Writing):
             page_dict['type'] = 'Writing'
             page_dict['content'] = page.text
@@ -46,6 +52,7 @@ def serialize_stack(stack):
             page_dict['type'] = 'Pass'
             page_dict['content'] = None
         pages.append(page_dict)
+    await asyncio.gather(*awaitables)
     return stack_dict
 
 def get_game_overview(game, start_player):
@@ -144,14 +151,15 @@ def get_game_state(game, player):
                      'state': 'wait'}
     return state
 
-def get_game_state_full(game, player):
+async def get_game_state_full(game, player):
     state = get_game_state(game, player)
 
     if state['state'] == 'done' or state['state'].startswith('spectate'):
-        state['stacks'] = [serialize_stack(s) for s in game.stacks]
+        stacks = game.stacks
+        state['stacks'] = await asyncio.gather(*[serialize_stack(s) for s in stacks])
     elif state['state'] == 'done_own':
         pending_stacks = get_pending_stacks(game, player)
-        state['stack'] = serialize_stack(pending_stacks[0])
+        state['stack'] = await serialize_stack(pending_stacks[0])
     elif state['state'] != 'wait':
         pending_stacks = get_pending_stacks(game, player)
         if pending_stacks[0]:
@@ -159,7 +167,7 @@ def get_game_state_full(game, player):
             if state['action'] == 'draw':
                 state['prev'] = prev.text
             else:
-                state['prev'] = prev.data_url
+                state['prev'] = await prev.data_url()
         else:
             state['prev'] = ''
     state['overview'] = get_game_overview(game, player)

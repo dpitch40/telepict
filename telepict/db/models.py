@@ -1,6 +1,7 @@
 from datetime import datetime
 import operator
 import base64
+import asyncio
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, SmallInteger, \
     Boolean, LargeBinary, DateTime
@@ -302,17 +303,21 @@ class Drawing(Base, PaperMixin):
     @property
     def drawing(self):
         if getattr(self, 'drawing_', None) is None:
-            self.drawing_ = self.load_image()
+            self.drawing_ = asyncio.run(self.load_image())
         return self.drawing_
 
-    @property
-    def data_url(self):
-        img_data = base64.b64encode(self.drawing).decode('utf8')
+    async def drawing_async(self):
+        if getattr(self, 'drawing_', None) is None:
+            self.drawing_ = await self.load_image()
+        return self.drawing_
+
+    async def data_url(self):
+        img_data = base64.b64encode(await self.drawing_async()).decode('utf8')
         return f'data:image/jpeg;base64,{img_data}'
 
-    def load_image(self):
+    async def load_image(self):
         backend = Config.IMAGE_BACKEND(self)
-        return backend.load()
+        return await backend.load()
 
     def save_image(self):
         if getattr(self, 'drawing_', None) is None:

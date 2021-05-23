@@ -30,9 +30,9 @@ class GameHandler(WebsocketHandler):
         game = session.query(Game).get(game_id)
         player = session.query(Player).get(player_id)
         if endpoint == 'game':
-            state = get_game_state_full(game, player)
+            state = await get_game_state_full(game, player)
         else:
-            state = get_game_state_full(game, None)
+            state = await get_game_state_full(game, None)
         self.logger.debug(f'Sending {state["state"]!s} to {player.name}')
         await websocket.send(json.dumps(state))
 
