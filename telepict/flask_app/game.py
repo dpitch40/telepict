@@ -224,24 +224,19 @@ def leave_pending_game(session, current_player, game_id):
     session.commit()
     return redirect(url_for('game.index'), 303)
 
-@bp.route('/invite_player/<int:game_id>', methods=['get', 'post'])
+@bp.route('/invite_player/<int:game_id>', methods=['get'])
 @inject_current_player
 @require_logged_in
 def invite_player(session, current_player, game_id):
     game = session.query(PendingGame).get(game_id)
     if game.creator_id != current_player.id_:
         raise FlashedError('Cannot edit a game you did not create')
-    if request.method == 'GET':
-        player_name = request.args['name']
-    else:
-        player_name = request.form['player_name']
-    player = session.query(Player).filter_by(name=player_name).one_or_none()
-    if player is None:
-        flash(f'No player named {player_name!r} exists', 'danger')
-    else:
-        invitation = Invitation(game=game, recipient=player)
-        session.add(invitation)
-        session.commit()
+
+    player_id = int(request.args['player_id'])
+    player = session.query(Player).get(player_id)
+    invitation = Invitation(game=game, recipient=player)
+    session.add(invitation)
+    session.commit()
     return redirect(url_for('game.pending_game', game_id=game_id), 303)
 
 @bp.route('/revoke_invitation/<int:game_id>/<int:player_id>', methods=['post'])

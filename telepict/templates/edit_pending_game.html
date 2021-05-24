@@ -37,7 +37,7 @@
           {% for player in game.players -%}
           {%- do included_players.append(player) -%}
           <tr>
-            <td>{{ player.display_name }} ({{ player.name }})
+            <td>{{ player.display_name }}
                 {%- if game.creator.id_ != player.id_ %}<button class="btn btn-secondary ml-2" type="button" onclick="AJAXRequest(this, 'POST', '{{ url_for('game.remove_player', game_id=game.id_, player_id=player.id_) }}', handleRemovePlayer)">Remove</button>{% endif -%}
                 <button class="btn btn-secondary ml-2 up-button" type="button"{% if loop.first %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='up') }}', handleMovePlayer)">Move Up</button>
                 <button class="btn btn-secondary ml-2 down-button" type="button"{% if loop.last %} style="display: none"{% endif %} onclick="AJAXRequest(this, 'POST', '{{ url_for('game.move_player', game_id=game.id_, player_id=player.id_, direction='down') }}', handleMovePlayer)">Move Down</button>
@@ -50,25 +50,18 @@
       <ul>
         {% for invitation in game.invitations -%}
         {%- do included_players.append(invitation.recipient) -%}
-        <li>{{ invitation.recipient.display_name }} ({{ invitation.recipient.name }})</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button class="btn btn-secondary">Revoke</button></form>
+        <li>{{ invitation.recipient.display_name }}</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button class="btn btn-secondary">Revoke</button></form>
         {%- endfor %}
       </ul>
-      <form action="{{ url_for('game.invite_player', game_id=game.id_) }}" method="post" class="form-inline">
-        <div class="form-group">
-          <label for="invite-input">Invite player </label>
-          <input id="invite-input" type="text" name="player_name" class="form-control ml-2" required />
-          <button type="submit" class="btn btn-secondary">Invite</button>
-        </div>
-      </form>
-      <div>Or have them visit this URL: <input type="text" value="{{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}" id="join-link" size="33" readonly /> <button class="btn btn-secondary" type="button" onclick="copyJoinLink()">Copy</button></div>
+      <div>To invite a player, have them visit this URL: <input type="text" value="{{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}" id="join-link" size="33" readonly /> <button class="btn btn-secondary" type="button" onclick="copyJoinLink()">Copy</button></div>
     </div>
     <div class="col-md-4 overflow-auto border" style="max-height: 400px">
       <h3>Past Players</h3>
       <ul>
       {% for player in past_players -%}
-        <li>{{ player.display_name }} ({{ player.name }})
+        <li>{{ player.display_name }}
           {%- if player not in included_players -%}
-            <a href="{{ url_for('game.invite_player', game_id=game.id_, name=player.name) }}" class="btn btn-secondary btn-sm ml-2">Invite</a>
+            <a href="{{ url_for('game.invite_player', game_id=game.id_, player_id=player.id_) }}" class="btn btn-secondary btn-sm ml-2">Invite</a>
           {%- endif -%}
         </li>
       {%- endfor %}

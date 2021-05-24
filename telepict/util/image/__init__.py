@@ -41,5 +41,7 @@ class ImageBackend:
         raise NotImplementedError
 
     def save(self, drawing):
-        redis_client.set(self.generate_key(drawing), drawing.drawing)
+        key = self.generate_key(drawing)
+        logger.debug('Saving %s', key)
+        redis_client.set(key, drawing.drawing)
         self._save(drawing)
