@@ -7,7 +7,7 @@ from . import ImageBackend, logger
 class S3ImageBackend(ImageBackend):
     def __init__(self, bucket=None):
         self.bucket = bucket
-        logger.debug('S3ImageBackend initialized with bucket %s', self.bucket)
+        logger.info('S3ImageBackend initialized with bucket %s', self.bucket)
 
     def generate_key(self, d):
         return f'{d.stack.game_id}/{d.stack.owner.name}_{d.stack.id_}/{d.author.name}_{d.stack_pos}.jpg'

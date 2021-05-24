@@ -18,6 +18,7 @@ class ImageBackend:
     @classmethod
     def get_instance(cls, **kwargs):
         if cls.instance is None:
+            logger.info('Started image backend; redis ping = %s', redis_client.ping())
             cls.instance = cls(**kwargs)
         return cls.instance
 
