@@ -1,0 +1,12 @@
+[Unit]
+Description=Telepict websocket server
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user/telepict
+EnvironmentFile=/etc/sysconfig/telepict
+ExecStart=/usr/bin/python3 -m telepict.ws.run_server
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
