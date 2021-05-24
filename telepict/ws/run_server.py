@@ -12,7 +12,8 @@ def main():
     image_backend = Config.IMAGE_BACKEND.get_instance(**Config.IMAGE_BACKEND_KWARGS)
     start_server = websockets.serve(main_handler, Config.WS_HOST, Config.WS_PORT,
                                     max_size=Config.MAX_WS_MESSAGE_SIZE)
-    main_logger.info('Running on ws://%s:%s', Config.WS_HOST, Config.WS_PORT)
+    main_logger.info('Started (%s); running on ws://%s:%s', Config.TELEPICT_ENV,
+        Config.WS_HOST, Config.WS_PORT)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()

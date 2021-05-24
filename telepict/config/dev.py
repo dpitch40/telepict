@@ -4,6 +4,7 @@ import logging
 from .base import Config, make_logging_config
 
 class ConfigDev(Config):
+    ENV ='dev'
     LOG_LEVEL = logging.DEBUG
     DEBUG = True
     DBFILE = 'telepict.db'

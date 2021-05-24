@@ -29,6 +29,8 @@ if Config.SECRET_KEY_FILE is not None and os.path.isfile(Config.SECRET_KEY_FILE)
 app.config.from_object(Config)
 app.db = DB()
 
+app.logger.info('Started app (%s)', app.config['TELEPICT_ENV'])
+
 # Initialize image backend
 image_backend = app.config['IMAGE_BACKEND'].get_instance(**app.config['IMAGE_BACKEND_KWARGS'])
 

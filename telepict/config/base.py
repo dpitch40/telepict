@@ -65,7 +65,7 @@ def make_logging_config(level, log_dir=None):
             'class': 'logging.handlers.RotatingFileHandler',
             'level': level,
             'formatter': 'default',
-            'filename': os.path.join(log_dir, 'flask.log'),
+            'filename': os.path.join(log_dir, 'telepict.log'),
             'maxBytes': 2 ** 20,
             'backupCount': 10,
         }
