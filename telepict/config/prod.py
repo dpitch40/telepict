@@ -10,3 +10,4 @@ class ConfigProd(Config):
     LOG_LEVEL = logging.INFO
     LOGGING_CONFIG = make_logging_config(LOG_LEVEL, os.getenv('LOG_DIR'))
     IMAGE_BACKEND = S3ImageBackend
+    IMAGE_BACKEND_KWARGS = {'bucket': 'telepict-images'}

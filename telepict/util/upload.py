@@ -12,7 +12,7 @@ from .image import flatten_rgba_image
 from ..config import Config
 from ..db import Game, Player, Writing, Drawing, Pass
 
-logger = logging.getLogger('upload')
+logger = logging.getLogger('Telepict.upload')
 
 def add_to_stack(session, stack, item):
     session.add(item)
@@ -77,7 +77,7 @@ def handle_image(session, img_file, game_id, player_id):
 
             drawing = Drawing(author=player, stack=stack, drawing=bio.getvalue())
             add_to_stack(session, stack, drawing)
-            session.flush()
+            session.commit()
             drawing.save_image()
     else:
         logger.error('%s trying to add a drawing with no pending stacks',

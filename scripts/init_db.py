@@ -298,6 +298,8 @@ if __name__ == '__main__':
                         help='Populate with test data')
     args = parser.parse_args()
 
+    image_backend = Config.IMAGE_BACKEND.get_instance(**Config.IMAGE_BACKEND_KWARGS)
+
     print('Resetting drawing storage')
     for fname in os.listdir('drawings'):
         os.remove(os.path.join('drawings', fname))

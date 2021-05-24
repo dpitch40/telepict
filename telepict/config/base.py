@@ -26,6 +26,7 @@ class Config:
     JPEG_QUALITY = 80
     MAX_WS_MESSAGE_SIZE = 2 ** 21
     IMAGE_BACKEND = FileImageBackend
+    IMAGE_BACKEND_KWARGS = {}
 
     TS_FORMAT = "%b %d, %Y, %H:%M"
 

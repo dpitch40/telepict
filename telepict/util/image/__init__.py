@@ -1,7 +1,11 @@
+import logging
+
 from PIL import Image
 import redis
 
 redis_client = redis.Redis()
+
+logger = logging.getLogger('Telepict.image')
 
 def flatten_rgba_image(img, background_color=(255, 255, 255)):
     background = Image.new('RGB', img.size, background_color)
@@ -12,9 +16,9 @@ class ImageBackend:
     instance = None
 
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls, **kwargs):
         if cls.instance is None:
-            cls.instance = cls()
+            cls.instance = cls(**kwargs)
         return cls.instance
 
     def generate_key(self, drawing):
@@ -26,7 +30,9 @@ class ImageBackend:
     async def load(self, drawing):
         key = self.generate_key(drawing)
         if redis_client.exists(key):
+            logger.debug('Cache hit for %s', key)
             return redis_client.get(key)
+        logger.debug('Cache miss for %s', key)
         data = await self._load(drawing)
         redis_client.set(key, data)
         return data

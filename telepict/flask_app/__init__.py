@@ -14,7 +14,6 @@ from .image import bp as image_bp
 from ..db import DB
 from .exceptions import FlashedError
 from .util import get_current_player
-import telepict.util.image
 
 app_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -25,6 +24,9 @@ app = Flask('Telepict', template_folder=os.path.join(app_dir, 'templates'),
 app.jinja_env.add_extension('jinja2.ext.do')
 app.config.from_object(Config)
 app.db = DB()
+
+# Initialize image backend
+image_backend = app.config['IMAGE_BACKEND'].get_instance(**app.config['IMAGE_BACKEND_KWARGS'])
 
 # import logging_tree
 # logging_tree.printout()
