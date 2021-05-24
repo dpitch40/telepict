@@ -14,6 +14,7 @@ from .image import bp as image_bp
 from ..db import DB
 from .exceptions import FlashedError
 from .util import get_current_player
+import telepict.util.image
 
 app_dir = os.path.dirname(os.path.dirname(__file__))
 

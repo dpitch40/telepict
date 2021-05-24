@@ -316,14 +316,14 @@ class Drawing(Base, PaperMixin):
         return f'data:image/jpeg;base64,{img_data}'
 
     async def load_image(self):
-        backend = Config.IMAGE_BACKEND(self)
-        return await backend.load()
+        backend = Config.IMAGE_BACKEND.get_instance()
+        return await backend.load(self)
 
     def save_image(self):
         if getattr(self, 'drawing_', None) is None:
             raise RuntimeError('Trying to save a Drawing with no image data')
-        backend = Config.IMAGE_BACKEND(self)
-        backend.save()
+        backend = Config.IMAGE_BACKEND.get_instance()
+        backend.save(self)
 
     def __init__(self, *args, **kwargs):
         self.drawing_ = None

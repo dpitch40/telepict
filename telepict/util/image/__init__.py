@@ -9,26 +9,31 @@ def flatten_rgba_image(img, background_color=(255, 255, 255)):
     return background
 
 class ImageBackend:
-    def __init__(self, drawing):
-        self.drawing = drawing
+    instance = None
 
-    def generate_key(self):
+    @classmethod
+    def get_instance(cls):
+        if cls.instance is None:
+            cls.instance = cls()
+        return cls.instance
+
+    def generate_key(self, drawing):
         raise NotImplementedError
 
-    async def _load(self):
+    async def _load(self, drawing):
         raise NotImplementedError
 
-    async def load(self):
-        key = self.generate_key()
+    async def load(self, drawing):
+        key = self.generate_key(drawing)
         if redis_client.exists(key):
             return redis_client.get(key)
-        data = await self._load()
+        data = await self._load(drawing)
         redis_client.set(key, data)
         return data
 
-    def _save(self):
+    def _save(self, drawing):
         raise NotImplementedError
 
-    def save(self):
-        redis_client.set(self.generate_key(), self.drawing.drawing)
-        self._save()
+    def save(self, drawing):
+        redis_client.set(self.generate_key(drawing), drawing.drawing)
+        self._save(drawing)
