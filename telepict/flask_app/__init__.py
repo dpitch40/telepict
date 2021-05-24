@@ -22,6 +22,10 @@ logging.config.dictConfig(Config.LOGGING_CONFIG)
 app = Flask('Telepict', template_folder=os.path.join(app_dir, 'templates'),
             static_folder=os.path.join(app_dir, 'static'))
 app.jinja_env.add_extension('jinja2.ext.do')
+# Load secret key if enabled
+if Config.SECRET_KEY_FILE is not None and os.path.isfile(Config.SECRET_KEY_FILE):
+    print('Loading secret key from', Config.SECRET_KEY_FILE)
+    Config.SECRET_KEY = open(Config.SECRET_KEY_FILE, 'rb').read()
 app.config.from_object(Config)
 app.db = DB()
 

@@ -14,6 +14,7 @@ class Config:
     WS_HOST = '0.0.0.0'
     WS_PORT = 8765
     SECRET_KEY = None
+    SECRET_KEY_FILE = None
     HASH_ITERATIONS = 500000
     ACCESS_CODE_FILE = 'access_code'
     REQUIRE_ACCESS_CODE = False
