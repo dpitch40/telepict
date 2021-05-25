@@ -133,20 +133,22 @@
 {%- endblock %}
 
 {% block footer -%}
-  <script>
-    var rejoinModal = document.getElementById('rejoinGameModal');
-    rejoinModal.addEventListener('show.bs.modal', function (event) {
-      // Button that triggered the modal
-      var button = event.relatedTarget
-      // Extract info from data-bs-* attributes
-      var game_id = button.getAttribute('data-bs-game-id')
-      // If necessary, you could initiate an AJAX request here
-      // and then do the updating in a callback.
-      //
-      // Update the modal's content.
-      var rejoinForm = rejoinModal.querySelector('.modal-footer form')
+  {% if 'username' in session -%}
+    <script>
+      var rejoinModal = document.getElementById('rejoinGameModal');
+      rejoinModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        var game_id = button.getAttribute('data-bs-game-id')
+        // If necessary, you could initiate an AJAX request here
+        // and then do the updating in a callback.
+        //
+        // Update the modal's content.
+        var rejoinForm = rejoinModal.querySelector('.modal-footer form')
 
-      rejoinForm.action = rejoinForm.action.replace('game/0', 'game/' + game_id);
-    });
-  </script>
+        rejoinForm.action = rejoinForm.action.replace('game/0', 'game/' + game_id);
+      });
+    </script>
+  {%- endif %}
 {%- endblock %}
