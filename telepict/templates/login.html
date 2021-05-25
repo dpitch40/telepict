@@ -13,7 +13,7 @@
           <label for="input-pwd">Password </label>
           <input id="input-pwd" type="password" name="password" autocomplete="current-password" class="form-control" required />
         </div>
-        <input id="redirect-url" type="hidden" name="redirect_url" value="{% if redirect_url is defined %}{{ redirect_url }}{% elif request.path|trim('/') not in ('login', 'create_account') %}{{ request.url }}{% else %}{{ url_for('game.index') }}{% endif %}" />
+        <input id="redirect-url" type="hidden" name="redirect_url" value="{% if redirect_url is defined %}{{ redirect_url }}{% elif request.path not in (url_for('auth.login'), url_for('auth.create_account')) %}{{ request.url }}{% else %}{{ url_for('game.index') }}{% endif %}" />
         <button type="submit" class="btn btn-primary">Login</button>
       </form>
     </div>
