@@ -13,7 +13,7 @@ from .exceptions import FlashedError
 from ..util.game import get_game_state, get_pending_stacks, get_game_summary
 from ..util.upload import add_to_stack
 
-bp = Blueprint('game', __name__)
+bp = Blueprint('game', __name__, url_prefix='/telepict')
 
 @bp.route('/')
 def index():

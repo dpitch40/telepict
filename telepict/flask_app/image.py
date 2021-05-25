@@ -3,7 +3,7 @@ from flask import Blueprint, current_app, request, jsonify
 from .auth import require_logged_in
 from ..util.upload import handle_image
 
-bp = Blueprint('image', __name__)
+bp = Blueprint('image', __name__, url_prefix='/telepict')
 
 @bp.route('/img_upload', methods=['POST'])
 @require_logged_in
