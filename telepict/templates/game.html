@@ -63,10 +63,17 @@
         <input id="color-picker" data-jscolor="" onChange="" value="#000000" />
         <div id="image-canvas" data-dimensions="{{ config['CANVAS_WIDTH'] }}x{{ config['CANVAS_HEIGHT'] }}"></div>
         <button class="btn btn-primary" type="button" onclick="passDrawing()">Submit</button>
-        <br/>
-        <label for="img-upload" class="form-label">Or upload a file:</label>
-        <input class="form-control w-50" type="file" id="img-upload">
-        <button class="btn btn-primary" type="button" onclick="sendImage()">Upload</button>
+        <div class="card mt-4" style="width: 36rem">
+          <h5 class="card-header">Or upload a file</h5>
+          <div class="card-body row row-cols-lg-auto">
+            <div class="col-12">
+              <input class="form-control" type="file" id="img-upload">
+            </div>
+            <div class="col-12">
+              <button class="btn btn-primary" type="button" onclick="sendImage()">Upload</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
