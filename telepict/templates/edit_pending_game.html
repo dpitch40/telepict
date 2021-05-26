@@ -53,7 +53,7 @@
         <li>{{ invitation.recipient.display_name }}</li> <form action="{{ url_for('game.revoke_invitation', game_id=game.id_, player_id=invitation.recipient_id) }}" method='post'><button class="btn btn-secondary">Revoke</button></form>
         {%- endfor %}
       </ul>
-      <div>To invite a player, have them visit this URL: <input type="text" value="{{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}" id="join-link" size="33" readonly /> <button class="btn btn-secondary" type="button" onclick="copyJoinLink()">Copy</button></div>
+      <div>To invite a player, have them visit this URL: <input type="text" value="{{ url_for('game.respond_invitation', game_id=game.id_, _external=True) }}" id="join-link" size="33" readonly /> <button class="btn btn-secondary" type="button" data-copies="join-link" onclick="copyTextBox(this)">Copy</button></div>
     </div>
     <div class="col-md-4 overflow-auto border" style="max-height: 400px">
       <h3>Past Players</h3>
@@ -136,17 +136,6 @@
           downButton.style.display = 'none';
         }
       }
-    }
-
-    function copyJoinLink() {
-      var joinLinkInput = document.querySelector('#join-link');
-
-      /* Select the text field */
-      joinLinkInput.select();
-      joinLinkInput.setSelectionRange(0, 99999); /*For mobile devices*/
-
-      /* Copy the text inside the text field */
-      document.execCommand("copy");
     }
   </script>
 {% endblock -%}

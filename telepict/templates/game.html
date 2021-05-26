@@ -46,7 +46,8 @@
       <canvas id="overview-canvas" width="1px" height="1px"></canvas>
       <br/>
       <button class="btn btn-secondary" type="button" data-bs-toggle="modal" data-bs-target="#leaveGameModal">Leave Game</button>
-      <span>Spectate URL: {{ server_full }}{{ url_for('game.spectate_game', game_id=game_id) }}</span>
+      <span>Spectate URL: <input type="text" value="{{ url_for('game.spectate_game', game_id=game_id, _external=True) }}" id="spectate-link" size="24" readonly /> <button class="btn btn-secondary" type="button" data-copies="spectate-link" onclick="copyTextBox(this)">Copy</button></span>
+      <span></span>
     </div>
     <div class="col-lg">
       <div id="game-display"></div>
