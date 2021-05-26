@@ -107,6 +107,8 @@ def delete_game(session, current_player, game_id):
 @require_logged_in
 def pending_game(session, current_player, game_id):
     game = session.query(PendingGame).get(game_id)
+    if game is None:
+        raise FlashedError(f'Pending game {game_id} not found')
     owner = game.creator_id == current_player.id_
     if request.method == 'GET' or not owner:
         if owner:
@@ -135,6 +137,8 @@ def pending_game(session, current_player, game_id):
 @require_logged_in
 def respond_invitation(session, current_player, game_id):
     game = session.query(PendingGame).get(game_id)
+    if game is None:
+        raise FlashedError(f'Pending game {game_id} not found')
     invitation = session.query(Invitation).get({'game_id': game.id_,
                                                 'recipient_id': current_player.id_})
     reject = request.form.get('action', 'accept') == 'reject'

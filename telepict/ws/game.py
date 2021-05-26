@@ -43,9 +43,13 @@ class GameHandler(WebsocketHandler):
         await asyncio.gather(*aws)
 
     def handle_str(self, session, message, game_id, player_id):
-        data = json.loads(message)
-        if data['action'] == 'writing':
-            handle_text(session, data['text'], game_id, player_id)
-        elif data['action'] == 'update':
-            # Don't do anything here, just update everyone
-            pass
+        try:
+            data = json.loads(message)
+        except json.decoder.JSONDecodeError as exc:
+             self.logger.error('Could not decide JSON: %r', message)
+        else:
+            if data['action'] == 'writing':
+                handle_text(session, data['text'], game_id, player_id)
+            elif data['action'] == 'update':
+                # Don't do anything here, just update everyone
+                pass
