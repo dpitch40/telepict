@@ -6,6 +6,7 @@
  * @license MIT
  */
 var colorSelector = document.getElementById('color-picker');
+var clear = new Object();
 
 var CanvasDraw = /** @class */ (function () {
     function CanvasDraw(wrapper) {
@@ -40,7 +41,7 @@ var CanvasDraw = /** @class */ (function () {
         this.clear = function () {
             if (!_this.strokes.length)
                 return;
-            _this.strokes = [];
+            _this.strokes.push(clear);
             _this.redraw();
             _this.updateButtons();
         };
@@ -149,24 +150,28 @@ var CanvasDraw = /** @class */ (function () {
         }
     };
     CanvasDraw.prototype.drawStroke = function (context, stroke) {
-        if (stroke.erase === true) {
-            context.strokeStyle = "white";
+        if (stroke === clear) {
+            context.clearRect(0, 0, this.w, this.h);
+        } else {
+            if (stroke.erase === true) {
+                context.strokeStyle = "white";
+            }
+            else {
+                context.strokeStyle = stroke.color;
+            }
+            context.lineWidth = stroke.width * 2 * this.pixelRatio;
+            context.lineCap = 'round';
+            context.lineJoin = 'round';
+            var _a = stroke.points[0], x = _a[0], y = _a[1];
+            var _b;
+            context.beginPath();
+            context.moveTo(x, y);
+            for (var i = 1; i < stroke.points.length; i++) {
+                _b = stroke.points[i], x = _b[0], y = _b[1];
+                context.lineTo(x, y);
+            }
+            context.stroke();
         }
-        else {
-            context.strokeStyle = stroke.color;
-        }
-        context.lineWidth = stroke.width * 2 * this.pixelRatio;
-        context.lineCap = 'round';
-        context.lineJoin = 'round';
-        var _a = stroke.points[0], x = _a[0], y = _a[1];
-        context.beginPath();
-        context.moveTo(x, y);
-        for (var i = 1; i < stroke.points.length; i++) {
-            _b = stroke.points[i], x = _b[0], y = _b[1];
-            context.lineTo(x, y);
-        }
-        context.stroke();
-        var _b;
     };
     CanvasDraw.prototype.commitStroke = function () {
         if (!this.currentStroke)
@@ -187,18 +192,21 @@ var CanvasDraw = /** @class */ (function () {
         var buttons = this.wrapper.getElementsByTagName('button');
         for (var _i = 0, buttons_1 = buttons; _i < buttons_1.length; _i++) {
             var button = buttons_1[_i];
-            var active;
-            if (button.name === 'undo' || button.name === 'clear') {
-                active = !this.strokes.length;
+            var disable;
+            if (button.name === 'undo') {
+                disable = !this.strokes.length;
+            } else if (button.name === 'clear') {
+                disable = !this.strokes.length || this.strokes[this.strokes.length - 1] === clear;
             }
             else {
-                active = button.title == "eraser" && this.erase == true;
+                disable = button.title == "eraser" && this.erase == true;
             }
-            if (active) {
-                button.classList.add("active");
+
+            if (disable) {
+                button.disabled = true;
             }
             else {
-                button.classList.remove("active");
+                button.disabled = false;
             }
         }
     };
