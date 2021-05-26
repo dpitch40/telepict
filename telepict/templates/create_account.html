@@ -19,7 +19,7 @@
       </div>
       <div class="col-md-2">
         <div class="form-group">
-          <label for="input-tz">Change Time Zone</label>
+          <label for="input-tz">Time Zone</label>
           <select id="input-tz" name="timezone" class="form-select" />
             {% for timezone in timezones -%}
             <option {% if loop.first %}selected{% endif %}>{{ timezone }}</option>

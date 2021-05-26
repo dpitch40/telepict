@@ -11,7 +11,7 @@ function sendImage() {
     formData.set('game_id', game_id);
     formData.set('player_id', player_id);
 
-    url = httpHost + '/img_upload'
+    url = httpHost + '/telepict/img_upload'
     request = new XMLHttpRequest();
     request.open('POST', url, true);
     request.send(formData);
@@ -24,7 +24,7 @@ function sendImage() {
 function passDrawing() {
   if (!canvasDraw.empty()) {
     canvasDraw.drawingCanvas.toBlob(function (blob) {
-      var url = httpHost + '/img_upload';
+      var url = httpHost + '/telepict/img_upload';
 
       var formData = new FormData();
       formData.set('file', blob, 'drawing.png');
