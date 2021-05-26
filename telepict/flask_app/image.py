@@ -13,4 +13,4 @@ def image_upload():
     with current_app.db.session_scope(expire_on_commit=False) as session:
         handle_image(session, request.files['file'], game_id, player_id)
 
-    return jsonify({})
+    return '', 204

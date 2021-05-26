@@ -37,7 +37,7 @@ def make_logging_config(level, log_dir=None):
         'disable_existing_loggers': False,
         'formatters': {
             'default': {
-                'format': '%(asctime)s %(name)s[%(process)s] %(pathname)s.%(lineno)d %(levelname)s: %(message)s'
+                'format': '%(asctime)s %(levelname)s %(name)s[%(process)s] %(pathname)s.%(lineno)d: %(message)s'
             }
         },
         'handlers': {

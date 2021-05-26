@@ -16,7 +16,7 @@ function sendImage() {
     request.open('POST', url, true);
     request.send(formData);
     request.onload = function(event) {
-      ws.send('UPDATE:');
+      ws.send(JSON.stringify({'action': 'update'}));
     }
   }
 }
