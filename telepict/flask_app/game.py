@@ -50,13 +50,13 @@ def index():
 @inject_current_player
 @require_logged_in
 def view_game(session, current_player, game_id):
-    game_summary = get_game_summary(session, game_id)
-    current_app.logger.debug(game_summary)
     game = session.query(Game).get(game_id)
     if game is None:
-        raise FlashedError('Game not found')
+        raise FlashedError('Game not found', redirect=url_for('game.index'))
     elif current_player.id_ not in map(operator.attrgetter('player_id'), game.players_):
-        raise FlashedError('Not a player in this game')
+        raise FlashedError('Not a player in this game', redirect=url_for('game.index'))
+    game_summary = get_game_summary(session, game_id)
+    current_app.logger.debug(game_summary)
     return render_template('game.html', game_id=game_id, player_id=current_player.id_)
 
 @bp.route('/game/spectate/<int:game_id>')
@@ -67,7 +67,7 @@ def spectate_game(session, current_player, game_id):
     current_app.logger.debug(game_summary)
     game = session.query(Game).get(game_id)
     if game is None:
-        raise FlashedError('Game not found')
+        raise FlashedError('Game not found', redirect=url_for('game.index'))
     return render_template('game_spectate.html', game_id=game_id, player_id=current_player.id_)
 
 @bp.route('/create_game', methods=['get', 'post'])
@@ -108,7 +108,7 @@ def delete_game(session, current_player, game_id):
 def pending_game(session, current_player, game_id):
     game = session.query(PendingGame).get(game_id)
     if game is None:
-        raise FlashedError(f'Pending game {game_id} not found')
+        raise FlashedError(f'Pending game {game_id} not found', redirect=url_for('game.index'))
     owner = game.creator_id == current_player.id_
     if request.method == 'GET' or not owner:
         if owner:
@@ -138,7 +138,7 @@ def pending_game(session, current_player, game_id):
 def respond_invitation(session, current_player, game_id):
     game = session.query(PendingGame).get(game_id)
     if game is None:
-        raise FlashedError(f'Pending game {game_id} not found')
+        raise FlashedError(f'Pending game {game_id} not found', redirect=url_for('game.index'))
     invitation = session.query(Invitation).get({'game_id': game.id_,
                                                 'recipient_id': current_player.id_})
     reject = request.form.get('action', 'accept') == 'reject'
