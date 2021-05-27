@@ -21,6 +21,8 @@ var CanvasDraw = /** @class */ (function () {
         this.erase = false;
         colorSelector.onchange = function () {
             _this.strokeColor = this.dataset.currentColor;
+            _this.erase = false;
+            _this.updateButtons();
         };
         this.clickEraser = function (ev) {
             _this.erase = !_this.erase;
