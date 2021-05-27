@@ -1,15 +1,12 @@
 """Defines backend for handling uploads of text and images.
 """
 
-import io
 import logging
 
-from flask import current_app
-from PIL import Image
+from flask import current_app, abort
 
 from .game import get_pending_stacks
-from .image import flatten_rgba_image
-from ..config import Config
+from .image import convert_image
 from ..db import Game, Player, Writing, Drawing, Pass
 
 logger = logging.getLogger('Telepict.upload')
@@ -60,22 +57,11 @@ def handle_image(session, img_file, game_id, player_id):
             logger.error('%s trying to add a drawing to stack %d when '
                          'it already ended with a drawing', player.name, stack.id_)
         else:
-            image = Image.open(img_file)
-            if image.mode == 'RGBA':
-                image = flatten_rgba_image(image)
-            # Scale image if necessary
-            width_factor = image.size[0] / current_app.config['MAX_IMAGE_WIDTH']
-            height_factor = image.size[1] / current_app.config['MAX_IMAGE_HEIGHT']
-            max_factor = max(height_factor, width_factor)
-            if max_factor > 1:
-                target_size = (int(image.size[0] // max_factor),
-                               int(image.size[1] // max_factor))
-                image = image.resize(target_size)
-
-            bio = io.BytesIO()
-            image.save(bio, format='JPEG', quality=Config.JPEG_QUALITY)
-
-            drawing = Drawing(author=player, stack=stack, drawing=bio.getvalue())
+            try:
+                image_bytes = convert_image(img_file)
+            except ValueError as exc:
+                abort(str(exc), 400)
+            drawing = Drawing(author=player, stack=stack, drawing=image_bytes)
             add_to_stack(session, stack, drawing)
             session.commit()
             drawing.save_image()
