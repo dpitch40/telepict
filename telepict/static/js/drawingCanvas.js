@@ -20,8 +20,6 @@ function sendImage() {
       // Clear inage inputs (drawing canvas/image upload)
       canvasDraw.reset();
       imgUpload.value = "";
-
-      ws.send(JSON.stringify({'action': 'update'}));
     }
   }
 }
@@ -44,8 +42,6 @@ function passDrawing() {
         // Clear inage inputs (drawing canvas/image upload)
         canvasDraw.reset();
         imgUpload.value = "";
-
-        ws.send(JSON.stringify({'action': 'update'}));
       }
     });
   }

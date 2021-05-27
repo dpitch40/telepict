@@ -1,9 +1,6 @@
 import functools
-import json
-import asyncio
 
 from flask import current_app, session as flask_session
-import websockets
 
 from ..db import Player
 
@@ -21,12 +18,3 @@ def inject_current_player(func):
         with current_app.db.session_scope() as session:
             return func(session, get_current_player(session), *args, **kwargs)
     return wrapped
-
-def websocket_send(game_id, player_id, payload):
-    asyncio.run(_websocket_send(game_id, player_id, payload))
-
-async def _websocket_send(game_id, player_id, payload):
-    uri = f'ws://{current_app.config["WS_HOST"]}:{current_app.config["WS_PORT"]}/game/{game_id}/{player_id}'
-    async with websockets.connect(uri) as websocket:
-        await websocket.send(json.dumps(payload))
-        await websocket.recv()

@@ -7,11 +7,12 @@ from flask import Blueprint, request, render_template, session as flask_session,
 
 from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, Stack, \
     GamePlayerAssn, Pass
-from .util import inject_current_player, websocket_send
+from .util import inject_current_player
 from .auth import require_logged_in
 from .exceptions import FlashedError
 from ..util.game import get_game_state, get_pending_stacks, get_game_summary
 from ..util.upload import add_to_stack
+from ..util.ws_client import update_game
 
 bp = Blueprint('game', __name__, url_prefix='/telepict')
 
@@ -167,7 +168,7 @@ def leave_game(session, current_player, game_id):
         add_to_stack(session, stack, Pass(author=current_player, stack=stack))
     session.commit()
     current_app.logger.info('%r left game %d', current_player, game_id)
-    websocket_send(game_id, current_player.id_, {'action': 'update'})
+    update_game(game_id)
     return redirect(url_for('game.index'), 303)
 
 @bp.route('/rejoin_game/<int:game_id>', methods=['post'])
@@ -181,7 +182,7 @@ def rejoin_game(session, current_player, game_id):
     assn.left_game = False
     session.commit()
     current_app.logger.info('%r rejoined game %d', current_player, game_id)
-    websocket_send(game_id, current_player.id_, {'action': 'update'})
+    update_game(game_id)
     return redirect(url_for('game.view_game', game_id=game_id, player_id=current_player.id_), 303)
 
 # AJAX endpoints
