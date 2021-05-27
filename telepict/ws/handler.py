@@ -57,7 +57,8 @@ class WebsocketHandler(metaclass=HandlerMeta):
         try:
             with self.db.session_scope(expire_on_commit=False) as session:
                 await self._update(session, websocket)
-                async for message in websocket:
+            async for message in websocket:
+                with self.db.session_scope(expire_on_commit=False) as session:
                     if isinstance(message, str):
                         self.handle_str(session, message, *args)
                     else:
