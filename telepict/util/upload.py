@@ -43,6 +43,7 @@ def handle_text(session, data, game_id, player_id):
             writing = Writing(author=player, stack=stack, text=data.strip())
             add_to_stack(session, stack, writing)
             session.commit()
+            logger.debug('Committed writing upload')
     else:
         logger.error('%s trying to add a writing with no pending stacks', player.name)
 
@@ -65,6 +66,7 @@ def handle_image(session, img_file, game_id, player_id):
             add_to_stack(session, stack, drawing)
             session.commit()
             drawing.save_image()
+            logger.debug('Committed drawing upload')
     else:
         logger.error('%s trying to add a drawing with no pending stacks',
                      player.name)

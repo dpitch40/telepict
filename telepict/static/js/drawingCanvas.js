@@ -11,11 +11,16 @@ function sendImage() {
     formData.set('game_id', game_id);
     formData.set('player_id', player_id);
 
-    url = httpHost + '/telepict/img_upload'
+    url = httpHost + '/telepict/img_upload';
     request = new XMLHttpRequest();
     request.open('POST', url, true);
     request.send(formData);
+    updateDisplaySent('drawing');
     request.onload = function(event) {
+      // Clear inage inputs (drawing canvas/image upload)
+      canvasDraw.reset();
+      imgUpload.value = "";
+
       ws.send(JSON.stringify({'action': 'update'}));
     }
   }
@@ -36,6 +41,10 @@ function passDrawing() {
       request.send(formData);
       updateDisplaySent('drawing');
       request.onload = function(event) {
+        // Clear inage inputs (drawing canvas/image upload)
+        canvasDraw.reset();
+        imgUpload.value = "";
+
         ws.send(JSON.stringify({'action': 'update'}));
       }
     });
