@@ -51,9 +51,11 @@ var CanvasDraw = /** @class */ (function () {
             _this.updateButtons();
         };
         this.reset = function () {
-            _this.strokes = [];
-            _this.redraw();
-            _this.updateButtons();
+            this.strokes = [];
+            this.setColor('black');
+            colorSelector.jscolor.fromRGBA(0, 0, 0, 1.0);
+            this.redraw();
+            this.updateButtons();
         };
         this.empty = function() {
             return _this.strokes.length == 0;
