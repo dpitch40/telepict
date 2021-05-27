@@ -19,10 +19,13 @@ var CanvasDraw = /** @class */ (function () {
         this.strokeWidth = 2;
         this.strokeColor = 'black';
         this.erase = false;
+        this.setColor = function(color) {
+            this.strokeColor = color;
+            this.erase = false;
+            this.updateButtons();
+        }
         colorSelector.onchange = function () {
-            _this.strokeColor = this.dataset.currentColor;
-            _this.erase = false;
-            _this.updateButtons();
+            _this.setColor(this.dataset.currentColor);
         };
         this.clickEraser = function (ev) {
             _this.erase = !_this.erase;
