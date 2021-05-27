@@ -45,6 +45,11 @@ var CanvasDraw = /** @class */ (function () {
             _this.redraw();
             _this.updateButtons();
         };
+        this.reset = function () {
+            _this.strokes = [];
+            _this.redraw();
+            _this.updateButtons();
+        };
         this.empty = function() {
             return _this.strokes.length == 0;
         };
@@ -193,20 +198,24 @@ var CanvasDraw = /** @class */ (function () {
         for (var _i = 0, buttons_1 = buttons; _i < buttons_1.length; _i++) {
             var button = buttons_1[_i];
             var disable;
-            if (button.name === 'undo') {
-                disable = !this.strokes.length;
-            } else if (button.name === 'clear') {
-                disable = !this.strokes.length || this.strokes[this.strokes.length - 1] === clear;
-            }
-            else {
-                disable = button.title == "eraser" && this.erase == true;
-            }
-
-            if (disable) {
-                button.disabled = true;
-            }
-            else {
-                button.disabled = false;
+            if (button.title == "eraser") {
+                if (this.erase) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            } else {
+                if (button.name === 'undo') {
+                    disable = !this.strokes.length;
+                } else if (button.name === 'clear') {
+                    disable = !this.strokes.length || this.strokes[this.strokes.length - 1] === clear;
+                }
+                if (disable) {
+                    button.disabled = true;
+                }
+                else {
+                    button.disabled = false;
+                }
             }
         }
     };

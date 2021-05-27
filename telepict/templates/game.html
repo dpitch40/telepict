@@ -16,7 +16,7 @@
       }
       textInputDiv.style.display = 'none';
       imageInputDiv.style.display = 'none';
-      canvasDraw.clear();
+      canvasDraw.reset();
       textInput.value = "";
       imgUpload.value = "";
     };
@@ -141,6 +141,11 @@
     };
     handlers.wait = function(data) {
       disp.appendChild(h('p', {}, data.text));
+    };
+
+    window.onload = function() {
+      // Reset color selector color to keep it in sync with canvasDraw
+      colorSelector.jscolor.fromRGBA(0, 0, 0, 1.0);
     };
 
   </script>
