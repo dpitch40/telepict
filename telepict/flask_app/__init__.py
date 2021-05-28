@@ -66,8 +66,10 @@ def inject_external_url():
         app.logger.info('External url: %s', url)
         scheme, loc, path, _, _, _ = urlparse(url)
         app.server = loc
+        app.server_name = loc.split(':', 1)[0]
         app.server_full = scheme + '://' + loc
     return {'server': app.server,
+            'server_name': app.server_name,
             'server_full': app.server_full}
 
 @app.errorhandler(FlashedError)
