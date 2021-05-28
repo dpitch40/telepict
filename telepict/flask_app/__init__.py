@@ -63,6 +63,7 @@ def render_timestamp_filter(ts):
 def inject_external_url():
     if not hasattr(app, 'server_full'):
         url = url_for('game.index', _external=True)
+        app.logger.info('External url: %s', url)
         scheme, loc, path, _, _, _ = urlparse(url)
         app.server = loc
         app.server_full = scheme + '://' + loc
