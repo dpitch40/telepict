@@ -17,11 +17,12 @@ def main():
         main_logger.info('Setting up SSL: %s, %s', Config.WS_CERTFILE, Config.WS_KEYFILE)
         ssl = SSLContext()
         ssl.load_cert_chain(Config.WS_CERTFILE, Config.WS_KEYFILE)
+        kwargs['ssl'] = ssl
         protocol = 'wss'
     start_server = websockets.serve(main_handler, Config.WS_HOST, Config.WS_PORT,
                                     max_size=Config.MAX_WS_MESSAGE_SIZE, **kwargs)
-    main_logger.info('Started (%s); running on %s://%s:%s', protocol, Config.TELEPICT_ENV,
-        Config.WS_HOST, Config.WS_PORT)
+    main_logger.info('Started (%s); running on %s://%s:%s', Config.TELEPICT_ENV,
+        protocol, Config.WS_HOST, Config.WS_PORT)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
