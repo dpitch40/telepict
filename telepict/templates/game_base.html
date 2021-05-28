@@ -42,7 +42,7 @@
   <script>
     var disp = document.querySelector('#game-display');
 
-    var ws = new WebSocket("ws://{{ server }}:{{ config['WS_PORT'] }}/" + endpoint + "/" + game_id + "/" + player_id);
+    var ws = new WebSocket("wss://{{ server }}:{{ config['WS_PORT'] }}/" + endpoint + "/" + game_id + "/" + player_id);
 
     ws.onmessage = function (event) {
       var data = JSON.parse(event.data);

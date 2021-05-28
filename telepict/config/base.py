@@ -13,6 +13,8 @@ class Config:
     HTTP_PORT = int(os.environ.get('FLASK_RUN_PORT', 8764))
     WS_HOST = '0.0.0.0'
     WS_PORT = 8765
+    WS_CERTFILE = None
+    WS_KEYFILE = None
     SECRET_KEY = None
     SECRET_KEY_FILE = None
     HASH_ITERATIONS = 500000

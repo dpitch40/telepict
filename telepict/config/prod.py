@@ -8,6 +8,8 @@ from ..util.image.s3_based import S3ImageBackend
 class ConfigProd(Config):
     DBFILE = os.path.join('/var', 'db', 'telepict', 'telepict.db')
     WS_PORT = 8001
+    WS_CERTFILE = '/etc/letsencrypt/live/www.telephone-pictionary.net/fullchain.pem'
+    WS_KEYFILE = '/etc/letsencrypt/live/www.telephone-pictionary.net/privkey.pem'
     DB_URL = f"sqlite:///{DBFILE}"
     ACCESS_CODE_FILE = '/tmp/telepict_access_code'
     REQUIRE_ACCESS_CODE = True

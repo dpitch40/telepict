@@ -2,7 +2,7 @@
 Description=Telepict websocket server
 
 [Service]
-User=ec2-user
+User=root
 WorkingDirectory=/home/ec2-user/telepict
 EnvironmentFile=/etc/sysconfig/telepict
 ExecStart=/usr/bin/python3 -m telepict.ws.run_server
