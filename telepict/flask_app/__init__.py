@@ -2,6 +2,7 @@ import os.path
 import logging
 import logging.config
 import logging.handlers
+from urllib.parse import urlparse
 
 import pytz
 from flask import Flask, request, flash, redirect, url_for
@@ -60,12 +61,13 @@ def render_timestamp_filter(ts):
 
 @app.context_processor
 def inject_external_url():
-    url = url_for('game.index', _external=True)
-    # Strip protocol and endpoint off
-    server = url.split(':', 1)[1].lstrip('/').split('/', 1)[0]
-    server_full = f'http://{server}'
-    return {'server': server,
-            'server_full': server_full}
+    if not hasattr(app, 'server_full'):
+        url = url_for('game.index', _external=True)
+        scheme, loc, path, _, _, _ = urlparse(url)
+        app.server = loc
+        app.server_full = scheme + '://' + loc
+    return {'server': app.server,
+            'server_full': app.server_full}
 
 @app.errorhandler(FlashedError)
 def handle_flashed_error(exc):
