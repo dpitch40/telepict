@@ -21,7 +21,7 @@ for tz in extra_tzs:
     common_timezones.remove(tz)
 common_timezones = extra_tzs + common_timezones
 
-bp = Blueprint('auth', __name__, url_prefix='/telepict/auth')
+bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def require_logged_in(func):
     @functools.wraps(func)

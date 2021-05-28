@@ -4,7 +4,7 @@ from .auth import require_logged_in
 from ..util.upload import handle_image
 from ..util.ws_client import update_game
 
-bp = Blueprint('image', __name__, url_prefix='/telepict')
+bp = Blueprint('image', __name__)
 
 @bp.route('/img_upload', methods=['POST'])
 @require_logged_in

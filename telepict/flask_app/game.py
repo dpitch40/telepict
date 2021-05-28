@@ -14,7 +14,7 @@ from ..util.game import get_game_state, get_pending_stacks, get_game_summary
 from ..util.upload import add_to_stack
 from ..util.ws_client import update_game
 
-bp = Blueprint('game', __name__, url_prefix='/telepict')
+bp = Blueprint('game', __name__)
 
 @bp.route('/')
 def index():
