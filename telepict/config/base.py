@@ -12,7 +12,8 @@ class Config:
     DB_URL = None
     HTTP_PORT = int(os.environ.get('FLASK_RUN_PORT', 8764))
     WS_HOST = '0.0.0.0'
-    WS_PORT = 8765
+    WS_PORT = 8001
+    EXTERNAL_WS_PORT = WS_PORT
     WS_CERTFILE = None
     WS_KEYFILE = None
     SECRET_KEY = None
