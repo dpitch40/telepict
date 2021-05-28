@@ -2,10 +2,10 @@
 Description=Telepict service
 
 [Service]
-User=ec2-user
+User=root
 WorkingDirectory=/home/ec2-user/telepict
 EnvironmentFile=/etc/sysconfig/telepict
-ExecStart=/home/ec2-user/.local/bin/gunicorn -c python:gunicorn_config telepict.flask_app:app
+ExecStart=/usr/bin/python3 -m gunicorn -c python:gunicorn_config telepict.flask_app:app
 Restart=always
 
 [Install]

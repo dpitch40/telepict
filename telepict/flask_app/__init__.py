@@ -60,10 +60,10 @@ def render_timestamp_filter(ts):
 
 @app.context_processor
 def inject_external_url():
-    pre_port_url = url_for('game.index', _external=True).rsplit(':', 1)[0]
-    # Strip protocol off
-    server = pre_port_url.split(':', 1)[1].lstrip('/')
-    server_full = f'http://{server}:{app.config["HTTP_PORT"]}'
+    url = url_for('game.index', _external=True)
+    # Strip protocol and endpoint off
+    server = url.split(':', 1)[1].lstrip('/').split('/', 1)[0]
+    server_full = f'http://{server}'
     return {'server': server,
             'server_full': server_full}
 

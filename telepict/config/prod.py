@@ -1,11 +1,12 @@
 import os
+import os.path
 import logging
 
 from .base import Config, make_logging_config
 from ..util.image.s3_based import S3ImageBackend
 
 class ConfigProd(Config):
-    DBFILE = os.path.expanduser(os.path.join('~', '.telepict', 'telepict.db'))
+    DBFILE = os.path.join('/var', 'db', 'telepict', 'telepict.db')
     WS_PORT = 8001
     DB_URL = f"sqlite:///{DBFILE}"
     ACCESS_CODE_FILE = '/tmp/telepict_access_code'
