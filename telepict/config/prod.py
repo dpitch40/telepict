@@ -9,6 +9,7 @@ class ConfigProd(Config):
     DBFILE = os.path.join('/var', 'db', 'telepict', 'telepict.db')
     # WS_CERTFILE = '/etc/letsencrypt/live/www.telephone-pictionary.net/fullchain.pem'
     # WS_KEYFILE = '/etc/letsencrypt/live/www.telephone-pictionary.net/privkey.pem'
+    WS_PROTOCOL = 'wss'
     EXTERNAL_WS_PORT = 8002
     DB_URL = f"sqlite:///{DBFILE}"
     ACCESS_CODE_FILE = '/tmp/telepict_access_code'
