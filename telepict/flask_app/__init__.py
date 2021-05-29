@@ -3,6 +3,7 @@ import logging
 import logging.config
 import logging.handlers
 from urllib.parse import urlparse
+import base64
 
 import pytz
 from flask import Flask, request, flash, redirect, url_for
@@ -28,12 +29,22 @@ secret_key_message = None
 if Config.SECRET_KEY_FILE is not None and os.path.isfile(Config.SECRET_KEY_FILE):
     secret_key_message = f'Loading secret key from {Config.SECRET_KEY_FILE}'
     Config.SECRET_KEY = open(Config.SECRET_KEY_FILE, 'rb').read()
+encryption_key_message = None
+if Config.ENCRYPTION_KEY_FILE is not None and os.path.isfile(Config.ENCRYPTION_KEY_FILE):
+    encryption_key_message = f'Loading encryption key from {Config.ENCRYPTION_KEY_FILE}'
+    Config.ENCRYPTION_KEY = base64.b64encode(open(Config.ENCRYPTION_KEY_FILE, 'rb').read())
+else:
+    encryption_key_message = f'WARNING: Using Flask secret key for encryption key'
+    Config.ENCRYPTION_KEY = base64.b64encode(Config.SECRET_KEY[:32])
+
 app.config.from_object(Config)
 app.db = DB()
 
 app.logger.info('Started app (%s)', app.config['TELEPICT_ENV'])
 if secret_key_message:
     app.logger.info(secret_key_message)
+if encryption_key_message:
+    app.logger.info(encryption_key_message)
 
 # Initialize image backend
 image_backend = app.config['IMAGE_BACKEND'].get_instance(**app.config['IMAGE_BACKEND_KWARGS'])

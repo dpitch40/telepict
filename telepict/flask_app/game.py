@@ -7,7 +7,7 @@ from flask import Blueprint, request, render_template, session as flask_session,
 
 from ..db import PendingGame, Invitation, PendingGamePlayerAssn, Player, Game, Stack, \
     GamePlayerAssn, Pass
-from .util import inject_current_player
+from .util import inject_current_player, encrypt_with_secret_key, decrypt_with_secret_key
 from .auth import require_logged_in
 from .exceptions import FlashedError
 from ..util.game import get_game_state, get_pending_stacks, get_game_summary
@@ -58,18 +58,21 @@ def view_game(session, current_player, game_id):
         raise FlashedError('Not a player in this game', redirect=url_for('game.index'))
     game_summary = get_game_summary(session, game_id)
     current_app.logger.debug(game_summary)
-    return render_template('game.html', game_id=game_id, player_id=current_player.id_)
+    return render_template('game.html', game_id=game_id, player_id=current_player.id_,
+                           encrypted_game_id=encrypt_with_secret_key(str(game_id).encode('utf8')))
 
-@bp.route('/game/spectate/<int:game_id>')
-@inject_current_player
-@require_logged_in
-def spectate_game(session, current_player, game_id):
-    game_summary = get_game_summary(session, game_id)
-    current_app.logger.debug(game_summary)
-    game = session.query(Game).get(game_id)
-    if game is None:
-        raise FlashedError('Game not found', redirect=url_for('game.index'))
-    return render_template('game_spectate.html', game_id=game_id, player_id=current_player.id_)
+@bp.route('/game/spectate/<encrypted_game_id>')
+# @inject_current_player
+# @require_logged_in
+def spectate_game(encrypted_game_id):
+    game_id = int(decrypt_with_secret_key(encrypted_game_id))
+    with current_app.db.session_scope() as session:
+        game_summary = get_game_summary(session, game_id)
+        current_app.logger.debug(game_summary)
+        game = session.query(Game).get(game_id)
+        if game is None:
+            raise FlashedError('Game not found', redirect=url_for('game.index'))
+    return render_template('game_spectate.html', game_id=game_id, player_id='null')
 
 @bp.route('/create_game', methods=['get', 'post'])
 @inject_current_player

@@ -9,5 +9,4 @@ class ConfigDev(Config):
     DEBUG = True
     DBFILE = 'telepict.db'
     DB_URL = f"sqlite:///{DBFILE}"
-    SECRET_KEY = 'secret_key'
     LOGGING_CONFIG = make_logging_config(LOG_LEVEL, os.getenv('LOG_DIR'))

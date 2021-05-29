@@ -28,8 +28,8 @@ class GameHandler(WebsocketHandler):
 
     async def update(self, session, websocket, endpoint, game_id, player_id):
         game = session.query(Game).get(game_id)
-        player = session.query(Player).get(player_id)
         if endpoint == 'game':
+            player = session.query(Player).get(player_id)
             state = await get_game_state_full(game, player)
             self.logger.debug(f'Sending state {state["state"]!r} to {player.name}')
         else:

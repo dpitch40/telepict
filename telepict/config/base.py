@@ -17,8 +17,10 @@ class Config:
     EXTERNAL_WS_PORT = WS_PORT
     WS_CERTFILE = None
     WS_KEYFILE = None
-    SECRET_KEY = None
+    SECRET_KEY = b'\xdfH~{S\t\xe9\xec*`\xe6Cr\xbe\x06*\xcc3\x7f\xea\xef\xee\xb9\xc5\xad*\x96\xc9\xcd\x15\x05\x16\xf7\x92*<\x99n\x86\xcecd"]z\x89\x9br\x94\x07\xef\xee\xcf\xdc\x1a?,9\x88\xdb\xd5Lk1'
     SECRET_KEY_FILE = None
+    ENCRYPTION_KEY = None
+    ENCRYPTION_KEY_FILE = None
     HASH_ITERATIONS = 500000
     ACCESS_CODE_FILE = 'access_code'
     REQUIRE_ACCESS_CODE = False
