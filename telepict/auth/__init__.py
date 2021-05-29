@@ -2,6 +2,8 @@ import os.path
 from hashlib import pbkdf2_hmac
 import secrets
 import time
+import json
+from datetime import datetime
 
 from flask import current_app
 
@@ -19,20 +21,39 @@ def gen_password_hash_and_salt(password):
     hash_ = gen_password_hash(password, salt)
     return hash_, salt
 
+def read_access_code_file():
+    if not os.path.isfile(Config.ACCESS_CODE_FILE):
+        d = dict()
+    else:
+        with open(Config.ACCESS_CODE_FILE, 'r') as fobj:
+            d = json.load(fobj)
+        for k, v in d.items():
+            d[k] = datetime.fromisoformat(v)
+    return d
+
+def write_access_code_file(d):
+    d = d.copy()
+    for k, v in d.items():
+        d[k] = v.isoformat()
+    with open(Config.ACCESS_CODE_FILE, 'w') as fobj:
+        return json.dump(d, fobj, indent=2)
+
 def verify_access_code(name, code):
     time.sleep(1)
     file_exists = os.path.isfile(Config.ACCESS_CODE_FILE)
     if not file_exists:
-        current_app.logger.warning('Failed to verify access code because the file does not exist')
+        current_app.logger.warning('Failed to verify access code %r from %s '
+            'because the file does not exist', code, name)
     else:
-        file_age = time.time() - os.path.getmtime(Config.ACCESS_CODE_FILE)
-        recent_enough = file_age < Config.MAX_ACCESS_CODE_AGE
-        if not recent_enough:
-            current_app.logger.warning(
-                'Failed to verify access code because the file is %.2f hours old', file_age / 3600)
+        codes = read_access_code_file()
+
+        now = datetime.utcnow()
+
+        if code not in codes:
+            current_app.logger.warning('Bad access code from %s: %r', name, code)
+        elif codes[code] < now:
+            current_app.logger.warning('Expired access code from %s: %r', name, code)
         else:
-            if open(Config.ACCESS_CODE_FILE).read().strip() == code:
-                return True
-            else:
-                current_app.logger.warning('Invalid access code from %s: %s', name, code)
+            return True
+
     return False

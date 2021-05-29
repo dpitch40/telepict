@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import base64
 
 import pytz
-from flask import Flask, request, flash, redirect, url_for
+from flask import Flask, request, flash, redirect, url_for, session
 
 from ..config import Config
 from ..config.logging_config import update_werkzeug_logger
@@ -57,6 +57,11 @@ update_werkzeug_logger()
 app.register_blueprint(auth_bp)
 app.register_blueprint(game_bp)
 app.register_blueprint(image_bp)
+
+@app.before_request
+def check_for_access_code():
+    if 'code' in request.args:
+        session['access_code'] = request.args['code']
 
 @app.template_filter('render_timestamp')
 def render_timestamp_filter(ts):

@@ -3,5 +3,5 @@
 __pycache__/
 *.db
 *.log
-access_code
+access_codes
 drawings/

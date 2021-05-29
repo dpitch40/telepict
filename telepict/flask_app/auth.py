@@ -63,7 +63,11 @@ def logout():
 @bp.route('/create_account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'GET':
-        return render_template('create_account.html', timezones=common_timezones)
+        kwargs = {'timezones': common_timezones,
+                  'access_code': ''}
+        if 'access_code' in flask_session:
+            kwargs['access_code'] = flask_session['access_code']
+        return render_template('create_account.html', **kwargs)
 
     name, dispname, password, timezone = request.form['name'], request.form['dispname'], \
         request.form['password'], request.form['timezone']

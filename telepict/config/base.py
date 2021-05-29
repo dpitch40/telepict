@@ -22,7 +22,7 @@ class Config:
     ENCRYPTION_KEY = None
     ENCRYPTION_KEY_FILE = None
     HASH_ITERATIONS = 500000
-    ACCESS_CODE_FILE = 'access_code'
+    ACCESS_CODE_FILE = 'access_codes'
     REQUIRE_ACCESS_CODE = False
     MAX_ACCESS_CODE_AGE = 3600
 

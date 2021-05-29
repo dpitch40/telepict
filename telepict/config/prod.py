@@ -12,11 +12,11 @@ class ConfigProd(Config):
     WS_PROTOCOL = 'wss'
     EXTERNAL_WS_PORT = 8002
     DB_URL = f"sqlite:///{DBFILE}"
-    ACCESS_CODE_FILE = '/tmp/telepict_access_code'
+    ACCESS_CODE_FILE = '/home/ec2-user/.telepict/telepict_access_codes'
     REQUIRE_ACCESS_CODE = True
     SECRET_KEY = None
-    SECRET_KEY_FILE = '/home/ec2-user/.secret_key'
-    ENCRYPTION_KEY_FILE = '/home/ec2-user/.encryption_key'
+    SECRET_KEY_FILE = '/home/ec2-user/.telepict/.secret_key'
+    ENCRYPTION_KEY_FILE = '/home/ec2-user/.telepict/.encryption_key'
     LOG_LEVEL = logging.INFO
     LOGGING_CONFIG = make_logging_config(LOG_LEVEL, os.getenv('LOG_DIR'))
     IMAGE_BACKEND = S3ImageBackend
