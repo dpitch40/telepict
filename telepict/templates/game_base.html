@@ -9,6 +9,7 @@
     var player_id = {{ player_id }};
     var currentState;
     var endpoint = '';
+    var maxWritingWidth = "660px";
 
     var handlers = {};
     var httpHost = "{{ server_full }}";
@@ -60,7 +61,7 @@
             disp.appendChild(h('img', {class: 'img-fluid img-thumbnail mb-3', src: pageData}));
           } else if (page.type == 'Writing') {
             disp.appendChild(h('p', {}, page.author + ' wrote:'));
-            disp.appendChild(h('p', {class: 'card card-body'}, pageData));
+            disp.appendChild(h('p', {class: 'card card-body', style: {'maxWidth': maxWritingWidth}}, pageData));
           } else {
             // Player passed due to leaving
             disp.appendChild(h('p', {}, page.author + ' was not in the game'));

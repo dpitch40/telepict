@@ -117,7 +117,7 @@
           disp.appendChild(h('img', {class: 'img-fluid img-thumbnail mb-3', src: pageData}));
         } else if (page.type == 'Writing') {
           disp.appendChild(h('p', {}, page.author + ' wrote:'));
-          disp.appendChild(h('p', {class: 'card card-body'}, pageData));
+          disp.appendChild(h('p', {class: 'card card-body', style: {'maxWidth': maxWritingWidth}}, pageData));
         } else {
           // Player passed due to leaving
         }
@@ -134,7 +134,7 @@
     handlers.draw = function(data) {
       if (data.text != '') {
         disp.appendChild(h('p', {}, data.text));
-        disp.appendChild(h('p', {class: 'card card-body'}, data.prev));
+        disp.appendChild(h('p', {class: 'card card-body', style: {'maxWidth': maxWritingWidth}}, data.prev));
       }
       disp.appendChild(h('p', {}, 'Draw something:'))
       imageInputDiv.style.display = '';
@@ -146,6 +146,7 @@
     window.onload = function() {
       // Sync canvasDraw color with color selector
       canvasDraw.setColor(colorSelector.jscolor.toHEXString());
+      maxWritingWidth = (canvasDraw.w + 20) + "px";
     };
 
   </script>
