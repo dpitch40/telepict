@@ -23,10 +23,10 @@ unit_mapping = {'s': 'seconds',
                 'Y': 'years'}
 
 def remove_expired_codes(d, now):
-    for k, v in d.items():
-        if v < now:
-            print(f'Removing code {k} (expired {v.isoformat()}')
-            del d[k]
+    expired = [k for k, v in d.items() if v < now]
+    for k in expired:
+        print(f'Removing code {k} (expired {d[k].isoformat()}')
+        del d[k]
 
 def parse_lifetime(s, now):
     m = lifetime_re.match(s)
