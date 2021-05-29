@@ -25,8 +25,9 @@
       <div class="col-md-4">
         <h1>Pending Games</h1>
       </div>
-      <div class="col-md-2">
-        <a class="btn btn-primary" href="{{ url_for('game.create_game') }}">Create Game</a>
+      <div class="col-md-4">
+        <button type="button" class="btn btn-secondary ms-3" onClick="window.location.reload();">Refresh</button>
+        <a class="btn btn-primary ms-3" href="{{ url_for('game.create_game') }}">Create Game</a>
       </div>
     </div>
     <table class="table">
