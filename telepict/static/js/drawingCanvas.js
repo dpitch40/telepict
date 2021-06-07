@@ -1,5 +1,26 @@
 var canvasDraw = new CanvasDraw(document.getElementById('image-canvas'));
 
+function uploadCallback(event) {
+    console.log(this);
+    console.log(event);
+    var status = this.status;
+    var statusType = Math.floor(status / 100);
+    if (statusType == 4) {
+      // Client error, check subtype
+      if (status == 413) {
+        window.alert("Image is too large");
+      } else {
+        window.alert(status + " error occurred. Contact the administrator for support");
+      }
+    } else if (statusType == 5) {
+      // Server error
+      window.alert(status + " server error occurred. Contact the administrator for support");
+    }
+    // Clear inage inputs (drawing canvas/image upload)
+    canvasDraw.reset();
+    imgUpload.value = "";
+}
+
 function sendImage() {
   var files = imgUpload.files;
   var file, request, formData;
@@ -15,12 +36,8 @@ function sendImage() {
     request = new XMLHttpRequest();
     request.open('POST', url, true);
     request.send(formData);
-    updateDisplaySent('drawing');
-    request.onload = function(event) {
-      // Clear inage inputs (drawing canvas/image upload)
-      canvasDraw.reset();
-      imgUpload.value = "";
-    }
+    // updateDisplaySent('drawing');
+    request.onload = uploadCallback;
   }
 }
 
@@ -37,12 +54,8 @@ function passDrawing() {
       var request = new XMLHttpRequest();
       request.open('POST', url, true);
       request.send(formData);
-      updateDisplaySent('drawing');
-      request.onload = function(event) {
-        // Clear inage inputs (drawing canvas/image upload)
-        canvasDraw.reset();
-        imgUpload.value = "";
-      }
+      // updateDisplaySent('drawing');
+      request.onload = uploadCallback;
     });
   }
 }

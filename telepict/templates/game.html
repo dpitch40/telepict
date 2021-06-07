@@ -5,10 +5,10 @@
   {{ super() }}
   <script>
     endpoint = 'game';
-    function updateDisplaySent(type) {
-      resetDisplay();
-      disp.appendChild(h('p', {}, 'Passing ' + type + '...'));
-    }
+    // function updateDisplaySent(type) {
+    //   resetDisplay();
+    //   disp.appendChild(h('p', {}, 'Passing ' + type + '...'));
+    // }
 
     function resetDisplay() {
       // Reset current action displau
@@ -103,7 +103,7 @@
       if (writing != '') {
         ws.send(JSON.stringify({'action': 'writing',
                                 'text': writing}));
-        updateDisplaySent('writing');
+        // updateDisplaySent('writing');
         textInput.value = "";
       }
     }
