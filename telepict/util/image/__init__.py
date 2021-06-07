@@ -37,7 +37,8 @@ def convert_image(img_file):
         image = image.resize(target_size)
 
     bio = io.BytesIO()
-    image.save(bio, format='JPEG', quality=current_app.config['JPEG_QUALITY'])
+    image.save(bio, format='JPEG', quality=current_app.config['JPEG_QUALITY'],
+        exif=image.info.get('exif', b''))
     return bio.getvalue()
 
 class ImageBackend:
