@@ -1,17 +1,22 @@
 import json
 import asyncio
+import pprint
 
 import websockets
+import websockets.exceptions
 from flask import current_app
 
 from ..config import Config
 
 async def _websocket_send(game_id, player_id, payload, endpoint='game'):
     uri = f'ws://{Config.WS_HOST}:{Config.WS_PORT}/{endpoint}/{game_id}/{player_id}'
-    async with websockets.connect(uri) as websocket:
-        await websocket.recv()
-        await websocket.send(json.dumps(payload))
-        await websocket.recv()
+    try:
+        async with websockets.connect(uri) as websocket:
+            await websocket.recv()
+            await websocket.send(json.dumps(payload))
+            await websocket.recv()
+    except websockets.exceptions.WebSocketException as exc:
+        current_app.logger.error("Error occurred sending payload %r to %s", payload, uri, exc_info=exc)
 
 def websocket_send(game_id, player_id, payload, endpoint='game'):
     asyncio.run(_websocket_send(game_id, player_id, payload, endpoint))
