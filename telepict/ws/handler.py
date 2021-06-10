@@ -2,6 +2,8 @@ import asyncio
 import logging
 import traceback
 
+import websockets.exceptions
+
 from ..db import DB
 from ..config import Config
 
@@ -57,16 +59,19 @@ class WebsocketHandler(metaclass=HandlerMeta):
         try:
             with self.db.session_scope(expire_on_commit=False) as session:
                 await self._update(session, websocket)
-            async for message in websocket:
-                self.logger.debug('Handling message: %r', message)
-                with self.db.session_scope(expire_on_commit=False) as session:
-                    if isinstance(message, str):
-                        self.handle_str(session, message, *args)
-                    else:
-                        self.handle_bytes(session, message, *args)
+            try:
+                async for message in websocket:
+                    self.logger.debug('Handling message: %r', message)
+                    with self.db.session_scope(expire_on_commit=False) as session:
+                        if isinstance(message, str):
+                            self.handle_str(session, message, *args)
+                        else:
+                            self.handle_bytes(session, message, *args)
 
-                    # Update all players
-                    await self.update_all(session, *args)
+                        # Update all players
+                        await self.update_all(session, *args)
+            except websockets.exceptions.ConnectionClosedError as exc:
+                self.logger.warning('Error receiving message from websocket %r', websocket)
         finally:
             self.deregister_websocket(websocket, *args)
 

@@ -43,11 +43,27 @@
   <script>
     var disp = document.querySelector('#game-display');
 
-    var ws = new WebSocket("{{ config['WS_PROTOCOL'] }}://{{ server_name }}:{{ config['EXTERNAL_WS_PORT'] }}/" + endpoint + "/" + game_id + "/" + player_id);
+    var ws = openWebsocketConnection();
+
+    function openWebsocketConnection() {
+      return new WebSocket("{{ config['WS_PROTOCOL'] }}://{{ server_name }}:{{ config['EXTERNAL_WS_PORT'] }}/" + endpoint + "/" + game_id + "/" + player_id);
+    }
 
     ws.onmessage = function (event) {
       var data = JSON.parse(event.data);
       mainHandler(data);
+    };
+
+    // ws.onclose = function(event) {
+    //   console.log("Websocket connection closed, reopening");
+    //   ws = openWebsocketConnection();
+    // };
+
+    ws.onerror = function(event) {
+      console.log("Websocket error occurred", event);
+      if (ws.readyState == WebSocket.CLOSED) {
+        ws = openWebsocketConnection();
+      }
     };
 
     handlers.view = function(data) {
