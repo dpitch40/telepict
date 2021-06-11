@@ -21,8 +21,8 @@ def main():
         protocol = 'wss'
     start_server = websockets.serve(main_handler, Config.WS_HOST, Config.WS_PORT,
                                     max_size=Config.MAX_WS_MESSAGE_SIZE, **kwargs)
-    main_logger.info('Started (%s); running on %s://%s:%s', Config.TELEPICT_ENV,
-        protocol, Config.WS_HOST, Config.WS_PORT)
+    main_logger.info('Started (%s); running on %s://%s:%s with max_size=%d', Config.TELEPICT_ENV,
+        protocol, Config.WS_HOST, Config.WS_PORT, Config.MAX_WS_MESSAGE_SIZE)
 
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
