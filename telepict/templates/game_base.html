@@ -47,7 +47,7 @@
   <script>
     var disp = document.querySelector('#game-display');
 
-    var imageBaseUrl = "{{ url_for('image.get_image', image_id=999) }}";
+    var imageBaseUrl = "{{ url_for('image.get_image', encrypted_game_id=encrypted_game_id, image_id=999) }}";
 
     var ws;
     openWebsocketConnection();

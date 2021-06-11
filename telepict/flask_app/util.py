@@ -32,4 +32,4 @@ def decrypt_with_secret_key(s):
         f = Fernet(current_app.config['ENCRYPTION_KEY'])
         return f.decrypt(s.encode('utf8'))
     else:
-        return b
+        return s
