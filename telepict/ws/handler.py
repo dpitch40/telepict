@@ -25,8 +25,9 @@ class WebsocketHandler(metaclass=HandlerMeta):
     def __init__(self):
         self.db = DB()
         self.socket_args = dict()
-        self.logger = logging.getLogger(','.join(self.endpoints))
-        self.logger.setLevel(Config.LOG_LEVEL)
+        self.loggers = {endpoint: logging.getLogger(endpoint) for endpoint in self.endpoints}
+        for logger in self.loggers.values():
+            logger.setLevel(Config.LOG_LEVEL)
 
     def parse_args(self, *args): # pylint: disable=no-self-use
         return args
@@ -55,6 +56,7 @@ class WebsocketHandler(metaclass=HandlerMeta):
 
     async def handle(self, websocket, endpoint, *args):
         args = self.parse_args(*args)
+        self.logger = self.loggers[endpoint]
         self.register_websocket(websocket, endpoint, *args)
         try:
             with self.db.session_scope(expire_on_commit=False) as session:

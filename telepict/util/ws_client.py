@@ -22,4 +22,4 @@ def websocket_send(game_id, player_id, payload, endpoint='game'):
     asyncio.run(_websocket_send(game_id, player_id, payload, endpoint))
 
 def update_game(game_id):
-    return websocket_send(game_id, 0, {'action': 'update'}, 'spectate')
+    return websocket_send(game_id, 0, {'action': 'update'}, 'update')

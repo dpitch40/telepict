@@ -10,7 +10,7 @@ from ..util.upload import handle_text
 from .handler import WebsocketHandler
 
 class GameHandler(WebsocketHandler):
-    endpoints = ['game', 'spectate']
+    endpoints = ['game', 'spectate', 'update']
 
     websockets_by_game = defaultdict(set)
 
@@ -30,11 +30,14 @@ class GameHandler(WebsocketHandler):
         game = session.query(Game).get(game_id)
         if endpoint == 'game':
             player = session.query(Player).get(player_id)
-            state = await get_game_state_full(game, player)
+            state = get_game_state_full(game, player)
             self.logger.debug(f'Sending state {state["state"]!r} to {player.name}')
-        else:
-            state = await get_game_state_full(game, None)
+        elif endpoint == 'spectate':
+            state = get_game_state_full(game, None)
             self.logger.debug(f'Sending state {state["state"]!r}')
+        else:
+            # This client requested an update for others, they don't need it
+            state = {}
         await websocket.send(json.dumps(state))
 
     async def update_all(self, session, game_id, _):
