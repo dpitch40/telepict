@@ -84,7 +84,7 @@
         waitBase = null;
       } else {
         // Increment waitBase and retry
-        var waitTime = (waitBase ** 2);
+        var waitTime = waitBase;
         console.log("Retrying WebSocket connection in " + waitTime + " seconds");
         setTimeout(openWebsocketConnection, waitTime * 1000);
         setTimeout(reattemptToConnect, (waitTime + 1) * 1000);
