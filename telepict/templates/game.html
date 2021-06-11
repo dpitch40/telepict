@@ -46,18 +46,14 @@
       <br/>
       <button class="btn btn-secondary" type="button" data-bs-toggle="modal" data-bs-target="#leaveGameModal">Leave Game</button>
       <span>Spectate URL: <input type="text" value="{{ url_for('game.spectate_game', encrypted_game_id=encrypted_game_id, _external=True) }}" id="spectate-link" size="24" readonly /> <button class="btn btn-secondary" type="button" data-copies="spectate-link" onclick="copyTextBox(this)">Copy</button></span>
-      <span></span>
     </div>
+
     <div class="col-lg">
       <div id="game-display"></div>
-    </div>
-  </div>
-  <div id="text-input-div" style="display: none">
-    <input id="text-input" size="100" type="text" autocomplete="off" />
-    <button class="btn btn-primary" type="button" onclick="passWriting()">Submit</button>
-  </div>
-  <div class="row">
-    <div class="col-md-8">
+      <div id="text-input-div" style="display: none">
+        <input id="text-input" size="100" type="text" autocomplete="off" />
+        <button class="btn btn-primary" type="button" onclick="passWriting()">Submit</button>
+      </div>
       <div id="image-input-div" style="display: none">
         <input id="color-picker" data-jscolor="" onChange="" value="#000000" />
         <div id="image-canvas" data-dimensions="{{ config['CANVAS_WIDTH'] }}x{{ config['CANVAS_HEIGHT'] }}"></div>
