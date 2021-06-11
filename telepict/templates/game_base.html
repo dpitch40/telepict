@@ -38,32 +38,60 @@
   </script>
 {% endblock %}
 
+{% block alerts %}
+<div id="not-connected-alert" class="alert alert-danger" role="alert">Not connected</div>
+{% endblock %}
+
 {% block footer -%}
   <script src="{{ url_for('static', filename='js/overview.js') }}"></script>
   <script>
     var disp = document.querySelector('#game-display');
 
-    var ws = openWebsocketConnection();
+    var ws;
+    openWebsocketConnection();
+    var notConnectedAlert = document.getElementById('not-connected-alert');
+    var waitBase = null;
 
     function openWebsocketConnection() {
-      return new WebSocket("{{ config['WS_PROTOCOL'] }}://{{ server_name }}:{{ config['EXTERNAL_WS_PORT'] }}/" + endpoint + "/" + game_id + "/" + player_id);
+      ws = new WebSocket("{{ config['WS_PROTOCOL'] }}://{{ server_name }}:{{ config['EXTERNAL_WS_PORT'] }}/" + endpoint + "/" + game_id + "/" + player_id);
+
+      ws.addEventListener('message', function(event) {
+        var data = JSON.parse(event.data);
+        mainHandler(data);
+      });
+
+      ws.addEventListener('open', function(event) {
+        notConnectedAlert.style.display = 'none';
+      });
+
+      ws.addEventListener('close', function(event) {
+        notConnectedAlert.style.display = '';
+        if (waitBase === null) {
+          waitBase = 1;
+          reattemptToConnect();
+        }
+      });
     }
 
-    ws.onmessage = function (event) {
-      var data = JSON.parse(event.data);
-      mainHandler(data);
-    };
 
-    // ws.onclose = function(event) {
-    //   console.log("Websocket connection closed, reopening");
-    //   ws = openWebsocketConnection();
-    // };
+    reattemptToConnect = function() {
+      if (ws.readyState === WebSocket.OPEN)
+      {
+        console.log("Reestablished connection");
+        // Reset waitBase
+        waitBase = null;
+      } else {
+        // Increment waitBase and retry
+        var waitTime = (waitBase ** 2);
+        console.log("Retrying WebSocket connection in " + waitTime + " seconds");
+        setTimeout(openWebsocketConnection, waitTime * 1000);
+        setTimeout(reattemptToConnect, (waitTime + 1) * 1000);
+        waitBase++;
+      }
+    }
 
     ws.onerror = function(event) {
       console.log("Websocket error occurred", event);
-      if (ws.readyState == WebSocket.CLOSED) {
-        ws = openWebsocketConnection();
-      }
     };
 
     handlers.view = function(data) {

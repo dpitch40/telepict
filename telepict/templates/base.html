@@ -42,6 +42,7 @@
         {%- endfor %}
       {%- endif -%}
     {%- endwith %}
+    {% block alerts %}{% endblock %}
     <div id="content" class="container-fluid">
       {% block content %}{% endblock %}
     </div>
