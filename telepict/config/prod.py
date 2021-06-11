@@ -17,7 +17,7 @@ class ConfigProd(Config):
     SECRET_KEY = None
     SECRET_KEY_FILE = '/home/ec2-user/.telepict/.secret_key'
     ENCRYPTION_KEY_FILE = '/home/ec2-user/.telepict/.encryption_key'
-    LOG_LEVEL = logging.INFO
+    LOG_LEVEL = os.getenv('LOG_LEVEL', logging.INFO)
     LOGGING_CONFIG = make_logging_config(LOG_LEVEL, os.getenv('LOG_DIR'))
     IMAGE_BACKEND = S3ImageBackend
     IMAGE_BACKEND_KWARGS = {'bucket': 'telepict-images'}

@@ -37,7 +37,7 @@ class Config:
 
     TS_FORMAT = "%b %d, %Y, %H:%M"
 
-def make_logging_config(level, log_dir=None):
+def make_logging_config(level, log_dir=None, root_level=logging.INFO):
     config = {
         'version': 1,
         'disable_existing_loggers': False,
@@ -62,7 +62,7 @@ def make_logging_config(level, log_dir=None):
             }
         },
         'root': {
-            'level': logging.INFO,
+            'level': root_level,
             'handlers': ['stream']
         }
     }
