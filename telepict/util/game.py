@@ -31,11 +31,7 @@ def get_pending_stacks(game, player):
     pending_stacks.sort(key=operator.methodcaller('__len__'))
     return pending_stacks
 
-async def _update_page_dict(page_dict, awaitable):
-    content = await awaitable()
-    page_dict['content'] = content
-
-async def serialize_stack(stack):
+def serialize_stack(stack):
     pages = list()
     stack_dict = {'owner': stack.owner.display_name,
                   'pages': pages}
@@ -44,7 +40,7 @@ async def serialize_stack(stack):
         page_dict = {'author': page.author.display_name}
         if isinstance(page, Drawing):
             page_dict['type'] = 'Drawing'
-            awaitables.append(_update_page_dict(page_dict, page.data_url))
+            page_dict['content'] = page.id_
         elif isinstance(page, Writing):
             page_dict['type'] = 'Writing'
             page_dict['content'] = page.text
@@ -52,7 +48,6 @@ async def serialize_stack(stack):
             page_dict['type'] = 'Pass'
             page_dict['content'] = None
         pages.append(page_dict)
-    await asyncio.gather(*awaitables)
     return stack_dict
 
 def get_game_overview(game, start_player):
@@ -151,15 +146,15 @@ def get_game_state(game, player):
                      'state': 'wait'}
     return state
 
-async def get_game_state_full(game, player):
+def get_game_state_full(game, player):
     state = get_game_state(game, player)
 
     if state['state'] == 'done' or state['state'].startswith('spectate'):
         stacks = game.stacks
-        state['stacks'] = await asyncio.gather(*[serialize_stack(s) for s in stacks])
+        state['stacks'] = [serialize_stack(s) for s in stacks]
     elif state['state'] == 'done_own':
         pending_stacks = get_pending_stacks(game, player)
-        state['stack'] = await serialize_stack(pending_stacks[0])
+        state['stack'] = serialize_stack(pending_stacks[0])
     elif state['state'] != 'wait':
         pending_stacks = get_pending_stacks(game, player)
         if pending_stacks[0]:
@@ -167,7 +162,7 @@ async def get_game_state_full(game, player):
             if state['action'] == 'draw':
                 state['prev'] = prev.text
             else:
-                state['prev'] = await prev.data_url()
+                state['prev'] = prev.id_
         else:
             state['prev'] = ''
     state['overview'] = get_game_overview(game, player)

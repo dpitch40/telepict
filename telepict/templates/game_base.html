@@ -47,6 +47,8 @@
   <script>
     var disp = document.querySelector('#game-display');
 
+    var imageBaseUrl = "{{ url_for('image.get_image', image_id=999) }}";
+
     var ws;
     openWebsocketConnection();
     var notConnectedAlert = document.getElementById('not-connected-alert');
@@ -102,7 +104,7 @@
           pageData = page.content;
           if (page.type == 'Drawing') {
             disp.appendChild(h('p', {}, page.author + ' drew:'));
-            disp.appendChild(h('img', {class: 'img-fluid img-thumbnail mb-3', src: pageData}));
+            disp.appendChild(h('img', {class: 'img-fluid img-thumbnail mb-3', src: imageBaseUrl.replace('999', pageData)}));
           } else if (page.type == 'Writing') {
             disp.appendChild(h('p', {}, page.author + ' wrote:'));
             disp.appendChild(h('p', {class: 'card card-body', style: {'maxWidth': maxWritingWidth}}, pageData));

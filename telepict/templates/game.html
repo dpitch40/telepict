@@ -114,7 +114,7 @@
         pageData = page.content;
         if (page.type == 'Drawing') {
           disp.appendChild(h('p', {}, page.author + ' drew:'));
-          disp.appendChild(h('img', {class: 'img-fluid img-thumbnail mb-3', src: pageData}));
+          disp.appendChild(h('img', {class: 'img-fluid img-thumbnail mb-3', src: imageBaseUrl.replace('999', pageData)}));
         } else if (page.type == 'Writing') {
           disp.appendChild(h('p', {}, page.author + ' wrote:'));
           disp.appendChild(h('p', {class: 'card card-body', style: {'maxWidth': maxWritingWidth}}, pageData));
@@ -126,7 +126,7 @@
     handlers.write = function(data) {
       if (data.text != '') {
         disp.appendChild(h('p', {}, data.text));
-        disp.appendChild(h('img', {class: 'img-fluid img-thumbnail', src: data.prev}));
+        disp.appendChild(h('img', {class: 'img-fluid img-thumbnail', src: imageBaseUrl.replace('999', data.prev)}));
       }
       disp.appendChild(h('p', {}, 'Write something:'))
       textInputDiv.style.display = '';

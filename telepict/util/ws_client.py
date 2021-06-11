@@ -11,7 +11,7 @@ from ..config import Config
 async def _websocket_send(game_id, player_id, payload, endpoint='game'):
     uri = f'ws://{Config.WS_HOST}:{Config.WS_PORT}/{endpoint}/{game_id}/{player_id}'
     try:
-        async with websockets.connect(uri, Config.MAX_WS_MESSAGE_SIZE) as websocket:
+        async with websockets.connect(uri, max_size=Config.MAX_WS_MESSAGE_SIZE) as websocket:
             await websocket.recv()
             await websocket.send(json.dumps(payload))
             await websocket.recv()
