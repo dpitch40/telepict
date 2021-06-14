@@ -10,7 +10,6 @@ from ..util.ws_client import update_game
 bp = Blueprint('image', __name__)
 
 @bp.route('/image/<encrypted_game_id>/<int:image_id>')
-@require_logged_in
 def get_image(encrypted_game_id, image_id):
     with current_app.db.session_scope() as session:
         # Require encrypted game ID for security
